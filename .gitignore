@@ -1,0 +1,28 @@
+# Build outputs
+/build
+/composeApp/build
+/iosApp/build
+.kotlin
+
+# Gradle
+.gradle
+/gradle/caches
+
+# IDE - Android Studio / IntelliJ
+.idea/
+*.iml
+
+# Local configuration
+local.properties
+
+# macOS
+.DS_Store
+
+# iOS / Xcode
+iosApp/Pods/
+iosApp/.build/
+*.xcuserdata
+*.xcworkspace/xcuserdata/
+
+# Windows
+Thumbs.db
