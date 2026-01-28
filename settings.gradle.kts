@@ -1,4 +1,4 @@
-rootProject.name = "Inspirehubmobile"
+rootProject.name = "InspireHubMobile"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
@@ -29,3 +29,4 @@ dependencyResolutionManagement {
 }
 
 include(":composeApp")
+include(":shared")

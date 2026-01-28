@@ -1,28 +1,18 @@
-# Build outputs
-/build
-/composeApp/build
-/iosApp/build
-.kotlin
-
-# Gradle
-.gradle
-/gradle/caches
-
-# IDE - Android Studio / IntelliJ
-.idea/
 *.iml
-
-# Local configuration
+.kotlin
+.gradle
+**/build/
+xcuserdata
+!src/**/build/
 local.properties
-
-# macOS
+.idea
 .DS_Store
-
-# iOS / Xcode
-iosApp/Pods/
-iosApp/.build/
-*.xcuserdata
-*.xcworkspace/xcuserdata/
-
-# Windows
-Thumbs.db
+captures
+.externalNativeBuild
+.cxx
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings

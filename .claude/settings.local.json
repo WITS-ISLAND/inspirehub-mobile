@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:kmp.jetbrains.com)",
+      "Bash(find:*)",
+      "Bash(./gradlew:*)"
+    ]
+  }
+}
