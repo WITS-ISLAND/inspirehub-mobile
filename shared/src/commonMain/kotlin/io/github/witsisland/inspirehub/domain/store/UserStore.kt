@@ -22,6 +22,25 @@ class UserStore {
     private val _isAuthenticated = MutableStateFlow(false)
     val isAuthenticated: StateFlow<Boolean> = _isAuthenticated.asStateFlow()
 
+    // PKCE用のcode_verifierを一時保存
+    private var _codeVerifier: String? = null
+
+    /**
+     * PKCE用のcode_verifierを保存
+     */
+    fun saveCodeVerifier(codeVerifier: String) {
+        _codeVerifier = codeVerifier
+    }
+
+    /**
+     * PKCE用のcode_verifierを取得してクリア
+     */
+    fun getAndClearCodeVerifier(): String? {
+        val verifier = _codeVerifier
+        _codeVerifier = null
+        return verifier
+    }
+
     /**
      * ログイン状態を設定
      */

@@ -14,7 +14,7 @@ import kotlinx.serialization.json.Json
  * プラットフォーム固有のエンジンを expect/actual で注入
  */
 expect fun createHttpClient(
-    baseUrl: String = "http://localhost:8787",
+    baseUrl: String = "https://api.inspirehub.wtnqk.org",
     enableLogging: Boolean = true,
     tokenProvider: (() -> String?)? = null
 ): HttpClient

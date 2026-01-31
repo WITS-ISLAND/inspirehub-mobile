@@ -26,14 +26,14 @@ val appModule = module {
     single {
         val userStore: UserStore = get()
         createHttpClient(
-            baseUrl = "http://localhost:8787",
+            baseUrl = "https://api.inspirehub.wtnqk.org",
             enableLogging = true,
             tokenProvider = { userStore.getAccessToken() }
         )
     }
 
     // DataSource（シングルトン）
-    single<AuthDataSource> { KtorAuthDataSource(get()) }
+    single<AuthDataSource> { KtorAuthDataSource(get(), get()) }
     single<NodeDataSource> { KtorNodeDataSource(get()) }
     single<CommentDataSource> { KtorCommentDataSource(get()) }
 
