@@ -9,11 +9,11 @@
 ### コアライブラリ
 
 - **State Management**: ViewModel + StateFlow（標準アプローチ）
-- **DI**: Koin
-- **Network**: Ktor Client + Mock（APIスペック未確定のため）
+- **DI**: Koin 4.1.0
+- **Network**: Ktor Client 3.0.3
 - **Persistence**: DataStore（Phase 1）
-- **ViewModel共有**: [KMP-ObservableViewModel](https://github.com/rickclephas/KMP-ObservableViewModel)
-- **非同期処理**: [KMP-NativeCoroutines](https://github.com/rickclephas/KMP-NativeCoroutines)（Flow → Swift async/await変換）
+- **ViewModel共有**: [KMP-ObservableViewModel](https://github.com/rickclephas/KMP-ObservableViewModel) 1.0.0-BETA-10
+- **iOS State Observation**: Swift Observation framework - Timer-based StateFlow polling (KMP-NativeCoroutinesは互換性の問題により不使用)
 
 ### Navigation
 
@@ -172,7 +172,6 @@ package io.github.witsisland.inspirehub.presentation.viewmodel
 import com.rickclephas.kmp.observableviewmodel.ViewModel
 import com.rickclephas.kmp.observableviewmodel.MutableStateFlow
 import com.rickclephas.kmp.observableviewmodel.coroutineScope
-import com.rickclephas.kmp.nativecoroutines.NativeCoroutinesState
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import io.github.witsisland.inspirehub.domain.store.IdeaStore
@@ -185,14 +184,10 @@ class IdeaListViewModel(
 ) : ViewModel() {
 
     // StoreからUI状態を取得（監視）
-    @NativeCoroutinesState
     val ideas: StateFlow<List<Idea>> = store.ideas
-
-    @NativeCoroutinesState
     val isLoading: StateFlow<Boolean> = store.isLoading
 
     // エラー状態は画面固有
-    @NativeCoroutinesState
     val error = MutableStateFlow(viewModelScope, null as String?)
 
     fun loadIdeas(forceRefresh: Boolean = false) {
@@ -229,7 +224,6 @@ package io.github.witsisland.inspirehub.presentation.viewmodel
 import com.rickclephas.kmp.observableviewmodel.ViewModel
 import com.rickclephas.kmp.observableviewmodel.MutableStateFlow
 import com.rickclephas.kmp.observableviewmodel.coroutineScope
-import com.rickclephas.kmp.nativecoroutines.NativeCoroutinesState
 import kotlinx.coroutines.launch
 import io.github.witsisland.inspirehub.domain.store.IdeaStore
 import io.github.witsisland.inspirehub.domain.repository.IdeaRepository
@@ -240,19 +234,10 @@ class IdeaPostViewModel(
     private val repository: IdeaRepository
 ) : ViewModel() {
 
-    @NativeCoroutinesState
     val title = MutableStateFlow(viewModelScope, "")
-
-    @NativeCoroutinesState
     val description = MutableStateFlow(viewModelScope, "")
-
-    @NativeCoroutinesState
     val isSubmitting = MutableStateFlow(viewModelScope, false)
-
-    @NativeCoroutinesState
     val error = MutableStateFlow(viewModelScope, null as String?)
-
-    @NativeCoroutinesState
     val isSuccess = MutableStateFlow(viewModelScope, false)
 
     fun updateTitle(value: String) {
@@ -350,34 +335,163 @@ shared/
 
 ## iOS統合
 
-SwiftUIでKMP-ObservableViewModelを使用する方法:
+### StateFlow観測パターン（Timer-based Polling）
+
+KMP-NativeCoroutinesは互換性の問題により使用せず、Timer-based pollingでStateFlowを観測します。
+
+**実装パターン**:
 
 ```swift
-// iosApp/ContentView.swift
+import SwiftUI
+import Shared
+import Combine
+
+class AuthViewModelWrapper: ObservableObject {
+    private let viewModel: AuthViewModel
+    private var cancellables = Set<AnyCancellable>()
+
+    @Published var currentUser: User? = nil
+    @Published var isAuthenticated: Bool = false
+    @Published var isLoading: Bool = false
+    @Published var error: String? = nil
+
+    init() {
+        // Koinから共有ViewModelを取得
+        self.viewModel = KoinHelper().getAuthViewModel()
+
+        // StateFlowをポーリング監視（0.1秒間隔）
+        observeViewModel()
+    }
+
+    private func observeViewModel() {
+        Timer.publish(every: 0.1, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                // StateFlowの現在値を@Publishedプロパティにコピー
+                self.currentUser = self.viewModel.currentUser.value as? User
+                self.isAuthenticated = self.viewModel.isAuthenticated.value as! Bool
+                self.isLoading = self.viewModel.isLoading.value as! Bool
+                self.error = self.viewModel.error.value as? String
+            }
+            .store(in: &cancellables)
+    }
+
+    // ViewModelのメソッドを委譲
+    func login() {
+        viewModel.login()
+    }
+}
+```
+
+**ポイント**:
+- `@ObservableObject`でSwiftUIのObservation frameworkを活用
+- `Timer.publish`で0.1秒ごとにStateFlowの値を取得
+- `@Published`プロパティに値をコピーしてSwiftUIに反映
+- ViewModelのメソッドはラッパーから委譲
+
+**注意点**:
+- iOS 17+のObservation frameworkを使用（`@Observable`マクロは不使用）
+- ポーリング間隔は0.1秒（パフォーマンスと反応速度のバランス）
+- メモリリーク防止のため`[weak self]`を使用
+
+### SwiftUIでの使用方法
+
+```swift
+// iosApp/LoginView.swift
+import SwiftUI
+
+struct LoginView: View {
+    @ObservedObject var viewModel: AuthViewModelWrapper
+
+    var body: some View {
+        VStack(spacing: 32) {
+            Text("InspireHub")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+
+            Button(action: {
+                viewModel.getGoogleAuthUrl()
+            }) {
+                HStack {
+                    Image(systemName: "g.circle.fill")
+                    Text("Googleでログイン")
+                }
+                .font(.headline)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.blue)
+                .cornerRadius(12)
+            }
+            .disabled(viewModel.isLoading)
+
+            if viewModel.isLoading {
+                ProgressView()
+            }
+
+            if let error = viewModel.error {
+                Text(error)
+                    .foregroundColor(.red)
+            }
+        }
+    }
+}
+
+// iosApp/RootView.swift
+import SwiftUI
+
+struct RootView: View {
+    @StateObject private var viewModel = AuthViewModelWrapper()
+
+    var body: some View {
+        Group {
+            if viewModel.isAuthenticated {
+                HomeView()
+            } else {
+                LoginView(viewModel: viewModel)
+            }
+        }
+    }
+}
+```
+
+### Koin初期化（iOS）
+
+```swift
+// iosApp/iOSApp.swift
 import SwiftUI
 import Shared
 
-struct IdeaListView: View {
-    @StateObject private var viewModel = IdeaListViewModel(
-        store: DIContainer.shared.ideaStore,
-        repository: DIContainer.shared.ideaRepository
-    )
+@main
+struct iOSApp: App {
+    init() {
+        // Koin初期化
+        KoinInitializerKt.doInitKoin(appDeclaration: { _ in })
+    }
 
-    var body: some View {
-        List(viewModel.ideas, id: \.id) { idea in
-            VStack(alignment: .leading) {
-                Text(idea.title)
-                    .font(.headline)
-                Text(idea.description_)
-                    .font(.body)
-            }
+    var body: some Scene {
+        WindowGroup {
+            RootView()
         }
-        .onAppear {
-            viewModel.loadIdeas()
-        }
-        .refreshable {
-            viewModel.refresh()
-        }
+    }
+}
+```
+
+**KoinHelper**（共有ViewModelの取得）:
+
+```kotlin
+// shared/iosMain/kotlin/io/github/witsisland/inspirehub/di/KoinHelper.kt
+package io.github.witsisland.inspirehub.di
+
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import io.github.witsisland.inspirehub.presentation.viewmodel.AuthViewModel
+
+object KoinHelper : KoinComponent {
+    fun getAuthViewModel(): AuthViewModel {
+        val viewModel: AuthViewModel by inject()
+        return viewModel
     }
 }
 ```

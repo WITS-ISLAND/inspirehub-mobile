@@ -1,5 +1,6 @@
 import SwiftUI
 import Shared
+import Combine
 
 struct RootView: View {
     @StateObject private var viewModel = AuthViewModelWrapper()
@@ -18,6 +19,7 @@ struct RootView: View {
 // AuthViewModel をSwiftUIで使えるようにラップ
 class AuthViewModelWrapper: ObservableObject {
     private let viewModel: AuthViewModel
+    private var cancellables = Set<AnyCancellable>()
 
     @Published var currentUser: User? = nil
     @Published var isAuthenticated: Bool = false
@@ -27,64 +29,25 @@ class AuthViewModelWrapper: ObservableObject {
 
     init() {
         // Koinから取得
-        self.viewModel = KoinHelperKt.getAuthViewModel()
+        self.viewModel = KoinHelper().getAuthViewModel()
 
-        // StateFlowを監視
-        observeCurrentUser()
-        observeIsAuthenticated()
-        observeIsLoading()
-        observeError()
-        observeAuthUrl()
+        // StateFlowを監視（KMP-ObservableViewModel使用）
+        observeViewModel()
     }
 
-    private func observeCurrentUser() {
-        Task {
-            for await value in viewModel.currentUser {
-                await MainActor.run {
-                    self.currentUser = value
-                }
+    private func observeViewModel() {
+        // Timer使ってポーリング（シンプルな方法）
+        Timer.publish(every: 0.1, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                self.currentUser = self.viewModel.currentUser.value as? User
+                self.isAuthenticated = self.viewModel.isAuthenticated.value as! Bool
+                self.isLoading = self.viewModel.isLoading.value as! Bool
+                self.error = self.viewModel.error.value as? String
+                self.authUrl = self.viewModel.authUrl.value as? String
             }
-        }
-    }
-
-    private func observeIsAuthenticated() {
-        Task {
-            for await value in viewModel.isAuthenticated {
-                await MainActor.run {
-                    self.isAuthenticated = value.boolValue
-                }
-            }
-        }
-    }
-
-    private func observeIsLoading() {
-        Task {
-            for await value in viewModel.isLoading {
-                await MainActor.run {
-                    self.isLoading = value.boolValue
-                }
-            }
-        }
-    }
-
-    private func observeError() {
-        Task {
-            for await value in viewModel.error {
-                await MainActor.run {
-                    self.error = value as? String
-                }
-            }
-        }
-    }
-
-    private func observeAuthUrl() {
-        Task {
-            for await value in viewModel.authUrl {
-                await MainActor.run {
-                    self.authUrl = value as? String
-                }
-            }
-        }
+            .store(in: &cancellables)
     }
 
     func getGoogleAuthUrl() {
