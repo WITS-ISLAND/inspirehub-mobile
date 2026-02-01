@@ -7,9 +7,7 @@ struct DetailView: View {
 
     var body: some View {
         Group {
-            if viewModel.isLoading && viewModel.selectedNode == nil {
-                ProgressView("読み込み中...")
-            } else if let node = viewModel.selectedNode {
+            if let node = viewModel.selectedNode {
                 nodeDetailContent(node: node)
             } else if let error = viewModel.error {
                 VStack(spacing: 16) {
@@ -19,7 +17,13 @@ struct DetailView: View {
                     Text(error)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
+                    Button("再読み込み") {
+                        viewModel.loadDetail(nodeId: nodeId)
+                    }
+                    .buttonStyle(.bordered)
                 }
+            } else {
+                ProgressView("読み込み中...")
             }
         }
         .navigationBarTitleDisplayMode(.inline)
