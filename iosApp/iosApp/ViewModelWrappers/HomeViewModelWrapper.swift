@@ -50,26 +50,38 @@ class HomeViewModelWrapper: ObservableObject {
             .autoconnect()
             .sink { [weak self] _ in
                 guard let self = self else { return }
-                self.nodes = self.viewModel.nodes.value as? [Node] ?? []
-                self.isLoading = self.viewModel.isLoading.value as! Bool
-                self.error = self.viewModel.error.value as? String
+
+                let newNodes = self.viewModel.nodes.value as? [Node] ?? []
+                if self.nodes.count != newNodes.count || self.nodes.map(\.id) != newNodes.map(\.id) {
+                    self.nodes = newNodes
+                }
+
+                let newIsLoading = self.viewModel.isLoading.value as! Bool
+                if self.isLoading != newIsLoading { self.isLoading = newIsLoading }
+
+                let newError = self.viewModel.error.value as? String
+                if self.error != newError { self.error = newError }
 
                 if let kotlinTab = self.viewModel.currentTab.value as? HomeTab {
+                    let newTab: HomeTabUI
                     switch kotlinTab {
-                    case .recent: self.currentTab = .latest
-                    case .issues: self.currentTab = .issue
-                    case .ideas: self.currentTab = .idea
-                    case .mine: self.currentTab = .mine
-                    default: break
+                    case .recent: newTab = .latest
+                    case .issues: newTab = .issue
+                    case .ideas: newTab = .idea
+                    case .mine: newTab = .mine
+                    default: return
                     }
+                    if self.currentTab != newTab { self.currentTab = newTab }
                 }
 
                 if let kotlinOrder = self.viewModel.sortOrder.value as? Shared.SortOrder {
+                    let newOrder: SortOrderUI
                     switch kotlinOrder {
-                    case .recent: self.sortOrder = .newest
-                    case .popular: self.sortOrder = .popular
-                    default: break
+                    case .recent: newOrder = .newest
+                    case .popular: newOrder = .popular
+                    default: return
                     }
+                    if self.sortOrder != newOrder { self.sortOrder = newOrder }
                 }
             }
             .store(in: &cancellables)
