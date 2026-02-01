@@ -28,12 +28,22 @@ class DetailViewModelWrapper: ObservableObject {
                 let newNode = self.viewModel.selectedNode.value as? Node
                 if self.selectedNode?.id != newNode?.id { self.selectedNode = newNode }
 
-                let newComments = self.viewModel.comments.value as? [Comment] ?? []
+                let newComments: [Comment]
+                if let arr = self.viewModel.comments.value as? NSArray {
+                    newComments = arr.compactMap { $0 as? Comment }
+                } else {
+                    newComments = self.viewModel.comments.value as? [Comment] ?? []
+                }
                 if self.comments.count != newComments.count || self.comments.map(\.id) != newComments.map(\.id) {
                     self.comments = newComments
                 }
 
-                let newChildNodes = self.viewModel.childNodes.value as? [Node] ?? []
+                let newChildNodes: [Node]
+                if let arr = self.viewModel.childNodes.value as? NSArray {
+                    newChildNodes = arr.compactMap { $0 as? Node }
+                } else {
+                    newChildNodes = self.viewModel.childNodes.value as? [Node] ?? []
+                }
                 if self.childNodes.count != newChildNodes.count || self.childNodes.map(\.id) != newChildNodes.map(\.id) {
                     self.childNodes = newChildNodes
                 }
