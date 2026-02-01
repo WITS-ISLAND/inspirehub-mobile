@@ -24,13 +24,31 @@ class DetailViewModelWrapper: ObservableObject {
             .autoconnect()
             .sink { [weak self] _ in
                 guard let self = self else { return }
-                self.selectedNode = self.viewModel.selectedNode.value as? Node
-                self.comments = self.viewModel.comments.value as? [Comment] ?? []
-                self.childNodes = self.viewModel.childNodes.value as? [Node] ?? []
-                self.isLoading = self.viewModel.isLoading.value as! Bool
-                self.error = self.viewModel.error.value as? String
-                self.commentText = self.viewModel.commentText.value as? String ?? ""
-                self.isCommentSubmitting = self.viewModel.isCommentSubmitting.value as! Bool
+
+                let newNode = self.viewModel.selectedNode.value as? Node
+                if self.selectedNode?.id != newNode?.id { self.selectedNode = newNode }
+
+                let newComments = self.viewModel.comments.value as? [Comment] ?? []
+                if self.comments.count != newComments.count || self.comments.map(\.id) != newComments.map(\.id) {
+                    self.comments = newComments
+                }
+
+                let newChildNodes = self.viewModel.childNodes.value as? [Node] ?? []
+                if self.childNodes.count != newChildNodes.count || self.childNodes.map(\.id) != newChildNodes.map(\.id) {
+                    self.childNodes = newChildNodes
+                }
+
+                let newIsLoading = self.viewModel.isLoading.value as! Bool
+                if self.isLoading != newIsLoading { self.isLoading = newIsLoading }
+
+                let newError = self.viewModel.error.value as? String
+                if self.error != newError { self.error = newError }
+
+                let newCommentText = self.viewModel.commentText.value as? String ?? ""
+                if self.commentText != newCommentText { self.commentText = newCommentText }
+
+                let newIsCommentSubmitting = self.viewModel.isCommentSubmitting.value as! Bool
+                if self.isCommentSubmitting != newIsCommentSubmitting { self.isCommentSubmitting = newIsCommentSubmitting }
             }
             .store(in: &cancellables)
     }
