@@ -31,7 +31,12 @@ class PostViewModelWrapper: ObservableObject {
                 let newContent = self.viewModel.content.value as! String
                 if self.content != newContent { self.content = newContent }
 
-                let newTags = self.viewModel.tags.value as! [String]
+                let newTags: [String]
+                if let arr = self.viewModel.tags.value as? NSArray {
+                    newTags = arr.compactMap { $0 as? String }
+                } else {
+                    newTags = self.viewModel.tags.value as? [String] ?? []
+                }
                 if self.tags != newTags { self.tags = newTags }
 
                 let newParentNode = self.viewModel.parentNode.value as? Node
