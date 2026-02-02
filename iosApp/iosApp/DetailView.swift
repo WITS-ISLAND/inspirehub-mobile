@@ -45,7 +45,7 @@ struct DetailView: View {
                 }
 
                 reactionBar(node: node)
-                deriveButton(node: node)
+                deriveButton
                 childNodesSection
                 commentsSection
             }
