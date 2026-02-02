@@ -45,7 +45,7 @@ struct DetailView: View {
                 }
 
                 reactionBar(node: node)
-                deriveButton
+                deriveButton(node: node)
                 childNodesSection
                 commentsSection
             }
@@ -152,9 +152,9 @@ struct DetailView: View {
 
     // MARK: - Derive Button
 
-    private var deriveButton: some View {
+    private func deriveButton(node: Node) -> some View {
         Button(action: {
-            // Phase 2: 派生投稿画面遷移
+            showDerivedPost = true
         }) {
             HStack {
                 Image(systemName: "plus.bubble")
@@ -167,6 +167,9 @@ struct DetailView: View {
             .padding(12)
             .background(Color.orange)
             .cornerRadius(10)
+        }
+        .sheet(isPresented: $showDerivedPost) {
+            DerivedPostView(parentNode: node)
         }
     }
 
