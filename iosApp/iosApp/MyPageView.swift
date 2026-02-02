@@ -1,23 +1,22 @@
 import SwiftUI
 import Shared
+import KMPObservableViewModelSwiftUI
 
 struct MyPageView: View {
-    @StateObject private var viewModel = MyPageViewModelWrapper()
+    @StateViewModel var viewModel = KoinHelper().getMyPageViewModel()
 
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 24) {
-                    profileSection
-                    myNodesSection
-                }
-                .padding(.vertical, 16)
+        ScrollView {
+            VStack(spacing: 24) {
+                profileSection
+                myNodesSection
             }
-            .navigationTitle("マイページ")
-            .navigationBarTitleDisplayMode(.inline)
-            .onAppear {
-                viewModel.loadMyNodes()
-            }
+            .padding(.vertical, 16)
+        }
+        .navigationTitle("マイページ")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            viewModel.loadMyNodes()
         }
     }
 
@@ -27,7 +26,7 @@ struct MyPageView: View {
                 .font(.system(size: 72))
                 .foregroundColor(.blue)
 
-            if let user = viewModel.currentUser {
+            if let user = viewModel.currentUser as? User {
                 Text(user.handle)
                     .font(.title2)
                     .fontWeight(.bold)
@@ -49,25 +48,29 @@ struct MyPageView: View {
         .padding(.top, 16)
     }
 
+    private var myNodes: [Node] {
+        viewModel.myNodes as? [Node] ?? []
+    }
+
     private var myNodesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("自分の投稿")
                     .font(.headline)
-                Text("\(viewModel.myNodes.count)")
+                Text("\(myNodes.count)")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
             .padding(.horizontal, 16)
 
-            if viewModel.isLoading && viewModel.myNodes.isEmpty {
+            if viewModel.isLoading as? Bool == true && myNodes.isEmpty {
                 HStack {
                     Spacer()
                     ProgressView()
                     Spacer()
                 }
                 .padding(.vertical, 32)
-            } else if viewModel.myNodes.isEmpty {
+            } else if myNodes.isEmpty {
                 VStack(spacing: 12) {
                     Image(systemName: "square.and.pencil")
                         .font(.system(size: 40))
@@ -80,7 +83,7 @@ struct MyPageView: View {
                 .padding(.vertical, 32)
             } else {
                 LazyVStack(spacing: 0) {
-                    ForEach(viewModel.myNodes, id: \.id) { node in
+                    ForEach(myNodes, id: \.id) { node in
                         NavigationLink(destination: DetailView(nodeId: node.id)) {
                             myNodeRow(node: node)
                         }
@@ -128,5 +131,7 @@ struct MyPageView: View {
 // MARK: - Preview
 
 #Preview("MyPageView") {
-    MyPageView()
+    NavigationStack {
+        MyPageView()
+    }
 }

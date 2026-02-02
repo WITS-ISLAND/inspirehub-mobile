@@ -1,53 +1,56 @@
 import SwiftUI
 import Shared
+import KMPObservableViewModelSwiftUI
 
 struct MapView: View {
-    @StateObject private var viewModel = MapViewModelWrapper()
+    @StateViewModel var viewModel = KoinHelper().getMapViewModel()
 
     var body: some View {
-        NavigationView {
-            Group {
-                if viewModel.isLoading && viewModel.nodes.isEmpty {
-                    ProgressView("読み込み中...")
-                } else if let error = viewModel.error, viewModel.nodes.isEmpty {
-                    VStack(spacing: 16) {
-                        Image(systemName: "exclamationmark.triangle")
-                            .font(.system(size: 40))
-                            .foregroundColor(.orange)
-                        Text(error)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                        Button("再読み込み") {
-                            viewModel.loadNodes()
-                        }
+        Group {
+            if viewModel.isLoading as? Bool == true && nodes.isEmpty {
+                ProgressView("読み込み中...")
+            } else if let error = viewModel.error as? String, nodes.isEmpty {
+                VStack(spacing: 16) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.system(size: 40))
+                        .foregroundColor(.orange)
+                    Text(error)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                    Button("再読み込み") {
+                        viewModel.loadNodes()
                     }
-                    .padding()
-                } else if viewModel.nodes.isEmpty {
-                    VStack(spacing: 16) {
-                        Image(systemName: "map")
-                            .font(.system(size: 60))
-                            .foregroundColor(.secondary.opacity(0.5))
-                        Text("ノードがありません")
-                            .font(.headline)
-                            .foregroundColor(.secondary)
-                    }
-                } else {
-                    nodeList
                 }
-            }
-            .navigationTitle("マップ")
-            .navigationBarTitleDisplayMode(.inline)
-            .onAppear {
-                viewModel.loadNodes()
+                .padding()
+            } else if nodes.isEmpty {
+                VStack(spacing: 16) {
+                    Image(systemName: "map")
+                        .font(.system(size: 60))
+                        .foregroundColor(.secondary.opacity(0.5))
+                    Text("ノードがありません")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+                }
+            } else {
+                nodeList
             }
         }
+        .navigationTitle("マップ")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            viewModel.loadNodes()
+        }
+    }
+
+    private var nodes: [Node] {
+        viewModel.nodes as? [Node] ?? []
     }
 
     private var nodeList: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
-                ForEach(viewModel.nodes, id: \.id) { node in
+                ForEach(nodes, id: \.id) { node in
                     let isChild = node.parentNodeId != nil
                     NavigationLink(destination: DetailView(nodeId: node.id)) {
                         nodeRow(node: node, indented: isChild)
@@ -105,5 +108,7 @@ struct MapView: View {
 // MARK: - Preview
 
 #Preview("MapView") {
-    MapView()
+    NavigationStack {
+        MapView()
+    }
 }

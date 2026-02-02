@@ -1,39 +1,86 @@
 import SwiftUI
 import Shared
+import KMPObservableViewModelSwiftUI
+
+// MARK: - Tab / Sort UI Enums
+
+enum HomeTabUI: String, CaseIterable {
+    case latest = "新着"
+    case issue = "課題"
+    case idea = "アイデア"
+    case mine = "自分"
+
+    var kotlinTab: HomeTab {
+        switch self {
+        case .latest: return .recent
+        case .issue: return .issues
+        case .idea: return .ideas
+        case .mine: return .mine
+        }
+    }
+
+    init(from kotlinTab: HomeTab) {
+        switch kotlinTab {
+        case .recent: self = .latest
+        case .issues: self = .issue
+        case .ideas: self = .idea
+        case .mine: self = .mine
+        default: self = .latest
+        }
+    }
+}
+
+enum SortOrderUI: String, CaseIterable {
+    case newest = "新しい順"
+    case popular = "人気順"
+
+    var kotlinOrder: Shared.SortOrder {
+        switch self {
+        case .newest: return .recent
+        case .popular: return .popular
+        }
+    }
+
+    init(from kotlinOrder: Shared.SortOrder) {
+        switch kotlinOrder {
+        case .recent: self = .newest
+        case .popular: self = .popular
+        default: self = .newest
+        }
+    }
+}
+
+// MARK: - HomeView
 
 struct HomeView: View {
-    @StateObject var viewModel = HomeViewModelWrapper()
+    @StateViewModel var viewModel = KoinHelper().getHomeViewModel()
     var onNodeTap: ((Node) -> Void)?
 
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                // Upper tab bar
-                tabBar
+        VStack(spacing: 0) {
+            tabBar
 
-                // Content
-                if viewModel.isLoading && viewModel.nodes.isEmpty {
-                    Spacer()
-                    ProgressView()
-                    Spacer()
-                } else if let error = viewModel.error, viewModel.nodes.isEmpty {
-                    Spacer()
-                    errorView(error)
-                    Spacer()
-                } else {
-                    nodeList
-                }
+            if viewModel.isLoading as? Bool == true && (viewModel.nodes as? [Node] ?? []).isEmpty {
+                Spacer()
+                ProgressView()
+                Spacer()
+            } else if let error = viewModel.error as? String, (viewModel.nodes as? [Node] ?? []).isEmpty {
+                Spacer()
+                errorView(error)
+                Spacer()
+            } else {
+                nodeList
             }
-            .navigationTitle("InspireHub")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    sortMenu
-                }
+        }
+        .navigationTitle("InspireHub")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                sortMenu
             }
-            .onAppear {
-                viewModel.loadNodes()
-            }
+        }
+        .onAppear {
+            viewModel.loadNodes(forceRefresh: false)
         }
     }
 
@@ -44,16 +91,16 @@ struct HomeView: View {
             HStack(spacing: 0) {
                 ForEach(HomeTabUI.allCases, id: \.self) { tab in
                     Button(action: {
-                        viewModel.setTab(tab)
+                        viewModel.setTab(tab: tab.kotlinTab)
                     }) {
                         VStack(spacing: 6) {
                             Text(tab.rawValue)
                                 .font(.subheadline)
-                                .fontWeight(viewModel.currentTab == tab ? .bold : .regular)
-                                .foregroundColor(viewModel.currentTab == tab ? .primary : .secondary)
+                                .fontWeight(isCurrentTab(tab) ? .bold : .regular)
+                                .foregroundColor(isCurrentTab(tab) ? .primary : .secondary)
 
                             Rectangle()
-                                .fill(viewModel.currentTab == tab ? Color.blue : Color.clear)
+                                .fill(isCurrentTab(tab) ? Color.blue : Color.clear)
                                 .frame(height: 2)
                         }
                     }
@@ -67,17 +114,22 @@ struct HomeView: View {
         .background(Color(.systemBackground))
     }
 
+    private func isCurrentTab(_ tab: HomeTabUI) -> Bool {
+        guard let currentTab = viewModel.currentTab as? HomeTab else { return false }
+        return currentTab == tab.kotlinTab
+    }
+
     // MARK: - Sort Menu
 
     private var sortMenu: some View {
         Menu {
             ForEach(SortOrderUI.allCases, id: \.self) { order in
                 Button(action: {
-                    viewModel.setSortOrder(order)
+                    viewModel.setSortOrder(order: order.kotlinOrder)
                 }) {
                     HStack {
                         Text(order.rawValue)
-                        if viewModel.sortOrder == order {
+                        if isCurrentSortOrder(order) {
                             Image(systemName: "checkmark")
                         }
                     }
@@ -89,12 +141,21 @@ struct HomeView: View {
         }
     }
 
+    private func isCurrentSortOrder(_ order: SortOrderUI) -> Bool {
+        guard let currentOrder = viewModel.sortOrder as? Shared.SortOrder else { return false }
+        return currentOrder == order.kotlinOrder
+    }
+
     // MARK: - Node List
+
+    private var nodes: [Node] {
+        viewModel.nodes as? [Node] ?? []
+    }
 
     private var nodeList: some View {
         ScrollView {
             LazyVStack(spacing: 12) {
-                ForEach(viewModel.nodes, id: \.id) { node in
+                ForEach(nodes, id: \.id) { node in
                     NavigationLink(destination: DetailView(nodeId: node.id)) {
                         NodeCardView(node: node)
                     }
@@ -121,7 +182,7 @@ struct HomeView: View {
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
             Button("再読み込み") {
-                viewModel.loadNodes()
+                viewModel.loadNodes(forceRefresh: false)
             }
             .buttonStyle(.bordered)
         }
@@ -200,7 +261,9 @@ struct NodeCardView: View {
 // MARK: - Preview
 
 #Preview("HomeView") {
-    HomeView()
+    NavigationStack {
+        HomeView()
+    }
 }
 
 #Preview("NodeCardView") {
