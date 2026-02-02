@@ -10,10 +10,7 @@ import io.github.witsisland.inspirehub.domain.store.HomeTab
 import io.github.witsisland.inspirehub.domain.store.NodeStore
 import io.github.witsisland.inspirehub.domain.store.SortOrder
 import io.github.witsisland.inspirehub.domain.store.UserStore
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
 
 /**
  * ホーム画面ViewModel
@@ -24,22 +21,7 @@ class HomeViewModel(
     private val userStore: UserStore
 ) : ViewModel() {
 
-    val nodes: StateFlow<List<Node>> = combine(
-        nodeStore.nodes,
-        nodeStore.currentTab,
-        nodeStore.sortOrder
-    ) { allNodes, tab, order ->
-        val filtered = when (tab) {
-            HomeTab.RECENT -> allNodes
-            HomeTab.ISSUES -> allNodes.filter { it.type == NodeType.ISSUE }
-            HomeTab.IDEAS -> allNodes.filter { it.type == NodeType.IDEA }
-            HomeTab.MINE -> allNodes // TODO: currentUserのauthorIdでフィルタ
-        }
-        when (order) {
-            SortOrder.RECENT -> filtered.sortedByDescending { it.createdAt }
-            SortOrder.POPULAR -> filtered // TODO: likeCountでソート
-        }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+    val nodes = MutableStateFlow<List<Node>>(viewModelScope, emptyList())
 
     val isLoading: StateFlow<Boolean> = nodeStore.isLoading
 
@@ -61,6 +43,7 @@ class HomeViewModel(
                 error.value = result.exceptionOrNull()?.message ?: "Failed to load nodes"
             }
 
+            applyFilter()
             nodeStore.setLoading(false)
         }
     }
@@ -69,10 +52,29 @@ class HomeViewModel(
 
     fun setTab(tab: HomeTab) {
         nodeStore.setTab(tab)
+        applyFilter()
     }
 
     fun setSortOrder(order: SortOrder) {
         nodeStore.setSortOrder(order)
+        applyFilter()
+    }
+
+    private fun applyFilter() {
+        val allNodes = nodeStore.nodes.value
+        val tab = nodeStore.currentTab.value
+        val order = nodeStore.sortOrder.value
+
+        val filtered = when (tab) {
+            HomeTab.RECENT -> allNodes
+            HomeTab.ISSUES -> allNodes.filter { it.type == NodeType.ISSUE }
+            HomeTab.IDEAS -> allNodes.filter { it.type == NodeType.IDEA }
+            HomeTab.MINE -> allNodes
+        }
+        nodes.value = when (order) {
+            SortOrder.RECENT -> filtered.sortedByDescending { it.createdAt }
+            SortOrder.POPULAR -> filtered
+        }
     }
 
     fun toggleLike(nodeId: String) {
