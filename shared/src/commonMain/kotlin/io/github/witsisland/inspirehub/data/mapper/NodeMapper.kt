@@ -21,6 +21,9 @@ fun NodeDto.toDomain(): Node {
         authorId = authorId,
         parentNodeId = null, // APIレスポンスにparentNodeIdがない場合はnull
         tagIds = tags.map { it.id },
+        likeCount = likeCount,
+        isLiked = isLiked,
+        commentCount = commentCount,
         createdAt = Instant.parse(createdAt),
         updatedAt = Instant.parse(updatedAt)
     )

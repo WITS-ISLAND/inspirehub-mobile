@@ -4,6 +4,7 @@ import Shared
 struct DetailView: View {
     let nodeId: String
     @StateObject private var viewModel = DetailViewModelWrapper()
+    @State private var showDerivedPost = false
 
     var body: some View {
         Group {
@@ -44,7 +45,7 @@ struct DetailView: View {
                 }
 
                 reactionBar(node: node)
-                deriveButton
+                deriveButton(node: node)
                 childNodesSection
                 commentsSection
             }
@@ -118,9 +119,17 @@ struct DetailView: View {
 
     private func reactionBar(node: Node) -> some View {
         HStack(spacing: 16) {
-            reactionButton(emoji: "👍", label: "いいね") {
-                viewModel.toggleLike()
+            Button(action: { viewModel.toggleLike() }) {
+                VStack(spacing: 2) {
+                    Text("👍")
+                        .font(.title3)
+                    Text(node.likeCount > 0 ? "いいね \(node.likeCount)" : "いいね")
+                        .font(.system(size: 9))
+                        .foregroundColor(node.isLiked ? .blue : .secondary)
+                }
             }
+            .buttonStyle(.plain)
+
             reactionButton(emoji: "💡", label: "共感") { }
             reactionButton(emoji: "👀", label: "気になる") { }
             reactionButton(emoji: "🤝", label: "作りたい") { }

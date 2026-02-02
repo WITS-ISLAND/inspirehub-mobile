@@ -26,7 +26,12 @@ class DetailViewModelWrapper: ObservableObject {
                 guard let self = self else { return }
 
                 let newNode = self.viewModel.selectedNode.value as? Node
-                if self.selectedNode?.id != newNode?.id { self.selectedNode = newNode }
+                if self.selectedNode?.id != newNode?.id
+                    || self.selectedNode?.likeCount != newNode?.likeCount
+                    || self.selectedNode?.isLiked != newNode?.isLiked
+                    || self.selectedNode?.commentCount != newNode?.commentCount {
+                    self.selectedNode = newNode
+                }
 
                 let newComments: [Comment]
                 if let arr = self.viewModel.comments.value as? NSArray {

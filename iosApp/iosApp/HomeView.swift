@@ -155,6 +155,15 @@ struct NodeCardView: View {
                 .foregroundColor(.secondary)
                 .lineLimit(3)
                 .multilineTextAlignment(.leading)
+
+            HStack(spacing: 12) {
+                Label("\(node.likeCount)", systemImage: node.isLiked ? "hand.thumbsup.fill" : "hand.thumbsup")
+                    .font(.caption2)
+                    .foregroundColor(node.isLiked ? .blue : .secondary)
+                Label("\(node.commentCount)", systemImage: "bubble.right")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
