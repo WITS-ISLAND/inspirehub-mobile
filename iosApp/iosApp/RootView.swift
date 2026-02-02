@@ -84,3 +84,9 @@ class AuthViewModelWrapper: ObservableObject {
         viewModel.verifyGoogleToken(idToken: idToken)
     }
 }
+
+// MARK: - Preview
+
+#Preview("RootView") {
+    RootView()
+}
