@@ -18,12 +18,24 @@ class AuthViewModel(
     private val userStore: UserStore
 ) : ViewModel() {
 
-    // UserStore の状態を監視
+    // UserStore の状態をVM側のMutableStateFlowに転写（KMP-ObservableViewModelの観測チェーンに乗せる）
+    private val _currentUser = MutableStateFlow<User?>(viewModelScope, null)
     @NativeCoroutinesState
-    val currentUser: StateFlow<User?> = userStore.currentUser
+    val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
 
+    private val _isAuthenticated = MutableStateFlow(viewModelScope, false)
     @NativeCoroutinesState
-    val isAuthenticated: StateFlow<Boolean> = userStore.isAuthenticated
+    val isAuthenticated: StateFlow<Boolean> = _isAuthenticated.asStateFlow()
+
+    init {
+        // UserStoreのStateFlowをcollectしてVM側に転写
+        viewModelScope.launch {
+            userStore.currentUser.collect { _currentUser.value = it }
+        }
+        viewModelScope.launch {
+            userStore.isAuthenticated.collect { _isAuthenticated.value = it }
+        }
+    }
 
     // 画面固有の状態
     private val _isLoading = MutableStateFlow(viewModelScope, false)

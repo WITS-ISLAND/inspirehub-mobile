@@ -19,8 +19,16 @@ class MyPageViewModel(
     private val nodeRepository: NodeRepository
 ) : ViewModel() {
 
+    // UserStoreの状態をVM側のMutableStateFlowに転写
+    private val _currentUser = MutableStateFlow<User?>(viewModelScope, null)
     @NativeCoroutinesState
-    val currentUser: StateFlow<User?> = userStore.currentUser
+    val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            userStore.currentUser.collect { _currentUser.value = it }
+        }
+    }
 
     private val _myNodes = MutableStateFlow(viewModelScope, emptyList<Node>())
     @NativeCoroutinesState

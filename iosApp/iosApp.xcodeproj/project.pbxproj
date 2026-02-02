@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EF1FF49C2F3073D5009A3039 /* KMPObservableViewModelCore in Frameworks */ = {isa = PBXBuildFile; productRef = EF1FF49B2F3073D5009A3039 /* KMPObservableViewModelCore */; };
+		EF1FF49E2F3073D5009A3039 /* KMPObservableViewModelSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = EF1FF49D2F3073D5009A3039 /* KMPObservableViewModelSwiftUI */; };
+		EF1FF4A12F307422009A3039 /* KMPNativeCoroutinesAsync in Frameworks */ = {isa = PBXBuildFile; productRef = EF1FF4A02F307422009A3039 /* KMPNativeCoroutinesAsync */; };
+		EF1FF4A32F307422009A3039 /* KMPNativeCoroutinesCombine in Frameworks */ = {isa = PBXBuildFile; productRef = EF1FF4A22F307422009A3039 /* KMPNativeCoroutinesCombine */; };
+		EF1FF4A52F307422009A3039 /* KMPNativeCoroutinesCore in Frameworks */ = {isa = PBXBuildFile; productRef = EF1FF4A42F307422009A3039 /* KMPNativeCoroutinesCore */; };
+		EF1FF4A72F307422009A3039 /* KMPNativeCoroutinesRxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = EF1FF4A62F307422009A3039 /* KMPNativeCoroutinesRxSwift */; };
 		EF9960062F2DE5D000760553 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = EF9960052F2DE5D000760553 /* GoogleSignIn */; };
 		EF9960082F2DE5D000760553 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = EF9960072F2DE5D000760553 /* GoogleSignInSwift */; };
 /* End PBXBuildFile section */
@@ -47,7 +53,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				EF9960062F2DE5D000760553 /* GoogleSignIn in Frameworks */,
+				EF1FF49E2F3073D5009A3039 /* KMPObservableViewModelSwiftUI in Frameworks */,
+				EF1FF4A52F307422009A3039 /* KMPNativeCoroutinesCore in Frameworks */,
+				EF1FF4A72F307422009A3039 /* KMPNativeCoroutinesRxSwift in Frameworks */,
 				EF9960082F2DE5D000760553 /* GoogleSignInSwift in Frameworks */,
+				EF1FF4A32F307422009A3039 /* KMPNativeCoroutinesCombine in Frameworks */,
+				EF1FF4A12F307422009A3039 /* KMPNativeCoroutinesAsync in Frameworks */,
+				EF1FF49C2F3073D5009A3039 /* KMPObservableViewModelCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -94,6 +106,12 @@
 			packageProductDependencies = (
 				EF9960052F2DE5D000760553 /* GoogleSignIn */,
 				EF9960072F2DE5D000760553 /* GoogleSignInSwift */,
+				EF1FF49B2F3073D5009A3039 /* KMPObservableViewModelCore */,
+				EF1FF49D2F3073D5009A3039 /* KMPObservableViewModelSwiftUI */,
+				EF1FF4A02F307422009A3039 /* KMPNativeCoroutinesAsync */,
+				EF1FF4A22F307422009A3039 /* KMPNativeCoroutinesCombine */,
+				EF1FF4A42F307422009A3039 /* KMPNativeCoroutinesCore */,
+				EF1FF4A62F307422009A3039 /* KMPNativeCoroutinesRxSwift */,
 			);
 			productName = iosApp;
 			productReference = C3E71D2B60F1D32C2341FA05 /* InspireHubMobile.app */;
@@ -125,6 +143,8 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				EF9960042F2DE5D000760553 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				EF1FF49A2F3073D5009A3039 /* XCRemoteSwiftPackageReference "KMP-ObservableViewModel" */,
+				EF1FF49F2F307422009A3039 /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = F2C9EE9426BD20B313D744F2 /* Products */;
@@ -382,6 +402,22 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		EF1FF49A2F3073D5009A3039 /* XCRemoteSwiftPackageReference "KMP-ObservableViewModel" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/rickclephas/KMP-ObservableViewModel.git";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+		EF1FF49F2F307422009A3039 /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/rickclephas/KMP-NativeCoroutines.git";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 		EF9960042F2DE5D000760553 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
@@ -393,6 +429,36 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		EF1FF49B2F3073D5009A3039 /* KMPObservableViewModelCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EF1FF49A2F3073D5009A3039 /* XCRemoteSwiftPackageReference "KMP-ObservableViewModel" */;
+			productName = KMPObservableViewModelCore;
+		};
+		EF1FF49D2F3073D5009A3039 /* KMPObservableViewModelSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EF1FF49A2F3073D5009A3039 /* XCRemoteSwiftPackageReference "KMP-ObservableViewModel" */;
+			productName = KMPObservableViewModelSwiftUI;
+		};
+		EF1FF4A02F307422009A3039 /* KMPNativeCoroutinesAsync */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EF1FF49F2F307422009A3039 /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */;
+			productName = KMPNativeCoroutinesAsync;
+		};
+		EF1FF4A22F307422009A3039 /* KMPNativeCoroutinesCombine */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EF1FF49F2F307422009A3039 /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */;
+			productName = KMPNativeCoroutinesCombine;
+		};
+		EF1FF4A42F307422009A3039 /* KMPNativeCoroutinesCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EF1FF49F2F307422009A3039 /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */;
+			productName = KMPNativeCoroutinesCore;
+		};
+		EF1FF4A62F307422009A3039 /* KMPNativeCoroutinesRxSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EF1FF49F2F307422009A3039 /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */;
+			productName = KMPNativeCoroutinesRxSwift;
+		};
 		EF9960052F2DE5D000760553 /* GoogleSignIn */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = EF9960042F2DE5D000760553 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;

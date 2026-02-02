@@ -18,11 +18,23 @@ class MapViewModel(
     private val nodeRepository: NodeRepository
 ) : ViewModel() {
 
+    // NodeStoreの状態をVM側のMutableStateFlowに転写
+    private val _nodes = MutableStateFlow<List<Node>>(viewModelScope, emptyList())
     @NativeCoroutinesState
-    val nodes: StateFlow<List<Node>> = nodeStore.nodes
+    val nodes: StateFlow<List<Node>> = _nodes.asStateFlow()
 
+    private val _isLoading = MutableStateFlow(viewModelScope, false)
     @NativeCoroutinesState
-    val isLoading: StateFlow<Boolean> = nodeStore.isLoading
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            nodeStore.nodes.collect { _nodes.value = it }
+        }
+        viewModelScope.launch {
+            nodeStore.isLoading.collect { _isLoading.value = it }
+        }
+    }
 
     private val _error = MutableStateFlow(viewModelScope, null as String?)
     @NativeCoroutinesState

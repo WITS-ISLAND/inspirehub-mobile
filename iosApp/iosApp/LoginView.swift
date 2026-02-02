@@ -2,9 +2,10 @@ import SwiftUI
 import Shared
 import GoogleSignIn
 import GoogleSignInSwift
+import KMPObservableViewModelSwiftUI
 
 struct LoginView: View {
-    var viewModel: AuthViewModel
+    @ObservedViewModel var viewModel: AuthViewModel
     @State private var signInError: String?
 
     var body: some View {

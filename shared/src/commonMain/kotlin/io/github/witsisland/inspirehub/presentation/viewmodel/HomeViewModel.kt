@@ -27,14 +27,30 @@ class HomeViewModel(
     @NativeCoroutinesState
     val nodes: StateFlow<List<Node>> = _nodes.asStateFlow()
 
+    // NodeStoreの状態をVM側のMutableStateFlowに転写
+    private val _isLoading = MutableStateFlow(viewModelScope, false)
     @NativeCoroutinesState
-    val isLoading: StateFlow<Boolean> = nodeStore.isLoading
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    private val _currentTab = MutableStateFlow(viewModelScope, HomeTab.RECENT)
     @NativeCoroutinesState
-    val currentTab: StateFlow<HomeTab> = nodeStore.currentTab
+    val currentTab: StateFlow<HomeTab> = _currentTab.asStateFlow()
 
+    private val _sortOrder = MutableStateFlow(viewModelScope, SortOrder.RECENT)
     @NativeCoroutinesState
-    val sortOrder: StateFlow<SortOrder> = nodeStore.sortOrder
+    val sortOrder: StateFlow<SortOrder> = _sortOrder.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            nodeStore.isLoading.collect { _isLoading.value = it }
+        }
+        viewModelScope.launch {
+            nodeStore.currentTab.collect { _currentTab.value = it }
+        }
+        viewModelScope.launch {
+            nodeStore.sortOrder.collect { _sortOrder.value = it }
+        }
+    }
 
     private val _error = MutableStateFlow(viewModelScope, null as String?)
     @NativeCoroutinesState

@@ -23,9 +23,16 @@ class DetailViewModel(
     private val commentRepository: CommentRepository
 ) : ViewModel() {
 
-    // NodeStoreの選択状態を監視
+    // NodeStoreの選択状態をVM側のMutableStateFlowに転写
+    private val _selectedNode = MutableStateFlow<Node?>(viewModelScope, null)
     @NativeCoroutinesState
-    val selectedNode: StateFlow<Node?> = nodeStore.selectedNode
+    val selectedNode: StateFlow<Node?> = _selectedNode.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            nodeStore.selectedNode.collect { _selectedNode.value = it }
+        }
+    }
 
     private val _comments = MutableStateFlow(viewModelScope, emptyList<Comment>())
     @NativeCoroutinesState
