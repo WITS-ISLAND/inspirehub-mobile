@@ -117,3 +117,9 @@ struct FlowLayout<Data: RandomAccessCollection, Content: View>: View where Data.
         }
     }
 }
+
+// MARK: - Preview
+
+#Preview("IssuePostView") {
+    IssuePostView()
+}
