@@ -5,6 +5,10 @@
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 
+	<!-- TestFlight配信時のExport Complianceダイアログを省略 -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+
 	<!-- Google Sign-In Configuration -->
 	<key>GIDClientID</key>
 	<string>605273458355-9c4cvk0o5nhpdrkknj4m98voh712enr9.apps.googleusercontent.com</string>
