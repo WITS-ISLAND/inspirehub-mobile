@@ -17,7 +17,8 @@ kotlinx-datetime = "0.6.2"
 kotlinx-serialization = "1.8.0"
 kotlinx-coroutines = "1.10.2"
 ktor = "3.0.3"
-kmp-observableviewmodel = "1.0.0-BETA-10"
+kmp-nativecoroutines = "1.0.0"
+kmp-observableviewmodel = "1.0.1"
 material3 = "1.10.0-alpha05"
 turbine = "1.2.1"
 
@@ -55,6 +56,7 @@ compose-components-resources = { module = "org.jetbrains.compose.components:comp
 compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
 
 [plugins]
+kmpNativeCoroutines = { id = "com.rickclephas.kmp.nativecoroutines", version.ref = "kmp-nativecoroutines" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
