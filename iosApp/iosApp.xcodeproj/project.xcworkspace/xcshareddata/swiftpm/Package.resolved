@@ -1,0 +1,96 @@
+{
+  "originHash" : "cc65704ddd281b8c18704b1e1a9676fae09d05bd7af96bcffadb923cd6f7342b",
+  "pins" : [
+    {
+      "identity" : "app-check",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/google/app-check.git",
+      "state" : {
+        "revision" : "61b85103a1aeed8218f17c794687781505fbbef5",
+        "version" : "11.2.0"
+      }
+    },
+    {
+      "identity" : "appauth-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/openid/AppAuth-iOS.git",
+      "state" : {
+        "revision" : "145104f5ea9d58ae21b60add007c33c1cc0c948e",
+        "version" : "2.0.0"
+      }
+    },
+    {
+      "identity" : "googlesignin-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/google/GoogleSignIn-iOS",
+      "state" : {
+        "revision" : "913b4005ea26aebe1c97d54e35ad82a515924c71",
+        "version" : "9.1.0"
+      }
+    },
+    {
+      "identity" : "googleutilities",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/google/GoogleUtilities.git",
+      "state" : {
+        "revision" : "60da361632d0de02786f709bdc0c4df340f7613e",
+        "version" : "8.1.0"
+      }
+    },
+    {
+      "identity" : "gtm-session-fetcher",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/google/gtm-session-fetcher.git",
+      "state" : {
+        "revision" : "a2ab612cb980066ee56d90d60d8462992c07f24b",
+        "version" : "3.5.0"
+      }
+    },
+    {
+      "identity" : "gtmappauth",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/google/GTMAppAuth.git",
+      "state" : {
+        "revision" : "56e0ccf09a6dd29dc7e68bdf729598240ca8aa16",
+        "version" : "5.0.0"
+      }
+    },
+    {
+      "identity" : "kmp-nativecoroutines",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/rickclephas/KMP-NativeCoroutines.git",
+      "state" : {
+        "revision" : "a84bdbf80f4c6befd3fe82db138b7201968dde09",
+        "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "kmp-observableviewmodel",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/rickclephas/KMP-ObservableViewModel.git",
+      "state" : {
+        "revision" : "4439d3df550aa34e91fb751e6ce77e405db7a20e",
+        "version" : "1.0.1"
+      }
+    },
+    {
+      "identity" : "promises",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/google/promises.git",
+      "state" : {
+        "revision" : "540318ecedd63d883069ae7f1ed811a2df00b6ac",
+        "version" : "2.4.0"
+      }
+    },
+    {
+      "identity" : "rxswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ReactiveX/RxSwift.git",
+      "state" : {
+        "revision" : "5734ad2b6d7d4c0656df3d09ca4ce54fa3c09913",
+        "version" : "6.10.1"
+      }
+    }
+  ],
+  "version" : 3
+}
