@@ -295,3 +295,29 @@ class MyViewModelTest : MainDispatcherRule() {
 - **派生アイデア**: 既存の課題やアイデアから引用して作成されたアイデア
 - **作ってみたい**: ユーザーがアイデアに対して示す軽いコミットメント（参加確定の手前）
 - **ノード**: 課題またはアイデアの総称（マップ表示での呼称）
+
+## 開発自動化ツール
+
+### カスタムエージェント（`.claude/agents/`）
+
+Task toolでspawnして使用。
+
+| エージェント | 用途 |
+| ----------- | ---- |
+| kotlin-dev | shared層のKotlin実装 |
+| ios-dev | iosApp/のSwiftUI実装 |
+| architect | アーキテクチャ設計・技術選定 |
+| qa-checker | コード品質検証・テスト実行 |
+| design-reviewer | UI設計書準拠・HIG・審査チェック |
+| code-reviewer | Kotlin+iOS統合コードレビュー |
+| task-planner | タスク分解・ガントチャート・チーム管理 |
+
+### スキル（`.claude/skills/`）
+
+| コマンド | 用途 |
+| ------- | ---- |
+| /qa-check [BUG-ID\|all] | QAチェックリスト検証 |
+| /build-check [ios\|android\|shared\|all] | ビルド実行・エラー報告 |
+| /fix-bug \<BUG-ID\> | バグ自動修正 |
+| /design-review [画面名\|all] | デザインレビュー |
+| /retro | 振り返り・効率化提案 |

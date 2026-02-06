@@ -1,7 +1,4 @@
 {
-  "enabledPlugins": {
-    "example-skills@anthropic-agent-skills": true
-  },
   "permissions": {
     "allow": [
       "Bash(git:*)",
@@ -27,7 +24,11 @@
       "WebFetch(domain:kmp.jetbrains.com)",
       "WebFetch(domain:drive.google.com)",
       "WebFetch(domain:zenn.dev)",
-      "WebSearch"
+      "WebSearch",
+      "mcp__context7__resolve-library-id"
     ]
+  },
+  "enabledPlugins": {
+    "example-skills@anthropic-agent-skills": true
   }
 }

@@ -1,19 +1,28 @@
 # InspireHub Mobile ドキュメント
 
-## 概要
-
-このディレクトリにはInspireHub Mobileの設計ドキュメントが含まれています。
-
 ## ドキュメント構成
 
-### design/
-アプリケーションの設計ドキュメント
+### design/ — 設計ドキュメント
 
-- `persona.md` - ペルソナ定義
-- `journey-map.md` - ユーザージャーニーマップ
-- `object-model.md` - オブジェクトモデル図
-- `feature-list.md` - 機能一覧
-- `screen-design.md` - 画面設計
+| ファイル | 内容 |
+| ------- | ---- |
+| ペルソナ.md | ユーザーペルソナ定義 |
+| ジャーニーマップ.html | ユーザージャーニーマップ |
+| ドメインモデル図.md | ドメインモデル図 |
+| 機能一覧.md | 機能リストとフェーズ計画（Phase 1-3） |
+| 画面設計_ネイティブアプリ.md | 画面設計仕様 |
+| swiftui_design_guide.md | SwiftUIデザインガイド（色、タイポグラフィ、スペーシング） |
+| link_expression_proposals.md | リンク表現提案 |
+| spm_multimodule_architecture.md | SPMマルチモジュール化の設計 |
+
+### ルートレベル
+
+| ファイル | 内容 |
+| ------- | ---- |
+| architecture.md | アーキテクチャ概要（MVVM + Store Pattern） |
+| qa_checklist.md | Phase 1 QAチェックリスト |
+| ci_cd_strategy.md | CI/CD戦略 |
+| spm_xcodecloud_report.md | SPM + Xcode Cloud検証レポート |
 
 ## Google Driveとの同期
 
@@ -22,19 +31,12 @@
 ### 同期手順
 
 1. **Serverチームが設計を更新した場合**:
-   - Slack/Discord等で通知
-   - Mobileチームが該当ファイルをダウンロード
-   - `docs/design/` 内のファイルを更新
-   - Gitコミット
+   - Slack等で通知 → `docs/design/` 内のファイルを更新 → Gitコミット
 
 2. **Mobileチームが設計を更新する場合**:
-   - `docs/design/` 内のファイルを編集
-   - Gitコミット
-   - Google Driveへアップロード（上書き）
-   - Serverチームに通知
+   - `docs/design/` 内のファイルを編集 → Gitコミット → Google Driveへアップロード → Serverチームに通知
 
 ### 注意事項
 
-- Git内のMarkdownファイルが**Single Source of Truth**です
+- Git内のMarkdownファイルが **Single Source of Truth**
 - Google Driveはバックアップ・共有用
-- コンフリクトが発生した場合は、チーム内で調整してください
