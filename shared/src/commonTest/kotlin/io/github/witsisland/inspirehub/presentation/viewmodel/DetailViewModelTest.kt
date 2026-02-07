@@ -12,7 +12,6 @@ import io.github.witsisland.inspirehub.domain.repository.FakeCommentRepository
 import io.github.witsisland.inspirehub.domain.repository.FakeNodeRepository
 import io.github.witsisland.inspirehub.domain.repository.FakeReactionRepository
 import io.github.witsisland.inspirehub.domain.store.NodeStore
-import io.github.witsisland.inspirehub.domain.store.UserStore
 import io.github.witsisland.inspirehub.test.MainDispatcherRule
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
@@ -30,7 +29,6 @@ class DetailViewModelTest : MainDispatcherRule() {
     private lateinit var fakeCommentRepository: FakeCommentRepository
     private lateinit var fakeReactionRepository: FakeReactionRepository
     private lateinit var nodeStore: NodeStore
-    private lateinit var userStore: UserStore
 
     private val sampleNode = Node(
         id = "node1",
@@ -88,8 +86,7 @@ class DetailViewModelTest : MainDispatcherRule() {
         fakeCommentRepository = FakeCommentRepository()
         fakeReactionRepository = FakeReactionRepository()
         nodeStore = NodeStore()
-        userStore = UserStore()
-        viewModel = DetailViewModel(nodeStore, fakeNodeRepository, fakeCommentRepository, fakeReactionRepository, userStore)
+        viewModel = DetailViewModel(nodeStore, fakeNodeRepository, fakeCommentRepository, fakeReactionRepository)
     }
 
     @AfterTest

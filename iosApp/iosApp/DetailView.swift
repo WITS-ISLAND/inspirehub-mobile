@@ -70,6 +70,9 @@ struct DetailView: View {
                 }
                 .padding(16)
             }
+            .refreshable {
+                viewModel.loadDetail(nodeId: nodeId)
+            }
 
             commentInputBar
         }
