@@ -32,6 +32,12 @@ ViewModel (per-screen, disposable)
   └→ Repository (persistence, singleton, interface + impl)
 ```
 
+## ロギング
+- `println` を使うな → **Kermit** (`co.touchlab:kermit`) を使え
+- `Logger.withTag("クラス名")` でタグ付きロガーを生成
+- ログレベル: `.e` (エラー), `.w` (警告), `.d` (デバッグ), `.i` (情報)
+- Android → Logcat、iOS → os_log に自動ルーティングされる
+
 ## テスト
 - MockKは使わない（KMP Nativeで不安定）→ Fake実装を使え
 - `MainDispatcherRule` を継承
