@@ -39,7 +39,7 @@ kotlin {
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.kermit)
             implementation(libs.koin.core)
-            implementation(libs.kmp.observableviewmodel.core)
+            api(libs.kmp.observableviewmodel.core)
         }
         androidMain.dependencies {
             implementation(libs.ktor.client.okhttp)
