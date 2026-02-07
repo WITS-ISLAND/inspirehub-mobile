@@ -96,4 +96,16 @@ class NodeRepositoryImpl(
             Result.failure(e)
         }
     }
+
+    override suspend fun getReactedNodes(
+        limit: Int,
+        offset: Int
+    ): Result<List<Node>> {
+        return try {
+            val dtos = nodeDataSource.getReactedNodes(limit = limit, offset = offset)
+            Result.success(dtos.map { it.toDomain() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

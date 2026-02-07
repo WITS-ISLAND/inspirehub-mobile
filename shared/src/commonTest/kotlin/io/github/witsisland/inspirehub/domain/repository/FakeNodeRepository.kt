@@ -13,6 +13,7 @@ class FakeNodeRepository : NodeRepository {
     var toggleLikeResult: Result<Node>? = null
     var getChildNodesResult: Result<List<Node>>? = null
     var searchNodesResult: Result<List<Node>>? = null
+    var getReactedNodesResult: Result<List<Node>>? = null
 
     var shouldReturnError: Boolean = false
     var errorMessage: String = "Test error"
@@ -23,6 +24,7 @@ class FakeNodeRepository : NodeRepository {
     var toggleLikeCallCount = 0
     var getChildNodesCallCount = 0
     var searchNodesCallCount = 0
+    var getReactedNodesCallCount = 0
 
     var lastGetNodesType: String? = null
     var lastGetNodesLimit: Int? = null
@@ -117,6 +119,16 @@ class FakeNodeRepository : NodeRepository {
         )
     }
 
+    override suspend fun getReactedNodes(
+        limit: Int,
+        offset: Int
+    ): Result<List<Node>> {
+        getReactedNodesCallCount++
+
+        if (shouldReturnError) return Result.failure(Exception(errorMessage))
+        return getReactedNodesResult ?: Result.success(emptyList())
+    }
+
     fun reset() {
         nodes.clear()
         getNodesResult = null
@@ -125,6 +137,7 @@ class FakeNodeRepository : NodeRepository {
         toggleLikeResult = null
         getChildNodesResult = null
         searchNodesResult = null
+        getReactedNodesResult = null
         shouldReturnError = false
         errorMessage = "Test error"
         getNodesCallCount = 0
@@ -133,6 +146,7 @@ class FakeNodeRepository : NodeRepository {
         toggleLikeCallCount = 0
         getChildNodesCallCount = 0
         searchNodesCallCount = 0
+        getReactedNodesCallCount = 0
         lastGetNodesType = null
         lastGetNodesLimit = null
         lastGetNodesOffset = null

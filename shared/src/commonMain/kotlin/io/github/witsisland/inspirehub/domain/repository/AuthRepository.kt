@@ -27,4 +27,11 @@ interface AuthRepository {
      * ログアウト
      */
     suspend fun logout(): Result<Unit>
+
+    /**
+     * ユーザー名を更新
+     * @param name 新しいユーザー名
+     * @return 更新後のユーザー
+     */
+    suspend fun updateUserName(name: String): Result<User>
 }

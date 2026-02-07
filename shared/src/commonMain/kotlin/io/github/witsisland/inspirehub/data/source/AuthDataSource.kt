@@ -31,4 +31,11 @@ interface AuthDataSource {
      * ログアウト
      */
     suspend fun logout()
+
+    /**
+     * ユーザー名を更新
+     * @param name 新しいユーザー名
+     * @return 更新後のユーザー情報
+     */
+    suspend fun updateUserName(name: String): UserDto
 }

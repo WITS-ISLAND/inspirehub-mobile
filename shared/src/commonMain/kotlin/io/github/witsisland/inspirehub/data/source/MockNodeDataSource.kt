@@ -115,6 +115,15 @@ class MockNodeDataSource : NodeDataSource {
         return filtered.drop(offset).take(limit)
     }
 
+    override suspend fun getReactedNodes(
+        limit: Int,
+        offset: Int
+    ): List<NodeDto> {
+        // Mock: いいね済みのノードを返す
+        val reacted = nodes.filter { it.reactions.like.isReacted }
+        return reacted.drop(offset).take(limit)
+    }
+
     private fun generateMockNodes(): List<NodeDto> {
         val random = Random(42)
 

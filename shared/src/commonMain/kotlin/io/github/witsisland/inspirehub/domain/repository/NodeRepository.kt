@@ -33,4 +33,9 @@ interface NodeRepository {
         limit: Int = 20,
         offset: Int = 0
     ): Result<List<Node>>
+
+    suspend fun getReactedNodes(
+        limit: Int = 20,
+        offset: Int = 0
+    ): Result<List<Node>>
 }

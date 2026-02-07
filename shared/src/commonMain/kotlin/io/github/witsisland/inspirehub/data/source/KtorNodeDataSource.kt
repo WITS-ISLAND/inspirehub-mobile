@@ -83,4 +83,15 @@ class KtorNodeDataSource(
             type?.let { parameter("type", it) }
         }.body()
     }
+
+    override suspend fun getReactedNodes(
+        limit: Int,
+        offset: Int
+    ): List<NodeDto> {
+        return httpClient.get("/nodes") {
+            parameter("reacted", true)
+            parameter("limit", limit)
+            parameter("offset", offset)
+        }.body()
+    }
 }

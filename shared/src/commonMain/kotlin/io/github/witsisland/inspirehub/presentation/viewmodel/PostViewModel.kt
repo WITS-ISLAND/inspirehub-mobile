@@ -48,12 +48,25 @@ class PostViewModel(
     @NativeCoroutinesState
     val isSuccess: StateFlow<Boolean> = _isSuccess.asStateFlow()
 
+    /**
+     * フォームが有効かどうか (BUG-010: タイトルと本文の両方が必須)
+     */
+    private val _isValid = MutableStateFlow(viewModelScope, false)
+    @NativeCoroutinesState
+    val isValid: StateFlow<Boolean> = _isValid.asStateFlow()
+
+    private fun updateValidation() {
+        _isValid.value = _title.value.isNotBlank() && _content.value.isNotBlank()
+    }
+
     fun updateTitle(value: String) {
         _title.value = value
+        updateValidation()
     }
 
     fun updateContent(value: String) {
         _content.value = value
+        updateValidation()
     }
 
     fun addTag(tag: String) {
@@ -102,6 +115,7 @@ class PostViewModel(
         _isSubmitting.value = false
         _error.value = null
         _isSuccess.value = false
+        _isValid.value = false
     }
 
     private fun submit(type: NodeType, parentNodeId: String?) {

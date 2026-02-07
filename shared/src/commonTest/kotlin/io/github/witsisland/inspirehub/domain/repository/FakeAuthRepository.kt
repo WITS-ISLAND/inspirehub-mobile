@@ -11,15 +11,18 @@ class FakeAuthRepository : AuthRepository {
     var refreshAccessTokenResult: Result<Unit> = Result.success(Unit)
     var getCurrentUserResult: Result<User>? = null
     var logoutResult: Result<Unit> = Result.success(Unit)
+    var updateUserNameResult: Result<User>? = null
 
     // 呼び出し回数をカウント
     var verifyGoogleTokenCallCount = 0
     var refreshAccessTokenCallCount = 0
     var getCurrentUserCallCount = 0
     var logoutCallCount = 0
+    var updateUserNameCallCount = 0
 
     // 最後に渡された引数を保存
     var lastIdToken: String? = null
+    var lastUpdateUserName: String? = null
 
     override suspend fun verifyGoogleToken(idToken: String): Result<User> {
         verifyGoogleTokenCallCount++
@@ -42,11 +45,19 @@ class FakeAuthRepository : AuthRepository {
         return logoutResult
     }
 
+    override suspend fun updateUserName(name: String): Result<User> {
+        updateUserNameCallCount++
+        lastUpdateUserName = name
+        return updateUserNameResult ?: error("updateUserNameResult not set")
+    }
+
     fun reset() {
         verifyGoogleTokenCallCount = 0
         refreshAccessTokenCallCount = 0
         getCurrentUserCallCount = 0
         logoutCallCount = 0
+        updateUserNameCallCount = 0
         lastIdToken = null
+        lastUpdateUserName = null
     }
 }

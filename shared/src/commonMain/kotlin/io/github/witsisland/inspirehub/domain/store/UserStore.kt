@@ -50,6 +50,13 @@ class UserStore {
     }
 
     /**
+     * ユーザー情報を更新（名前変更等）
+     */
+    fun updateUser(user: User) {
+        _currentUser.value = user
+    }
+
+    /**
      * 現在のアクセストークンを取得（nullable）
      */
     fun getAccessToken(): String? = _accessToken.value

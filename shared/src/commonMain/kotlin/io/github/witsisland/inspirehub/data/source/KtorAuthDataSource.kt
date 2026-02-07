@@ -45,4 +45,11 @@ class KtorAuthDataSource(
     override suspend fun logout() {
         httpClient.post("/auth/logout")
     }
+
+    override suspend fun updateUserName(name: String): UserDto {
+        return httpClient.patch("/users/me") {
+            contentType(ContentType.Application.Json)
+            setBody(mapOf("name" to name))
+        }.body()
+    }
 }

@@ -86,4 +86,15 @@ class AuthRepositoryImpl(
             Result.failure(e)
         }
     }
+
+    override suspend fun updateUserName(name: String): Result<User> {
+        return try {
+            val userDto = authDataSource.updateUserName(name)
+            val user = userDto.toDomain()
+            userStore.updateUser(user)
+            Result.success(user)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

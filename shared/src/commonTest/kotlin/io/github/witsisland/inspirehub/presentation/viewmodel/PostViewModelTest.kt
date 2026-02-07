@@ -229,5 +229,51 @@ class PostViewModelTest : MainDispatcherRule() {
         assertFalse(viewModel.isSubmitting.value)
         assertNull(viewModel.error.value)
         assertFalse(viewModel.isSuccess.value)
+        assertFalse(viewModel.isValid.value)
+    }
+
+    // ========================================
+    // isValid バリデーション (BUG-010)
+    // ========================================
+
+    @Test
+    fun `isValid - タイトルと本文の両方が入力されている場合trueになること`() = runTest {
+        viewModel.updateTitle("タイトル")
+        viewModel.updateContent("本文")
+
+        assertTrue(viewModel.isValid.value)
+    }
+
+    @Test
+    fun `isValid - タイトルのみの場合falseであること`() = runTest {
+        viewModel.updateTitle("タイトル")
+
+        assertFalse(viewModel.isValid.value)
+    }
+
+    @Test
+    fun `isValid - 本文のみの場合falseであること`() = runTest {
+        viewModel.updateContent("本文")
+
+        assertFalse(viewModel.isValid.value)
+    }
+
+    @Test
+    fun `isValid - 空白のみの場合falseであること`() = runTest {
+        viewModel.updateTitle("  ")
+        viewModel.updateContent("  ")
+
+        assertFalse(viewModel.isValid.value)
+    }
+
+    @Test
+    fun `isValid - resetでfalseに戻ること`() = runTest {
+        viewModel.updateTitle("タイトル")
+        viewModel.updateContent("本文")
+        assertTrue(viewModel.isValid.value)
+
+        viewModel.reset()
+
+        assertFalse(viewModel.isValid.value)
     }
 }

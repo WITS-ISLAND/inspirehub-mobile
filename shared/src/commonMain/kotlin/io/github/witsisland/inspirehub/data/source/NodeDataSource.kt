@@ -77,4 +77,14 @@ interface NodeDataSource {
         limit: Int = 20,
         offset: Int = 0
     ): List<NodeDto>
+
+    /**
+     * リアクション済みノード一覧を取得
+     * @param limit 取得件数
+     * @param offset オフセット
+     */
+    suspend fun getReactedNodes(
+        limit: Int = 20,
+        offset: Int = 0
+    ): List<NodeDto>
 }
