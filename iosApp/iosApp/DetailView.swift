@@ -115,7 +115,7 @@ struct DetailView: View {
         VStack(alignment: .leading, spacing: 4) {
             Divider()
             HStack(spacing: 16) {
-                Label(node.authorId, systemImage: "person")
+                Label("\(node.authorName)：\(node.authorId)", systemImage: "person")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
