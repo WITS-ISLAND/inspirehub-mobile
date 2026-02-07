@@ -105,7 +105,8 @@ class DetailViewModel(
             }
 
             if (commentsResult.isSuccess) {
-                _comments.value = commentsResult.getOrNull() ?: emptyList()
+                _comments.value = (commentsResult.getOrNull() ?: emptyList())
+                    .sortedByDescending { it.createdAt }
             }
 
             if (childNodesResult.isSuccess) {
@@ -113,6 +114,36 @@ class DetailViewModel(
             }
 
             _isLoading.value = false
+        }
+    }
+
+    /**
+     * コンテンツを保持したままリフレッシュ（pull-to-refresh用）
+     */
+    fun refreshDetail(nodeId: String) {
+        viewModelScope.launch {
+            _error.value = null
+
+            val nodeDeferred = async { nodeRepository.getNode(nodeId) }
+            val commentsDeferred = async { commentRepository.getComments(nodeId) }
+            val childNodesDeferred = async { nodeRepository.getChildNodes(nodeId) }
+
+            val nodeResult = nodeDeferred.await()
+            val commentsResult = commentsDeferred.await()
+            val childNodesResult = childNodesDeferred.await()
+
+            if (nodeResult.isSuccess) {
+                nodeStore.selectNode(nodeResult.getOrNull())
+            }
+
+            if (commentsResult.isSuccess) {
+                _comments.value = (commentsResult.getOrNull() ?: emptyList())
+                    .sortedByDescending { it.createdAt }
+            }
+
+            if (childNodesResult.isSuccess) {
+                _childNodes.value = childNodesResult.getOrNull() ?: emptyList()
+            }
         }
     }
 
@@ -142,11 +173,15 @@ class DetailViewModel(
 
     /**
      * コメントを投稿
+     * テキストを即クリアしてレスポンシブなUXを実現
      */
     fun submitComment() {
         val nodeId = selectedNode.value?.id ?: return
         val text = _commentText.value.trim()
         if (text.isEmpty()) return
+
+        // 即座にテキストをクリア（UXフィードバック）
+        _commentText.value = ""
 
         viewModelScope.launch {
             _isCommentSubmitting.value = true
@@ -158,11 +193,13 @@ class DetailViewModel(
             )
 
             if (result.isSuccess) {
-                _commentText.value = ""
                 result.getOrNull()?.let { comment ->
-                    _comments.value = _comments.value + comment
+                    _comments.value = (_comments.value + comment)
+                        .sortedByDescending { it.createdAt }
                 }
             } else {
+                // 失敗時: テキストを復元
+                _commentText.value = text
                 _error.value = result.exceptionOrNull()?.message ?: "Failed to post comment"
             }
 

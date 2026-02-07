@@ -12,6 +12,10 @@ private struct LoginRequiredActionKey: EnvironmentKey {
     static let defaultValue: () -> Void = {}
 }
 
+private struct FABHiddenKey: EnvironmentKey {
+    static let defaultValue: Binding<Bool> = .constant(false)
+}
+
 private struct CurrentUserIdKey: EnvironmentKey {
     static let defaultValue: String? = nil
 }
@@ -25,6 +29,11 @@ extension EnvironmentValues {
     var loginRequired: () -> Void {
         get { self[LoginRequiredActionKey.self] }
         set { self[LoginRequiredActionKey.self] = newValue }
+    }
+
+    var fabHiddenBinding: Binding<Bool> {
+        get { self[FABHiddenKey.self] }
+        set { self[FABHiddenKey.self] = newValue }
     }
 
     var currentUserId: String? {

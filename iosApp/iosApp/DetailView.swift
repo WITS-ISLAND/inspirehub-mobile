@@ -14,6 +14,7 @@ struct DetailView: View {
     @Environment(\.isAuthenticated) private var isAuthenticated
     @Environment(\.currentUserId) private var currentUserId
     @Environment(\.loginRequired) private var loginRequired
+    @Environment(\.fabHiddenBinding) private var fabHiddenBinding
     @Environment(\.dismiss) private var dismiss
 
     private var isOwner: Bool {
@@ -93,7 +94,11 @@ struct DetailView: View {
             Text("この投稿を削除しますか？この操作は取り消せません。")
         }
         .onAppear {
+            fabHiddenBinding.wrappedValue = true
             viewModel.loadDetail(nodeId: nodeId)
+        }
+        .onDisappear {
+            fabHiddenBinding.wrappedValue = false
         }
     }
 
@@ -182,28 +187,36 @@ struct DetailView: View {
     // MARK: - Detail Content
 
     private func nodeDetailContent(node: Node) -> some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                headerSection(node: node)
-                bodySection(node: node)
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    headerSection(node: node)
+                    bodySection(node: node)
 
-                if !node.tagIds.isEmpty {
-                    tagChipsSection(node: node)
+                    if !node.tagIds.isEmpty {
+                        tagChipsSection(node: node)
+                    }
+
+                    metaSection(node: node)
+
+                    if let parentNode = node.parentNode {
+                        parentSection(parentNode: parentNode)
+                    }
+
+                    reactionBar(node: node)
+                    deriveButton(node: node)
+                    childNodesSection
+                    commentsSection
                 }
-
-                metaSection(node: node)
-
-                if let parentNode = node.parentNode {
-                    parentSection(parentNode: parentNode)
-                }
-
-                reactionBar(node: node)
-                deriveButton(node: node)
-                childNodesSection
-                commentsSection
+                .padding(16)
             }
-            .padding(16)
+            .refreshable {
+                viewModel.refreshDetail(nodeId: nodeId)
+            }
+
+            commentInputBar
         }
+        .toolbar(.hidden, for: .tabBar)
     }
 
     // MARK: - Header
@@ -444,56 +457,27 @@ struct DetailView: View {
 
     private var commentsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("コメント")
-                .font(.headline)
-
-            if isAuthenticated {
-                // Comment input
-                HStack(spacing: 8) {
-                    TextField(
-                        "コメントを入力...",
-                        text: Binding(
-                            get: { viewModel.commentText },
-                            set: { viewModel.updateCommentText(text: $0) }
-                        )
-                    )
-                    .textFieldStyle(.roundedBorder)
-
-                    Button(action: {
-                        viewModel.submitComment()
-                    }) {
-                        Image(systemName: "paperplane.fill")
-                            .foregroundColor(.appPrimary)
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle())
-                    }
-                    .disabled(
-                        viewModel.commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                            || viewModel.isCommentSubmitting
-                    )
-                    .accessibilityLabel("コメントを送信")
-                }
-            } else {
-                Button(action: loginRequired) {
-                    HStack {
-                        Image(systemName: "lock.fill")
-                            .font(.caption)
-                        Text("ログインしてコメントする")
-                            .font(.subheadline)
-                    }
-                    .foregroundColor(.appPrimary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(Color.appPrimary.opacity(0.05))
-                    .cornerRadius(8)
+            HStack {
+                Text("コメント")
+                    .font(.headline)
+                if !viewModel.comments.isEmpty {
+                    Text("\(viewModel.comments.count)")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
             }
 
             if viewModel.comments.isEmpty {
-                Text("まだコメントはありません")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .padding(.vertical, 8)
+                VStack(spacing: 8) {
+                    Image(systemName: "bubble.left.and.bubble.right")
+                        .font(.system(size: 32))
+                        .foregroundColor(.secondary.opacity(0.5))
+                    Text("まだコメントはありません")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
             } else {
                 ForEach(viewModel.comments, id: \.id) { comment in
                     commentRow(comment: comment)
@@ -502,14 +486,78 @@ struct DetailView: View {
         }
     }
 
+    // MARK: - Comment Input Bar
+
+    private var commentInputBar: some View {
+        Group {
+            if isAuthenticated {
+                VStack(spacing: 0) {
+                    Divider()
+                    HStack(spacing: 8) {
+                        TextField(
+                            "コメントを入力...",
+                            text: Binding(
+                                get: { viewModel.commentText },
+                                set: { viewModel.updateCommentText(text: $0) }
+                            )
+                        )
+                        .textFieldStyle(.roundedBorder)
+
+                        if viewModel.isCommentSubmitting {
+                            ProgressView()
+                                .frame(width: 44, height: 44)
+                        } else {
+                            Button(action: {
+                                viewModel.submitComment()
+                            }) {
+                                Image(systemName: "paperplane.fill")
+                                    .foregroundColor(.appPrimary)
+                                    .frame(width: 44, height: 44)
+                                    .contentShape(Rectangle())
+                            }
+                            .disabled(
+                                viewModel.commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                            )
+                            .accessibilityLabel("コメントを送信")
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                }
+                .background(Color(.systemBackground))
+            } else {
+                VStack(spacing: 0) {
+                    Divider()
+                    Button(action: loginRequired) {
+                        HStack {
+                            Image(systemName: "lock.fill")
+                                .font(.caption)
+                            Text("ログインしてコメントする")
+                                .font(.subheadline)
+                        }
+                        .foregroundColor(.appPrimary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                }
+                .background(Color(.systemBackground))
+            }
+        }
+    }
+
     private func commentRow(comment: Comment) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            HStack {
+            HStack(spacing: 4) {
                 Image(systemName: "person.circle")
                     .foregroundColor(.secondary)
-                Text(comment.authorId)
+                Text(comment.authorName)
                     .font(.caption)
                     .fontWeight(.semibold)
+                Text("・\(relativeTime(from: comment.createdAt))")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
                 Spacer()
             }
             Text(comment.content)
@@ -518,6 +566,18 @@ struct DetailView: View {
         .padding(10)
         .background(Color(.secondarySystemBackground))
         .cornerRadius(8)
+    }
+
+    private func relativeTime(from isoString: String) -> String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let date = formatter.date(from: isoString)
+            ?? ISO8601DateFormatter().date(from: isoString)
+        guard let date else { return "" }
+        let relativeFormatter = RelativeDateTimeFormatter()
+        relativeFormatter.locale = Locale(identifier: "ja_JP")
+        relativeFormatter.unitsStyle = .short
+        return relativeFormatter.localizedString(for: date, relativeTo: Date())
     }
 }
 #Preview("DetailView") {

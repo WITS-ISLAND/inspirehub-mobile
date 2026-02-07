@@ -15,6 +15,7 @@ struct MainTabView: View {
     @State private var showIdeaPost = false
     @State private var pendingPostType: PostType?
     @State private var pendingPostAfterLogin = false
+    @State private var isFABHidden = false
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -50,28 +51,31 @@ struct MainTabView: View {
                 }
                 .tag(2)
             }
+            .environment(\.fabHiddenBinding, $isFABHidden)
 
             // FAB
-            Button(action: {
-                if isAuthenticated {
-                    showPostTypeSheet = true
-                } else {
-                    pendingPostAfterLogin = true
-                    onLoginRequired()
+            if !isFABHidden {
+                Button(action: {
+                    if isAuthenticated {
+                        showPostTypeSheet = true
+                    } else {
+                        pendingPostAfterLogin = true
+                        onLoginRequired()
+                    }
+                }) {
+                    Image(systemName: "plus")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .frame(width: 56, height: 56)
+                        .background(Color.appPrimary)
+                        .clipShape(Circle())
+                        .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
                 }
-            }) {
-                Image(systemName: "plus")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .frame(width: 56, height: 56)
-                    .background(Color.appPrimary)
-                    .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
+                .accessibilityLabel("新規投稿")
+                .padding(.trailing, 20)
+                .padding(.bottom, 80)
             }
-            .accessibilityLabel("新規投稿")
-            .padding(.trailing, 20)
-            .padding(.bottom, 80)
         }
         .sheet(
             isPresented: $showPostTypeSheet,
