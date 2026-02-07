@@ -157,7 +157,7 @@ struct HomeView: View {
             LazyVStack(spacing: 12) {
                 ForEach(nodes, id: \.id) { node in
                     NavigationLink(destination: DetailView(nodeId: node.id)) {
-                        NodeCardView(node: node, allNodes: nodes)
+                        NodeCardView(node: node)
                     }
                     .buttonStyle(.plain)
                 }
@@ -194,8 +194,6 @@ struct HomeView: View {
 
 struct NodeCardView: View {
     let node: Node
-    var allNodes: [Node] = []
-    @State private var isParentExpanded: Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -245,78 +243,34 @@ struct NodeCardView: View {
     // MARK: - Parent Node Badge
 
     private func parentNodeBadge(_ parentNode: ParentNode) -> some View {
-        Button {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                isParentExpanded.toggle()
-            }
-        } label: {
-            VStack(alignment: .leading, spacing: isParentExpanded ? 6 : 0) {
-                HStack(spacing: 6) {
-                    Image(systemName: parentNodeIcon(parentNode.type))
-                        .font(.caption2)
-                        .foregroundColor(parentNodeColor(parentNode.type))
-                    Text("派生元")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                    Text(parentNodeTypeLabel(parentNode.type))
-                        .font(.caption2)
-                        .foregroundColor(parentNodeColor(parentNode.type))
-                    Text(parentNode.title)
-                        .font(.caption2)
-                        .fontWeight(.medium)
-                        .foregroundColor(.primary)
-                        .lineLimit(isParentExpanded ? nil : 1)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                        .rotationEffect(.degrees(isParentExpanded ? 90 : 0))
-                }
-
-                if isParentExpanded {
-                    Divider()
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(parentNodeTypeLabel(parentNode.type).replacingOccurrences(of: ":", with: ""))
-                            .font(.caption)
-                            .foregroundColor(parentNodeColor(parentNode.type))
-                            .fontWeight(.semibold)
-                        Text(parentNode.title)
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .foregroundColor(.primary)
-                            .multilineTextAlignment(.leading)
-
-                        if let fullParent = allNodes.first(where: { $0.id == parentNode.id }),
-                           !fullParent.content.isEmpty {
-                            Text(fullParent.content)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(3)
-                                .multilineTextAlignment(.leading)
-                        } else if allNodes.isEmpty || allNodes.first(where: { $0.id == parentNode.id }) == nil {
-                            Text("タップして詳細を見る")
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
-                                .italic()
-                        }
-                    }
-                    .padding(.leading, 4)
-                }
-            }
-            .padding(8)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(.tertiarySystemBackground))
-            .cornerRadius(8)
+        HStack(spacing: 6) {
+            Text(parentNodeEmoji(parentNode.type))
+                .font(.caption2)
+            Text(parentNodeTypeLabel(parentNode.type))
+                .font(.caption2)
+                .foregroundColor(parentNodeColor(parentNode.type))
+            Text("›")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            Text(parentNode.title)
+                .font(.caption2)
+                .fontWeight(.medium)
+                .foregroundColor(.primary)
+                .lineLimit(1)
         }
-        .buttonStyle(.plain)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.tertiarySystemBackground))
+        .cornerRadius(8)
     }
 
-    private func parentNodeIcon(_ type: NodeType) -> String {
+    private func parentNodeEmoji(_ type: NodeType) -> String {
         switch type {
-        case .issue: return "exclamationmark.triangle.fill"
-        case .idea: return "lightbulb.fill"
-        case .project: return "folder.fill"
-        default: return "doc.fill"
+        case .issue: return "\u{1F4CB}"
+        case .idea: return "\u{1F4A1}"
+        case .project: return "\u{1F527}"
+        default: return "\u{1F4C4}"
         }
     }
 
@@ -331,9 +285,9 @@ struct NodeCardView: View {
 
     private func parentNodeTypeLabel(_ type: NodeType) -> String {
         switch type {
-        case .issue: return "課題:"
-        case .idea: return "アイデア:"
-        case .project: return "プロジェクト:"
+        case .issue: return "課題"
+        case .idea: return "アイデア"
+        case .project: return "プロジェクト"
         default: return ""
         }
     }
@@ -409,13 +363,8 @@ struct NodeCardView: View {
 }
 
 #Preview("NodeCardView - Derived") {
-    NavigationStack {
-        NodeCardView(
-            node: PreviewData.sampleDerivedNode,
-            allNodes: [PreviewData.sampleIssueNode, PreviewData.sampleDerivedNode]
-        )
+    NodeCardView(node: PreviewData.sampleDerivedNode)
         .padding()
-    }
 }
 
 enum PreviewData {
