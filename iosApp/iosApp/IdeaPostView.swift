@@ -1,6 +1,10 @@
-import SwiftUI
-import Shared
 import KMPObservableViewModelSwiftUI
+
+import Shared
+
+import SwiftUI
+
+// MARK: - Preview
 
 struct IdeaPostView: View {
     @StateViewModel var viewModel = KoinHelper().getPostViewModel()
@@ -20,17 +24,21 @@ struct IdeaPostView: View {
         NavigationStack {
             Form {
                 Section(header: Text("タイトル")) {
-                    TextField("アイデアのタイトルを入力", text: Binding(
-                        get: { title },
-                        set: { viewModel.updateTitle(value: $0) }
-                    ))
+                    TextField(
+                        "アイデアのタイトルを入力",
+                        text: Binding(
+                            get: { title },
+                            set: { viewModel.updateTitle(value: $0) }
+                        ))
                 }
 
                 Section(header: Text("本文")) {
-                    TextEditor(text: Binding(
-                        get: { content },
-                        set: { viewModel.updateContent(value: $0) }
-                    ))
+                    TextEditor(
+                        text: Binding(
+                            get: { content },
+                            set: { viewModel.updateContent(value: $0) }
+                        )
+                    )
                     .frame(minHeight: 150)
                 }
 
@@ -102,9 +110,6 @@ struct IdeaPostView: View {
         tagInput = ""
     }
 }
-
-// MARK: - Preview
-
 #Preview("IdeaPostView") {
     IdeaPostView()
 }

@@ -1,6 +1,10 @@
-import SwiftUI
-import Shared
 import KMPObservableViewModelSwiftUI
+
+import Shared
+
+import SwiftUI
+
+// MARK: - Preview
 
 struct DetailView: View {
     let nodeId: String
@@ -183,7 +187,10 @@ struct DetailView: View {
                 count: node.reactions.like.count,
                 isReacted: node.reactions.like.isReacted
             ) {
-                guard isAuthenticated else { loginRequired(); return }
+                guard isAuthenticated else {
+                    loginRequired()
+                    return
+                }
                 viewModel.toggleReaction(type: .like)
             }
 
@@ -193,7 +200,10 @@ struct DetailView: View {
                 count: node.reactions.interested.count,
                 isReacted: node.reactions.interested.isReacted
             ) {
-                guard isAuthenticated else { loginRequired(); return }
+                guard isAuthenticated else {
+                    loginRequired()
+                    return
+                }
                 viewModel.toggleReaction(type: .interested)
             }
 
@@ -203,14 +213,19 @@ struct DetailView: View {
                 count: node.reactions.wantToTry.count,
                 isReacted: node.reactions.wantToTry.isReacted
             ) {
-                guard isAuthenticated else { loginRequired(); return }
+                guard isAuthenticated else {
+                    loginRequired()
+                    return
+                }
                 viewModel.toggleReaction(type: .wantToTry)
             }
         }
         .padding(.vertical, 4)
     }
 
-    private func reactionButton(emoji: String, label: String, count: Int32, isReacted: Bool, action: @escaping () -> Void) -> some View {
+    private func reactionButton(
+        emoji: String, label: String, count: Int32, isReacted: Bool, action: @escaping () -> Void
+    ) -> some View {
         Button(action: action) {
             VStack(spacing: 2) {
                 Text(emoji)
@@ -230,7 +245,10 @@ struct DetailView: View {
 
     private func deriveButton(node: Node) -> some View {
         Button(action: {
-            guard isAuthenticated else { loginRequired(); return }
+            guard isAuthenticated else {
+                loginRequired()
+                return
+            }
             showDerivedPost = true
         }) {
             HStack {
@@ -292,11 +310,14 @@ struct DetailView: View {
             if isAuthenticated {
                 // Comment input
                 HStack(spacing: 8) {
-                    TextField("コメントを入力...", text: Binding(
-                        get: { viewModel.commentText },
-                        set: { viewModel.updateCommentText(text: $0) }
-                    ))
-                        .textFieldStyle(.roundedBorder)
+                    TextField(
+                        "コメントを入力...",
+                        text: Binding(
+                            get: { viewModel.commentText },
+                            set: { viewModel.updateCommentText(text: $0) }
+                        )
+                    )
+                    .textFieldStyle(.roundedBorder)
 
                     Button(action: {
                         viewModel.submitComment()
@@ -306,7 +327,10 @@ struct DetailView: View {
                             .frame(width: 44, height: 44)
                             .contentShape(Rectangle())
                     }
-                    .disabled(viewModel.commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isCommentSubmitting)
+                    .disabled(
+                        viewModel.commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                            || viewModel.isCommentSubmitting
+                    )
                     .accessibilityLabel("コメントを送信")
                 }
             } else {
@@ -356,9 +380,6 @@ struct DetailView: View {
         .cornerRadius(8)
     }
 }
-
-// MARK: - Preview
-
 #Preview("DetailView") {
     NavigationStack {
         DetailView(nodeId: "preview-1")

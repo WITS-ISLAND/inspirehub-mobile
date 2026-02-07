@@ -1,6 +1,6 @@
-import SwiftUI
-import Shared
 import KMPObservableViewModelSwiftUI
+import Shared
+import SwiftUI
 
 // MARK: - Auth Environment
 

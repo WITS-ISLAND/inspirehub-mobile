@@ -1,8 +1,9 @@
-import SwiftUI
-import Shared
-
 /// Provides consistent styling for node types across all screens.
 /// Centralizes color, icon, and label definitions to prevent inconsistencies.
+import Shared
+
+import SwiftUI
+
 enum NodeTypeStyle {
 
     // MARK: - Colors

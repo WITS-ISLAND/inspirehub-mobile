@@ -1,5 +1,8 @@
-import SwiftUI
 import Shared
+
+import SwiftUI
+
+// MARK: - Preview
 
 struct PostTypeSelectSheet: View {
     var onIssueSelected: () -> Void
@@ -81,9 +84,6 @@ struct PostTypeSelectSheet: View {
         .presentationDetents([.medium])
     }
 }
-
-// MARK: - Preview
-
 #Preview("PostTypeSelectSheet") {
     PostTypeSelectSheet(
         onIssueSelected: {},

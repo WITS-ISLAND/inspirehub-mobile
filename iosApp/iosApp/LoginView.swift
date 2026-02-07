@@ -1,8 +1,8 @@
-import SwiftUI
-import Shared
 import GoogleSignIn
 import GoogleSignInSwift
 import KMPObservableViewModelSwiftUI
+import Shared
+import SwiftUI
 
 struct LoginView: View {
     @ObservedViewModel var viewModel: AuthViewModel
@@ -74,7 +74,8 @@ struct LoginView: View {
         signInError = nil
 
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let rootViewController = windowScene.windows.first?.rootViewController else {
+            let rootViewController = windowScene.windows.first?.rootViewController
+        else {
             signInError = "画面の取得に失敗しました"
             return
         }

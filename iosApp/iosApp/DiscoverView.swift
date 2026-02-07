@@ -1,6 +1,10 @@
-import SwiftUI
-import Shared
 import KMPObservableViewModelSwiftUI
+
+import Shared
+
+import SwiftUI
+
+// MARK: - Preview
 
 struct DiscoverView: View {
     @StateViewModel var viewModel = KoinHelper().getDiscoverViewModel()
@@ -203,9 +207,6 @@ struct DiscoverView: View {
         .padding(.vertical, 32)
     }
 }
-
-// MARK: - Preview
-
 #Preview("DiscoverView") {
     NavigationStack {
         DiscoverView()

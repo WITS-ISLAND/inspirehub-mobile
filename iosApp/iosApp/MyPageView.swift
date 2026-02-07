@@ -1,6 +1,10 @@
-import SwiftUI
-import Shared
 import KMPObservableViewModelSwiftUI
+
+import Shared
+
+import SwiftUI
+
+// MARK: - Preview
 
 struct MyPageView: View {
     @StateViewModel var viewModel = KoinHelper().getMyPageViewModel()
@@ -22,7 +26,7 @@ struct MyPageView: View {
             viewModel.refresh()
         }
         .alert("ログアウト", isPresented: $showLogoutAlert) {
-            Button("キャンセル", role: .cancel) { }
+            Button("キャンセル", role: .cancel) {}
             Button("ログアウト", role: .destructive) {
                 viewModel.logout()
             }
@@ -87,10 +91,13 @@ struct MyPageView: View {
 
     private var nameEditingView: some View {
         VStack(spacing: 8) {
-            TextField("名前を入力", text: Binding(
-                get: { viewModel.editingName as? String ?? "" },
-                set: { viewModel.updateEditingName(name: $0) }
-            ))
+            TextField(
+                "名前を入力",
+                text: Binding(
+                    get: { viewModel.editingName as? String ?? "" },
+                    set: { viewModel.updateEditingName(name: $0) }
+                )
+            )
             .textFieldStyle(.roundedBorder)
             .padding(.horizontal, 32)
 
@@ -250,9 +257,6 @@ struct MyPageView: View {
         }
     }
 }
-
-// MARK: - Preview
-
 #Preview("MyPageView") {
     NavigationStack {
         MyPageView()

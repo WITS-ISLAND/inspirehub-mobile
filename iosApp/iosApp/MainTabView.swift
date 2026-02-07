@@ -1,9 +1,10 @@
 import SwiftUI
 
+// MARK: - Preview
+
 private enum PostType {
     case issue, idea
 }
-
 struct MainTabView: View {
     let isAuthenticated: Bool
     let onLoginRequired: () -> Void
@@ -77,18 +78,21 @@ struct MainTabView: View {
             .padding(.trailing, 20)
             .padding(.bottom, 80)
         }
-        .sheet(isPresented: $showPostTypeSheet, onDismiss: {
-            switch pendingPostType {
-            case .issue:
-                pendingPostType = nil
-                showIssuePost = true
-            case .idea:
-                pendingPostType = nil
-                showIdeaPost = true
-            case nil:
-                break
+        .sheet(
+            isPresented: $showPostTypeSheet,
+            onDismiss: {
+                switch pendingPostType {
+                case .issue:
+                    pendingPostType = nil
+                    showIssuePost = true
+                case .idea:
+                    pendingPostType = nil
+                    showIdeaPost = true
+                case nil:
+                    break
+                }
             }
-        }) {
+        ) {
             PostTypeSelectSheet(
                 onIssueSelected: { pendingPostType = .issue },
                 onIdeaSelected: { pendingPostType = .idea }
@@ -142,17 +146,12 @@ struct MainTabView: View {
         .padding()
     }
 }
-
-// MARK: - Preview
-
 #Preview("MainTabView") {
     MainTabView(isAuthenticated: true, onLoginRequired: {})
 }
-
 #Preview("MainTabView - Unauthenticated") {
     MainTabView(isAuthenticated: false, onLoginRequired: {})
 }
-
 #Preview("PostTypeSelectSheet") {
     PostTypeSelectSheet(
         onIssueSelected: {},

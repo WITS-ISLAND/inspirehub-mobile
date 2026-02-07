@@ -1,6 +1,10 @@
-import SwiftUI
-import Shared
 import KMPObservableViewModelSwiftUI
+
+import Shared
+
+import SwiftUI
+
+// MARK: - Preview
 
 struct DerivedPostView: View {
     let parentNode: Node
@@ -38,17 +42,21 @@ struct DerivedPostView: View {
                 }
 
                 Section(header: Text("タイトル")) {
-                    TextField("派生アイデアのタイトルを入力", text: Binding(
-                        get: { title },
-                        set: { viewModel.updateTitle(value: $0) }
-                    ))
+                    TextField(
+                        "派生アイデアのタイトルを入力",
+                        text: Binding(
+                            get: { title },
+                            set: { viewModel.updateTitle(value: $0) }
+                        ))
                 }
 
                 Section(header: Text("本文")) {
-                    TextEditor(text: Binding(
-                        get: { content },
-                        set: { viewModel.updateContent(value: $0) }
-                    ))
+                    TextEditor(
+                        text: Binding(
+                            get: { content },
+                            set: { viewModel.updateContent(value: $0) }
+                        )
+                    )
                     .frame(minHeight: 150)
                 }
 
@@ -123,9 +131,6 @@ struct DerivedPostView: View {
         tagInput = ""
     }
 }
-
-// MARK: - Preview
-
 #Preview("DerivedPostView") {
     DerivedPostView(parentNode: PreviewData.sampleIssueNode)
 }

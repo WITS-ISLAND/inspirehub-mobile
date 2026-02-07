@@ -1,6 +1,6 @@
-import SwiftUI
-import Shared
 import KMPObservableViewModelSwiftUI
+import Shared
+import SwiftUI
 
 // MARK: - Tab / Sort UI Enums
 
@@ -233,8 +233,10 @@ struct NodeCardView: View {
 
             HStack(spacing: 10) {
                 inlineReaction(emoji: "👍", count: node.reactions.like.count, isReacted: node.reactions.like.isReacted)
-                inlineReaction(emoji: "🔥", count: node.reactions.interested.count, isReacted: node.reactions.interested.isReacted)
-                inlineReaction(emoji: "💪", count: node.reactions.wantToTry.count, isReacted: node.reactions.wantToTry.isReacted)
+                inlineReaction(
+                    emoji: "🔥", count: node.reactions.interested.count, isReacted: node.reactions.interested.isReacted)
+                inlineReaction(
+                    emoji: "💪", count: node.reactions.wantToTry.count, isReacted: node.reactions.wantToTry.isReacted)
                 Label("\(node.commentCount)", systemImage: "bubble.right")
                     .font(.caption2)
                     .foregroundColor(.secondary)

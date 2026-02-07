@@ -1,6 +1,12 @@
-import SwiftUI
-import Shared
 import KMPObservableViewModelSwiftUI
+
+import Shared
+
+import SwiftUI
+
+// MARK: - Removable Tag Chip
+
+// MARK: - Preview
 
 struct IssuePostView: View {
     @StateViewModel var viewModel = KoinHelper().getPostViewModel()
@@ -20,17 +26,21 @@ struct IssuePostView: View {
         NavigationStack {
             Form {
                 Section(header: Text("タイトル")) {
-                    TextField("課題のタイトルを入力", text: Binding(
-                        get: { title },
-                        set: { viewModel.updateTitle(value: $0) }
-                    ))
+                    TextField(
+                        "課題のタイトルを入力",
+                        text: Binding(
+                            get: { title },
+                            set: { viewModel.updateTitle(value: $0) }
+                        ))
                 }
 
                 Section(header: Text("本文")) {
-                    TextEditor(text: Binding(
-                        get: { content },
-                        set: { viewModel.updateContent(value: $0) }
-                    ))
+                    TextEditor(
+                        text: Binding(
+                            get: { content },
+                            set: { viewModel.updateContent(value: $0) }
+                        )
+                    )
                     .frame(minHeight: 150)
                 }
 
@@ -102,9 +112,6 @@ struct IssuePostView: View {
         tagInput = ""
     }
 }
-
-// MARK: - Removable Tag Chip
-
 struct RemovableTagChip: View {
     let text: String
     let onRemove: () -> Void
@@ -126,7 +133,6 @@ struct RemovableTagChip: View {
         .cornerRadius(8)
     }
 }
-
 struct TagChip: View {
     let text: String
 
@@ -140,7 +146,6 @@ struct TagChip: View {
             .cornerRadius(8)
     }
 }
-
 struct FlowLayout<Data: RandomAccessCollection, Content: View>: View where Data.Element: Hashable {
     let tags: Data
     let content: (Data.Element) -> Content
@@ -153,9 +158,6 @@ struct FlowLayout<Data: RandomAccessCollection, Content: View>: View where Data.
         }
     }
 }
-
-// MARK: - Preview
-
 #Preview("IssuePostView") {
     IssuePostView()
 }

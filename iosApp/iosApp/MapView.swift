@@ -1,6 +1,10 @@
-import SwiftUI
-import Shared
 import KMPObservableViewModelSwiftUI
+
+import Shared
+
+import SwiftUI
+
+// MARK: - Preview
 
 struct MapView: View {
     @StateViewModel var viewModel = KoinHelper().getMapViewModel()
@@ -104,9 +108,6 @@ struct MapView: View {
         .background(Color(.systemBackground))
     }
 }
-
-// MARK: - Preview
-
 #Preview("MapView") {
     NavigationStack {
         MapView()
