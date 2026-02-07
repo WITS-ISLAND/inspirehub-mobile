@@ -1,30 +1,62 @@
 package io.github.witsisland.inspirehub.data.mapper
 
 import io.github.witsisland.inspirehub.data.dto.NodeDto
+import io.github.witsisland.inspirehub.data.dto.ParentNodeDto
+import io.github.witsisland.inspirehub.data.dto.ReactionSummaryDto
+import io.github.witsisland.inspirehub.data.dto.ReactionsDto
 import io.github.witsisland.inspirehub.domain.model.Node
 import io.github.witsisland.inspirehub.domain.model.NodeType
-import kotlinx.datetime.Instant
+import io.github.witsisland.inspirehub.domain.model.ParentNode
+import io.github.witsisland.inspirehub.domain.model.ReactionSummary
+import io.github.witsisland.inspirehub.domain.model.Reactions
 
-/**
- * NodeDto → Node への変換
- */
 fun NodeDto.toDomain(): Node {
     return Node(
         id = id,
         type = when (type.lowercase()) {
             "issue" -> NodeType.ISSUE
             "idea" -> NodeType.IDEA
-            else -> NodeType.IDEA // デフォルト値（"project" など未知の型の場合）
+            "project" -> NodeType.PROJECT
+            else -> NodeType.IDEA
         },
         title = title,
         content = content,
         authorId = authorId,
-        parentNodeId = null, // APIレスポンスにparentNodeIdがない場合はnull
+        authorName = authorName,
+        authorPicture = authorPicture,
+        parentNode = parentNode?.toDomain(),
         tagIds = tags.map { it.id },
-        likeCount = likeCount,
-        isLiked = isLiked,
+        reactions = reactions.toDomain(),
         commentCount = commentCount,
-        createdAt = Instant.parse(createdAt),
-        updatedAt = Instant.parse(updatedAt)
+        createdAt = createdAt,
+        updatedAt = updatedAt
+    )
+}
+
+fun ParentNodeDto.toDomain(): ParentNode {
+    return ParentNode(
+        id = id,
+        type = when (type.lowercase()) {
+            "issue" -> NodeType.ISSUE
+            "idea" -> NodeType.IDEA
+            "project" -> NodeType.PROJECT
+            else -> NodeType.IDEA
+        },
+        title = title
+    )
+}
+
+fun ReactionsDto.toDomain(): Reactions {
+    return Reactions(
+        like = like.toDomain(),
+        interested = interested.toDomain(),
+        wantToTry = wantToTry.toDomain()
+    )
+}
+
+fun ReactionSummaryDto.toDomain(): ReactionSummary {
+    return ReactionSummary(
+        count = count,
+        isReacted = isReacted
     )
 }
