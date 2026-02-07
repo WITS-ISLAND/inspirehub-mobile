@@ -5,7 +5,6 @@ import com.rickclephas.kmp.observableviewmodel.MutableStateFlow
 import com.rickclephas.kmp.observableviewmodel.ViewModel
 import com.rickclephas.kmp.observableviewmodel.launch
 import io.github.witsisland.inspirehub.domain.model.Node
-import io.github.witsisland.inspirehub.domain.model.NodeType
 import io.github.witsisland.inspirehub.domain.repository.NodeRepository
 import io.github.witsisland.inspirehub.domain.store.HomeTab
 import io.github.witsisland.inspirehub.domain.store.NodeStore
@@ -86,20 +85,8 @@ class HomeViewModel(
     }
 
     private fun applyFilter() {
-        val allNodes = nodeStore.nodes.value
-        val tab = nodeStore.currentTab.value
-        val order = nodeStore.sortOrder.value
-
-        val filtered = when (tab) {
-            HomeTab.RECENT -> allNodes
-            HomeTab.ISSUES -> allNodes.filter { it.type == NodeType.ISSUE }
-            HomeTab.IDEAS -> allNodes.filter { it.type == NodeType.IDEA }
-            HomeTab.MINE -> allNodes
-        }
-        _nodes.value = when (order) {
-            SortOrder.RECENT -> filtered.sortedByDescending { it.createdAt }
-            SortOrder.POPULAR -> filtered
-        }
+        val currentUserId = userStore.currentUser.value?.id
+        _nodes.value = nodeStore.getFilteredNodes(currentUserId)
     }
 
     fun toggleLike(nodeId: String) {

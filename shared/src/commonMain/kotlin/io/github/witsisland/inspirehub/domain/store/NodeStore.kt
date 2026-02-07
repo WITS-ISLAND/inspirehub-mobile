@@ -54,16 +54,24 @@ class NodeStore {
         _sortOrder.value = order
     }
 
-    fun getFilteredNodes(): List<Node> {
+    fun getFilteredNodes(currentUserId: String? = null): List<Node> {
         val filtered = when (_currentTab.value) {
             HomeTab.RECENT -> _nodes.value
             HomeTab.ISSUES -> _nodes.value.filter { it.type == NodeType.ISSUE }
             HomeTab.IDEAS -> _nodes.value.filter { it.type == NodeType.IDEA }
-            HomeTab.MINE -> _nodes.value
+            HomeTab.MINE -> if (currentUserId != null) {
+                _nodes.value.filter { it.authorId == currentUserId }
+            } else {
+                _nodes.value
+            }
         }
         return when (_sortOrder.value) {
             SortOrder.RECENT -> filtered.sortedByDescending { it.createdAt }
-            SortOrder.POPULAR -> filtered
+            SortOrder.POPULAR -> filtered.sortedByDescending { node ->
+                node.reactions.like.count +
+                    node.reactions.interested.count +
+                    node.reactions.wantToTry.count
+            }
         }
     }
 
