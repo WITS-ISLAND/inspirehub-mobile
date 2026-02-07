@@ -3,6 +3,7 @@ package io.github.witsisland.inspirehub.data.source
 import co.touchlab.kermit.Logger
 import io.github.witsisland.inspirehub.data.dto.TokenResponseDto
 import io.github.witsisland.inspirehub.data.dto.UserDto
+import io.github.witsisland.inspirehub.data.dto.UserUpdateResponseDto
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -47,9 +48,10 @@ class KtorAuthDataSource(
     }
 
     override suspend fun updateUserName(name: String): UserDto {
-        return httpClient.patch("/users/me") {
+        val response: UserUpdateResponseDto = httpClient.patch("/users/me") {
             contentType(ContentType.Application.Json)
             setBody(mapOf("name" to name))
         }.body()
+        return response.user
     }
 }
