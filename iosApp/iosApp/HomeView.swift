@@ -5,14 +5,14 @@ import KMPObservableViewModelSwiftUI
 // MARK: - Tab / Sort UI Enums
 
 enum HomeTabUI: String, CaseIterable {
-    case latest = "新着"
+    case all = "すべて"
     case issue = "課題"
     case idea = "アイデア"
     case mine = "自分"
 
     var kotlinTab: HomeTab {
         switch self {
-        case .latest: return .recent
+        case .all: return .all
         case .issue: return .issues
         case .idea: return .ideas
         case .mine: return .mine
@@ -21,11 +21,11 @@ enum HomeTabUI: String, CaseIterable {
 
     init(from kotlinTab: HomeTab) {
         switch kotlinTab {
-        case .recent: self = .latest
+        case .all: self = .all
         case .issues: self = .issue
         case .ideas: self = .idea
         case .mine: self = .mine
-        default: self = .latest
+        default: self = .all
         }
     }
 }

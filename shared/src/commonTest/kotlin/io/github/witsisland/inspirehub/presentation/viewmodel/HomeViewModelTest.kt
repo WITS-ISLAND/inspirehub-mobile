@@ -148,12 +148,12 @@ class HomeViewModelTest : MainDispatcherRule() {
     }
 
     @Test
-    fun `setTab - RECENTタブで全ノードが表示されること`() = runTest {
+    fun `setTab - ALLタブで全ノードが表示されること`() = runTest {
         fakeNodeRepository.getNodesResult = Result.success(sampleNodes)
         viewModel.loadNodes()
         viewModel.setTab(HomeTab.ISSUES)
 
-        viewModel.setTab(HomeTab.RECENT)
+        viewModel.setTab(HomeTab.ALL)
 
         assertEquals(sampleNodes.size, viewModel.nodes.value.size)
     }
@@ -220,9 +220,9 @@ class HomeViewModelTest : MainDispatcherRule() {
     }
 
     @Test
-    fun `初期状態 - ノードが空で、タブがRECENTであること`() = runTest {
+    fun `初期状態 - ノードが空で、タブがALLであること`() = runTest {
         assertTrue(viewModel.nodes.value.isEmpty())
-        assertEquals(HomeTab.RECENT, viewModel.currentTab.value)
+        assertEquals(HomeTab.ALL, viewModel.currentTab.value)
         assertEquals(SortOrder.RECENT, viewModel.sortOrder.value)
         assertFalse(viewModel.isLoading.value)
         assertNull(viewModel.error.value)
