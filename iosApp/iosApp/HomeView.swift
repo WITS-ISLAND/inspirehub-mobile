@@ -103,6 +103,8 @@ struct HomeView: View {
                                 .fill(isCurrentTab(tab) ? Color.blue : Color.clear)
                                 .frame(height: 2)
                         }
+                        .frame(minHeight: 44)
+                        .contentShape(Rectangle())
                     }
                     .frame(minWidth: 70)
                     .padding(.horizontal, 8)
@@ -221,6 +223,14 @@ struct NodeCardView: View {
                 tagChipsRow
             }
 
+            HStack(spacing: 4) {
+                Label(node.authorName, systemImage: "person")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                Spacer()
+            }
+
             HStack(spacing: 10) {
                 inlineReaction(emoji: "👍", count: node.reactions.like.count, isReacted: node.reactions.like.isReacted)
                 inlineReaction(emoji: "🔥", count: node.reactions.interested.count, isReacted: node.reactions.interested.isReacted)
@@ -244,9 +254,12 @@ struct NodeCardView: View {
 
     private func parentNodeBadge(_ parentNode: ParentNode) -> some View {
         HStack(spacing: 6) {
-            Text(parentNodeTypeLabel(parentNode.type))
+            Image(systemName: NodeTypeStyle.icon(for: parentNode.type))
                 .font(.caption2)
-                .foregroundColor(parentNodeColor(parentNode.type))
+                .foregroundColor(NodeTypeStyle.color(for: parentNode.type))
+            Text(NodeTypeStyle.label(for: parentNode.type))
+                .font(.caption2)
+                .foregroundColor(NodeTypeStyle.color(for: parentNode.type))
             Text("›")
                 .font(.caption2)
                 .foregroundColor(.secondary)
@@ -261,24 +274,6 @@ struct NodeCardView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(.tertiarySystemBackground))
         .cornerRadius(8)
-    }
-
-    private func parentNodeColor(_ type: NodeType) -> Color {
-        switch type {
-        case .issue: return .orange
-        case .idea: return .yellow
-        case .project: return .blue
-        default: return .secondary
-        }
-    }
-
-    private func parentNodeTypeLabel(_ type: NodeType) -> String {
-        switch type {
-        case .issue: return "課題"
-        case .idea: return "アイデア"
-        case .project: return "プロジェクト"
-        default: return ""
-        }
     }
 
     private func inlineReaction(emoji: String, count: Int32, isReacted: Bool) -> some View {
@@ -298,30 +293,29 @@ struct NodeCardView: View {
             HStack(spacing: 6) {
                 ForEach(node.tagIds, id: \.self) { tagId in
                     Text("#\(tagId)")
-                        .font(.caption2)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(Color.blue.opacity(0.08))
+                        .font(.caption)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(Color.blue.opacity(0.1))
                         .foregroundColor(.blue)
-                        .cornerRadius(6)
+                        .cornerRadius(8)
                 }
             }
         }
     }
 
     private var nodeTypeBadge: some View {
-        let isIssue = node.type == .issue
-        return HStack(spacing: 4) {
-            Image(systemName: isIssue ? "exclamationmark.triangle.fill" : "lightbulb.fill")
+        HStack(spacing: 4) {
+            Image(systemName: NodeTypeStyle.icon(for: node.type))
                 .font(.caption2)
-            Text(isIssue ? "課題" : "アイデア")
+            Text(NodeTypeStyle.label(for: node.type))
                 .font(.caption2)
                 .fontWeight(.medium)
         }
         .padding(.horizontal, 8)
-        .padding(.vertical, 3)
-        .background(isIssue ? Color.orange.opacity(0.15) : Color.yellow.opacity(0.15))
-        .foregroundColor(isIssue ? .orange : .yellow)
+        .padding(.vertical, 4)
+        .background(NodeTypeStyle.backgroundColor(for: node.type))
+        .foregroundColor(NodeTypeStyle.color(for: node.type))
         .cornerRadius(6)
     }
 

@@ -28,7 +28,7 @@ struct DetailView: View {
                 ProgressView("読み込み中...")
             }
         }
-        .navigationTitle(viewModel.selectedNode?.title ?? "詳細")
+        .navigationTitle("詳細")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             viewModel.loadDetail(nodeId: nodeId)
@@ -65,14 +65,15 @@ struct DetailView: View {
     private func headerSection(node: Node) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
-                Image(systemName: node.type == .issue ? "exclamationmark.circle.fill" : "lightbulb.fill")
-                    .foregroundColor(node.type == .issue ? .red : .orange)
-                Text(node.type == .issue ? "課題" : "アイデア")
+                Image(systemName: NodeTypeStyle.icon(for: node.type))
+                    .foregroundColor(NodeTypeStyle.color(for: node.type))
+                Text(NodeTypeStyle.label(for: node.type))
                     .font(.caption)
                     .fontWeight(.semibold)
+                    .foregroundColor(NodeTypeStyle.color(for: node.type))
                     .padding(.horizontal, 8)
                     .padding(.vertical, 2)
-                    .background(node.type == .issue ? Color.red.opacity(0.1) : Color.orange.opacity(0.1))
+                    .background(NodeTypeStyle.backgroundColor(for: node.type))
                     .cornerRadius(4)
             }
 
@@ -124,24 +125,42 @@ struct DetailView: View {
 
     // MARK: - Parent Node
 
+    /// 派生元ノードのcontentをchildNodesやselectedNodeの情報から解決する
+    private func resolveParentContent(parentId: String) -> String? {
+        // childNodesにparentが含まれるケースはないが、将来NodeStoreのnodes公開時に拡張可能
+        // 現在はParentNodeモデルにcontentがないためnilを返す
+        return nil
+    }
+
     private func parentSection(parentNode: ParentNode) -> some View {
-        NavigationLink(destination: DetailView(nodeId: parentNode.id)) {
-            HStack(spacing: 8) {
-                Image(systemName: parentNodeIcon(parentNode.type))
-                    .foregroundColor(parentNodeColor(parentNode.type))
-                VStack(alignment: .leading, spacing: 2) {
+        let parentContent = resolveParentContent(parentId: parentNode.id)
+
+        return NavigationLink(destination: DetailView(nodeId: parentNode.id)) {
+            HStack(spacing: 10) {
+                Image(systemName: NodeTypeStyle.icon(for: parentNode.type))
+                    .font(.title3)
+                    .foregroundColor(NodeTypeStyle.color(for: parentNode.type))
+                VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 4) {
                         Text("派生元")
                             .font(.caption2)
                             .foregroundColor(.secondary)
-                        Text(parentNodeTypeLabel(parentNode.type))
+                        Text(NodeTypeStyle.label(for: parentNode.type))
                             .font(.caption2)
-                            .foregroundColor(parentNodeColor(parentNode.type))
+                            .fontWeight(.medium)
+                            .foregroundColor(NodeTypeStyle.color(for: parentNode.type))
                     }
                     Text(parentNode.title)
                         .font(.subheadline)
+                        .fontWeight(.medium)
                         .foregroundColor(.primary)
                         .lineLimit(2)
+                    if let content = parentContent {
+                        Text(content)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(3)
+                    }
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
@@ -150,37 +169,10 @@ struct DetailView: View {
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.blue.opacity(0.05))
+            .background(NodeTypeStyle.color(for: parentNode.type).opacity(0.05))
             .cornerRadius(8)
         }
         .buttonStyle(.plain)
-    }
-
-    private func parentNodeIcon(_ type: NodeType) -> String {
-        switch type {
-        case .issue: return "exclamationmark.triangle.fill"
-        case .idea: return "lightbulb.fill"
-        case .project: return "folder.fill"
-        default: return "doc.fill"
-        }
-    }
-
-    private func parentNodeColor(_ type: NodeType) -> Color {
-        switch type {
-        case .issue: return .orange
-        case .idea: return .yellow
-        case .project: return .blue
-        default: return .secondary
-        }
-    }
-
-    private func parentNodeTypeLabel(_ type: NodeType) -> String {
-        switch type {
-        case .issue: return "課題"
-        case .idea: return "アイデア"
-        case .project: return "プロジェクト"
-        default: return ""
-        }
     }
 
     // MARK: - Reactions
@@ -223,11 +215,14 @@ struct DetailView: View {
                 Text(emoji)
                     .font(.title3)
                 Text(count > 0 ? "\(label) \(count)" : label)
-                    .font(.system(size: 9))
+                    .font(.system(size: 10))
                     .foregroundColor(isReacted ? .blue : .secondary)
             }
+            .frame(minWidth: 44, minHeight: 44)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("\(label) \(count)件\(isReacted ? " リアクション済み" : "")")
     }
 
     // MARK: - Derive Button
@@ -265,7 +260,7 @@ struct DetailView: View {
                     NavigationLink(destination: DetailView(nodeId: child.id)) {
                         HStack(spacing: 8) {
                             Image(systemName: "arrow.turn.down.right")
-                                .foregroundColor(.orange)
+                                .foregroundColor(.blue)
                                 .font(.caption)
                             Text(child.title)
                                 .font(.subheadline)
@@ -305,8 +300,11 @@ struct DetailView: View {
                 }) {
                     Image(systemName: "paperplane.fill")
                         .foregroundColor(.blue)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
                 .disabled(viewModel.commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isCommentSubmitting)
+                .accessibilityLabel("コメントを送信")
             }
 
             if viewModel.comments.isEmpty {
