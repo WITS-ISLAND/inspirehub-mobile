@@ -70,30 +70,53 @@ fun HttpClient.configureClient(
         // 認証済み → is_reacted等のユーザー固有情報を返す
         // 未認証 → is_reacted=false として返す
         tokenProvider?.let { provider ->
+            val authLog = KermitLogger.withTag("AuthPlugin")
             install(Auth) {
                 bearer {
                     loadTokens {
-                        provider()?.let { token ->
-                            val rt = refreshTokenProvider?.invoke() ?: ""
-                            BearerTokens(accessToken = token, refreshToken = rt)
-                        }
+                        val token = provider()
+                        val rt = refreshTokenProvider?.invoke() ?: ""
+                        authLog.d { "loadTokens: token=${token?.take(10)}...(${token?.length}), rt=${rt.take(10)}...(${rt.length})" }
+                        token?.let { BearerTokens(accessToken = it, refreshToken = rt) }
                     }
                     refreshTokens {
+                        authLog.d { "refreshTokens called. oldTokens.at=${oldTokens?.accessToken?.take(10)}..., oldTokens.rt=${oldTokens?.refreshToken?.take(10)}...(${oldTokens?.refreshToken?.length})" }
+
+                        // Case 1: ログイン後にloadTokensが再呼出しされない問題の対策
+                        // loadTokensがnullを返した後、Auth pluginのキャッシュが空のまま固定される。
+                        // ログイン後にUserStoreにトークンが入っていれば、ここで拾ってキャッシュを更新する。
+                        val currentAccessToken = provider()
+                        val currentRefreshToken = refreshTokenProvider?.invoke()
+                        if (currentAccessToken != null && currentAccessToken != oldTokens?.accessToken) {
+                            authLog.d { "refreshTokens: new tokens found in UserStore (login happened), updating cache" }
+                            return@refreshTokens BearerTokens(currentAccessToken, currentRefreshToken ?: "")
+                        }
+
+                        // Case 2: 通常のリフレッシュフロー（トークン期限切れ）
                         val rt = oldTokens?.refreshToken?.takeIf { it.isNotEmpty() }
-                            ?: return@refreshTokens null
+                            ?: currentRefreshToken?.takeIf { it.isNotEmpty() }
+                            ?: run {
+                                authLog.w { "refreshTokens: no refresh token available, giving up" }
+                                return@refreshTokens null
+                            }
                         try {
+                            authLog.d { "refreshTokens: sending POST ${baseUrl}/auth/refresh" }
                             val response = client.post("${baseUrl}/auth/refresh") {
                                 contentType(ContentType.Application.Json)
                                 setBody("""{"refresh_token":"$rt"}""")
                             }
+                            authLog.d { "refreshTokens: response status=${response.status}" }
                             if (!response.status.isSuccess()) {
+                                authLog.w { "refreshTokens: refresh failed with ${response.status}" }
                                 return@refreshTokens null
                             }
                             val json = Json { ignoreUnknownKeys = true }
                             val tokenResponse = json.decodeFromString<RefreshTokenResponse>(response.bodyAsText())
+                            authLog.d { "refreshTokens: success, new token=${tokenResponse.accessToken.take(10)}..." }
                             onTokenRefreshed?.invoke(tokenResponse.accessToken, tokenResponse.refreshToken)
                             BearerTokens(tokenResponse.accessToken, tokenResponse.refreshToken)
-                        } catch (_: Exception) {
+                        } catch (e: Exception) {
+                            authLog.e(e) { "refreshTokens: exception during refresh" }
                             null
                         }
                     }
