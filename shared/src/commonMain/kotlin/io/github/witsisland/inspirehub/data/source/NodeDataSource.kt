@@ -53,7 +53,7 @@ interface NodeDataSource {
     /**
      * PUT /nodes/{id}
      * Request: UpdateNodeRequestDto
-     * Response: NodeDto
+     * Response: { "message": string }
      *
      * @param id ノードID
      * @param title タイトル
@@ -65,7 +65,7 @@ interface NodeDataSource {
         title: String,
         content: String,
         tags: List<String> = emptyList()
-    ): NodeDto
+    )
 
     /**
      * DELETE /nodes/{id}

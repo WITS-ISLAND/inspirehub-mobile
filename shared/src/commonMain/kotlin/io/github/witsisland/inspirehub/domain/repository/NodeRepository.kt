@@ -23,6 +23,15 @@ interface NodeRepository {
         tags: List<String> = emptyList()
     ): Result<Node>
 
+    suspend fun updateNode(
+        id: String,
+        title: String,
+        content: String,
+        tags: List<String> = emptyList()
+    ): Result<Node>
+
+    suspend fun deleteNode(id: String): Result<Unit>
+
     suspend fun toggleLike(nodeId: String): Result<Node>
 
     suspend fun getChildNodes(parentNodeId: String): Result<List<Node>>

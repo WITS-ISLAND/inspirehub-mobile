@@ -274,5 +274,144 @@ class DetailViewModelTest : MainDispatcherRule() {
         assertNull(viewModel.error.value)
         assertEquals("", viewModel.commentText.value)
         assertFalse(viewModel.isCommentSubmitting.value)
+        assertFalse(viewModel.isEditing.value)
+        assertFalse(viewModel.isDeleted.value)
+    }
+
+    // --- 編集機能のテスト ---
+
+    @Test
+    fun `startEditing - 編集モードが開始されタイトルと内容がセットされること`() = runTest {
+        nodeStore.selectNode(sampleNode)
+
+        viewModel.startEditing()
+
+        assertTrue(viewModel.isEditing.value)
+        assertEquals(sampleNode.title, viewModel.editTitle.value)
+        assertEquals(sampleNode.content, viewModel.editContent.value)
+    }
+
+    @Test
+    fun `startEditing - 選択ノードがない場合は編集モードにならないこと`() = runTest {
+        viewModel.startEditing()
+
+        assertFalse(viewModel.isEditing.value)
+    }
+
+    @Test
+    fun `cancelEditing - 編集モードがキャンセルされること`() = runTest {
+        nodeStore.selectNode(sampleNode)
+        viewModel.startEditing()
+
+        viewModel.cancelEditing()
+
+        assertFalse(viewModel.isEditing.value)
+        assertEquals("", viewModel.editTitle.value)
+        assertEquals("", viewModel.editContent.value)
+    }
+
+    @Test
+    fun `updateEditTitle - 編集タイトルが更新されること`() = runTest {
+        viewModel.updateEditTitle("新しいタイトル")
+
+        assertEquals("新しいタイトル", viewModel.editTitle.value)
+    }
+
+    @Test
+    fun `updateEditContent - 編集内容が更新されること`() = runTest {
+        viewModel.updateEditContent("新しい内容")
+
+        assertEquals("新しい内容", viewModel.editContent.value)
+    }
+
+    @Test
+    fun `saveEdit - 編集保存が成功すること`() = runTest {
+        nodeStore.selectNode(sampleNode)
+        viewModel.startEditing()
+        viewModel.updateEditTitle("更新後のタイトル")
+        viewModel.updateEditContent("更新後の内容")
+
+        val updatedNode = sampleNode.copy(
+            title = "更新後のタイトル",
+            content = "更新後の内容"
+        )
+        fakeNodeRepository.updateNodeResult = Result.success(updatedNode)
+
+        viewModel.saveEdit()
+
+        assertEquals(1, fakeNodeRepository.updateNodeCallCount)
+        assertEquals("node1", fakeNodeRepository.lastUpdateNodeId)
+        assertEquals("更新後のタイトル", fakeNodeRepository.lastUpdateNodeTitle)
+        assertEquals("更新後の内容", fakeNodeRepository.lastUpdateNodeContent)
+        assertFalse(viewModel.isEditing.value)
+        assertFalse(viewModel.isLoading.value)
+        assertNull(viewModel.error.value)
+        viewModel.selectedNode.test {
+            assertEquals(updatedNode, awaitItem())
+        }
+    }
+
+    @Test
+    fun `saveEdit - タイトルが空の場合は保存しないこと`() = runTest {
+        nodeStore.selectNode(sampleNode)
+        viewModel.startEditing()
+        viewModel.updateEditTitle("   ")
+
+        viewModel.saveEdit()
+
+        assertEquals(0, fakeNodeRepository.updateNodeCallCount)
+    }
+
+    @Test
+    fun `saveEdit - 失敗時にエラーが設定されること`() = runTest {
+        nodeStore.selectNode(sampleNode)
+        viewModel.startEditing()
+        viewModel.updateEditTitle("更新タイトル")
+        viewModel.updateEditContent("更新内容")
+
+        val errorMessage = "Update failed"
+        fakeNodeRepository.updateNodeResult = Result.failure(Exception(errorMessage))
+
+        viewModel.saveEdit()
+
+        assertEquals(errorMessage, viewModel.error.value)
+        assertTrue(viewModel.isEditing.value) // 編集モードは維持
+        assertFalse(viewModel.isLoading.value)
+    }
+
+    // --- 削除機能のテスト ---
+
+    @Test
+    fun `deleteNode - 削除が成功すること`() = runTest {
+        nodeStore.selectNode(sampleNode)
+        fakeNodeRepository.deleteNodeResult = Result.success(Unit)
+
+        viewModel.deleteNode()
+
+        assertEquals(1, fakeNodeRepository.deleteNodeCallCount)
+        assertEquals("node1", fakeNodeRepository.lastDeleteNodeId)
+        assertTrue(viewModel.isDeleted.value)
+        assertFalse(viewModel.isLoading.value)
+        assertNull(viewModel.error.value)
+    }
+
+    @Test
+    fun `deleteNode - 選択ノードがない場合は何もしないこと`() = runTest {
+        viewModel.deleteNode()
+
+        assertEquals(0, fakeNodeRepository.deleteNodeCallCount)
+    }
+
+    @Test
+    fun `deleteNode - 失敗時にエラーが設定されること`() = runTest {
+        nodeStore.selectNode(sampleNode)
+        val errorMessage = "Delete failed"
+        fakeNodeRepository.deleteNodeResult = Result.failure(Exception(errorMessage))
+
+        viewModel.deleteNode()
+
+        assertEquals(errorMessage, viewModel.error.value)
+        assertFalse(viewModel.isDeleted.value)
+        assertFalse(viewModel.isLoading.value)
     }
 }

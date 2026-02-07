@@ -62,6 +62,36 @@ class NodeRepositoryImpl(
         }
     }
 
+    override suspend fun updateNode(
+        id: String,
+        title: String,
+        content: String,
+        tags: List<String>
+    ): Result<Node> {
+        return try {
+            nodeDataSource.updateNode(
+                id = id,
+                title = title,
+                content = content,
+                tags = tags
+            )
+            // PUT /nodes/{id} は { "message": string } のみ返す → getNode で再取得
+            val dto = nodeDataSource.getNode(id)
+            Result.success(dto.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteNode(id: String): Result<Unit> {
+        return try {
+            nodeDataSource.deleteNode(id)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun toggleLike(nodeId: String): Result<Node> {
         return try {
             // POST /nodes/{id}/like は ReactionSummaryDto を返す
