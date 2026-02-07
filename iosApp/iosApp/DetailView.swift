@@ -23,7 +23,7 @@ struct DetailView: View {
     }
 
     var body: some View {
-        Group {
+        ZStack {
             if viewModel.isDeleted as? Bool == true {
                 deletedView
             } else if let node = viewModel.selectedNode {
