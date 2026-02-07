@@ -39,13 +39,15 @@ interface NodeDataSource {
      * @param content 本文
      * @param type "idea" | "issue" | "project"
      * @param tags タグID一覧
+     * @param parentNodeId 派生元ノードID（派生投稿の場合）
      * @return 作成されたノードのID
      */
     suspend fun createNode(
         title: String,
         content: String,
         type: String,
-        tags: List<String> = emptyList()
+        tags: List<String> = emptyList(),
+        parentNodeId: String? = null
     ): String
 
     /**

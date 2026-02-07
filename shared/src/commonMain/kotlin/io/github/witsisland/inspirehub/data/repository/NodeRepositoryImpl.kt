@@ -52,7 +52,8 @@ class NodeRepositoryImpl(
                 title = title,
                 content = content,
                 type = typeString,
-                tags = tags
+                tags = tags,
+                parentNodeId = parentNodeId
             )
             val dto = nodeDataSource.getNode(nodeId)
             Result.success(dto.toDomain())

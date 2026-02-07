@@ -59,7 +59,8 @@ class KtorNodeDataSource(
         title: String,
         content: String,
         type: String,
-        tags: List<String>
+        tags: List<String>,
+        parentNodeId: String?
     ): String {
         val response: CreateNodeResponseDto = httpClient.post("/nodes") {
             contentType(ContentType.Application.Json)
@@ -67,7 +68,8 @@ class KtorNodeDataSource(
                 title = title,
                 content = content,
                 type = type,
-                tags = tags
+                tags = tags,
+                parentNodeId = parentNodeId
             ))
         }.body()
         return response.id

@@ -39,7 +39,8 @@ class MockNodeDataSource : NodeDataSource {
         title: String,
         content: String,
         type: String,
-        tags: List<String>
+        tags: List<String>,
+        parentNodeId: String?
     ): String {
         val now = "2026-02-01T12:00:00Z"
         val id = "node_${nextId++}"
