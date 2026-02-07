@@ -227,7 +227,9 @@ class DetailViewModelTest : MainDispatcherRule() {
             content = "新しいコメント",
             createdAt = "2026-01-22T09:00:00Z"
         )
-        fakeCommentRepository.createCommentResult = Result.success(newComment)
+        fakeCommentRepository.createCommentResult = Result.success("comment_new")
+        // submitComment成功後にgetCommentsが呼ばれるので、再取得結果を設定
+        fakeCommentRepository.comments.add(newComment)
 
         viewModel.submitComment()
 

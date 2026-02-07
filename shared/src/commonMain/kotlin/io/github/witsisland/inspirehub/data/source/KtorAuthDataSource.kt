@@ -1,6 +1,7 @@
 package io.github.witsisland.inspirehub.data.source
 
 import co.touchlab.kermit.Logger
+import io.github.witsisland.inspirehub.data.dto.AuthMeResponseDto
 import io.github.witsisland.inspirehub.data.dto.TokenResponseDto
 import io.github.witsisland.inspirehub.data.dto.UserDto
 import io.github.witsisland.inspirehub.data.dto.UserUpdateResponseDto
@@ -40,7 +41,8 @@ class KtorAuthDataSource(
     }
 
     override suspend fun getCurrentUser(): UserDto {
-        return httpClient.get("/auth/me").body()
+        val response: AuthMeResponseDto = httpClient.get("/auth/me").body()
+        return response.user
     }
 
     override suspend fun logout() {

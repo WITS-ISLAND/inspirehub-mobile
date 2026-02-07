@@ -22,7 +22,9 @@ class AuthRepositoryImpl(
     override suspend fun verifyGoogleToken(idToken: String): Result<User> {
         return try {
             val tokenResponse = authDataSource.verifyGoogleToken(idToken)
-            val user = tokenResponse.user.toDomain()
+            val userDto = tokenResponse.user
+                ?: return Result.failure(IllegalStateException("ユーザー情報が含まれていません"))
+            val user = userDto.toDomain()
 
             log.d { "Access token: ${tokenResponse.accessToken}" }
 

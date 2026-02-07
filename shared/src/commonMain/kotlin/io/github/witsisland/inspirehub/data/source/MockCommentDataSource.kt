@@ -29,9 +29,10 @@ class MockCommentDataSource : CommentDataSource {
         nodeId: String,
         content: String,
         parentId: String?
-    ): CommentDto {
+    ): String {
+        val id = "comment_${nextId++}"
         val newComment = CommentDto(
-            id = "comment_${nextId++}",
+            id = id,
             content = content,
             authorId = "user_mock",
             authorName = "テストユーザー",
@@ -44,17 +45,16 @@ class MockCommentDataSource : CommentDataSource {
             updatedAt = "2026-02-02T00:00:00Z"
         )
         comments.add(newComment)
-        return newComment
+        return id
     }
 
-    override suspend fun updateComment(id: String, content: String): CommentDto {
+    override suspend fun updateComment(id: String, content: String) {
         val index = comments.indexOfFirst { it.id == id }
         val updated = comments[index].copy(
             content = content,
             updatedAt = "2026-02-02T00:00:01Z"
         )
         comments[index] = updated
-        return updated
     }
 
     override suspend fun deleteComment(id: String) {

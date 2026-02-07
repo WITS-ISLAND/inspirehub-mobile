@@ -12,7 +12,7 @@ data class NodeDto(
     @SerialName("author_id")
     val authorId: String,
     @SerialName("author_name")
-    val authorName: String = "",
+    val authorName: String? = null,
     @SerialName("author_picture")
     val authorPicture: String? = null,
     @SerialName("parent_node")

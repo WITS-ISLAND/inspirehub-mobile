@@ -24,12 +24,13 @@ interface CommentRepository {
      * @param nodeId ノードID
      * @param content コメント内容
      * @param parentId 返信先コメントID（nullの場合は新規コメント）
+     * @return 作成されたコメントのID
      */
     suspend fun createComment(
         nodeId: String,
         content: String,
         parentId: String? = null
-    ): Result<Comment>
+    ): Result<String>
 
     /**
      * コメントを削除

@@ -12,7 +12,7 @@ class FakeCommentRepository : CommentRepository {
 
     // 各メソッドの戻り値（nullの場合はcommentsリストから自動生成）
     var getCommentsResult: Result<List<Comment>>? = null
-    var createCommentResult: Result<Comment>? = null
+    var createCommentResult: Result<String>? = null
     var deleteCommentResult: Result<Unit>? = null
 
     // エラーシミュレート用フラグ
@@ -48,14 +48,14 @@ class FakeCommentRepository : CommentRepository {
         nodeId: String,
         content: String,
         parentId: String?
-    ): Result<Comment> {
+    ): Result<String> {
         createCommentCallCount++
         lastCreateCommentNodeId = nodeId
         lastCreateCommentContent = content
         lastCreateCommentParentId = parentId
 
         if (shouldReturnError) return Result.failure(Exception(errorMessage))
-        return createCommentResult ?: error("createCommentResult not set")
+        return createCommentResult ?: Result.success("comment_new")
     }
 
     override suspend fun deleteComment(id: String): Result<Unit> {

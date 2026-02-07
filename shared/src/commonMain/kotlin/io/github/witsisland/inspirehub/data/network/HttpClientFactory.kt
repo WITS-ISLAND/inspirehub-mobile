@@ -49,6 +49,7 @@ fun HttpClient.configureClient(
                 prettyPrint = true
                 isLenient = true
                 ignoreUnknownKeys = true
+                coerceInputValues = true
             })
         }
 

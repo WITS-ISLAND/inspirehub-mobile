@@ -29,12 +29,13 @@ interface CommentDataSource {
      * @param nodeId ノードID
      * @param content コメント内容
      * @param parentId 返信先コメントID（nullの場合は新規コメント）
+     * @return 作成されたコメントのID
      */
     suspend fun createComment(
         nodeId: String,
         content: String,
         parentId: String? = null
-    ): CommentDto
+    ): String
 
     /**
      * コメントを更新
@@ -44,7 +45,7 @@ interface CommentDataSource {
     suspend fun updateComment(
         id: String,
         content: String
-    ): CommentDto
+    )
 
     /**
      * コメントを削除

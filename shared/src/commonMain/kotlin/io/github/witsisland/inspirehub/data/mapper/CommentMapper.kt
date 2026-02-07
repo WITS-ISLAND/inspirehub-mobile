@@ -9,10 +9,10 @@ fun CommentDto.toDomain(): Comment {
         nodeId = nodeId,
         parentId = parentId,
         authorId = authorId,
-        authorName = authorName,
+        authorName = authorName ?: "",
         authorPicture = authorPicture,
         content = content,
-        mentions = mentions,
+        mentions = mentions.map { it.name },
         replies = replies.map { it.toDomain() },
         createdAt = createdAt
     )

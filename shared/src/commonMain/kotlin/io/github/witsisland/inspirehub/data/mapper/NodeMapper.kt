@@ -22,7 +22,7 @@ fun NodeDto.toDomain(): Node {
         title = title,
         content = content ?: "",
         authorId = authorId,
-        authorName = authorName,
+        authorName = authorName ?: "",
         authorPicture = authorPicture,
         parentNode = parentNode?.toDomain(),
         tagIds = tags.map { it.name },

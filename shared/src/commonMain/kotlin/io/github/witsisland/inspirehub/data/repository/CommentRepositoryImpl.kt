@@ -30,10 +30,10 @@ class CommentRepositoryImpl(
         nodeId: String,
         content: String,
         parentId: String?
-    ): Result<Comment> {
+    ): Result<String> {
         return try {
-            val dto = dataSource.createComment(nodeId, content, parentId)
-            Result.success(dto.toDomain())
+            val commentId = dataSource.createComment(nodeId, content, parentId)
+            Result.success(commentId)
         } catch (e: Exception) {
             Result.failure(e)
         }

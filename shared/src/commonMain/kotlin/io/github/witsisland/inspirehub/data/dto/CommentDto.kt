@@ -10,14 +10,14 @@ data class CommentDto(
     @SerialName("author_id")
     val authorId: String,
     @SerialName("author_name")
-    val authorName: String = "",
+    val authorName: String? = null,
     @SerialName("author_picture")
     val authorPicture: String? = null,
     @SerialName("node_id")
     val nodeId: String,
     @SerialName("parent_id")
     val parentId: String? = null,
-    val mentions: List<String> = emptyList(),
+    val mentions: List<MentionDto> = emptyList(),
     val replies: List<CommentDto> = emptyList(),
     @SerialName("created_at")
     val createdAt: String,

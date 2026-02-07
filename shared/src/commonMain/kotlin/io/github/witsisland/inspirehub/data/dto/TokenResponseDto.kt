@@ -14,5 +14,5 @@ data class TokenResponseDto(
     val refreshToken: String,
     @SerialName("expires_in")
     val expiresIn: Int,
-    val user: UserDto
+    val user: UserDto? = null
 )
