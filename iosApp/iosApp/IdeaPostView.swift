@@ -19,6 +19,7 @@ struct IdeaPostView: View {
     private var error: String? { viewModel.error as? String }
     private var isSuccess: Bool { viewModel.isSuccess as? Bool ?? false }
     private var isValid: Bool { viewModel.isValid as? Bool ?? false }
+    private var suggestedTags: [Tag] { viewModel.suggestedTags as? [Tag] ?? [] }
 
     var body: some View {
         NavigationStack {
@@ -45,6 +46,9 @@ struct IdeaPostView: View {
                 Section(header: Text("タグ")) {
                     HStack {
                         TextField("タグを入力", text: $tagInput)
+                            .onChange(of: tagInput) { _, newValue in
+                                viewModel.searchTagSuggestions(query: newValue)
+                            }
                             .onSubmit {
                                 addTag()
                             }
@@ -53,6 +57,29 @@ struct IdeaPostView: View {
                                 .foregroundColor(.appPrimary)
                         }
                         .disabled(tagInput.trimmingCharacters(in: .whitespaces).isEmpty)
+                    }
+
+                    if !suggestedTags.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(suggestedTags, id: \.id) { tag in
+                                    Button(action: {
+                                        viewModel.addTag(tag: tag.name)
+                                        tagInput = ""
+                                        viewModel.clearTagSuggestions()
+                                    }) {
+                                        Text("#\(tag.name)")
+                                            .font(.caption)
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .background(Color.appPrimary.opacity(0.1))
+                                            .foregroundColor(.appPrimary)
+                                            .cornerRadius(8)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                        }
                     }
 
                     if !tags.isEmpty {
@@ -108,6 +135,7 @@ struct IdeaPostView: View {
         guard !trimmed.isEmpty else { return }
         viewModel.addTag(tag: trimmed)
         tagInput = ""
+        viewModel.clearTagSuggestions()
     }
 }
 #Preview("IdeaPostView") {
