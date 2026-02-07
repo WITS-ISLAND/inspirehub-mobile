@@ -57,6 +57,9 @@ fun HttpClient.configureClient(
         }
 
         // 認証設定
+        // 認証設定: Bearer tokenが利用可能ならGET含む全リクエストに付与
+        // 認証済み → is_reacted等のユーザー固有情報を返す
+        // 未認証 → is_reacted=false として返す
         tokenProvider?.let { provider ->
             install(Auth) {
                 bearer {
@@ -65,6 +68,7 @@ fun HttpClient.configureClient(
                             BearerTokens(accessToken = token, refreshToken = "")
                         }
                     }
+                    sendWithoutRequest { true }
                 }
             }
         }

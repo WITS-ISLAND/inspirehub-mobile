@@ -35,8 +35,6 @@ class KtorNodeDataSource(
         offset: Int
     ): List<NodeDto> {
         val response: NodesResponseDto = httpClient.get("/nodes") {
-            parameter("limit", limit)
-            parameter("offset", offset)
             type?.let { parameter("type", it) }
         }.body()
         return response.nodes
@@ -116,8 +114,6 @@ class KtorNodeDataSource(
     ): List<NodeDto> {
         val response: NodesResponseDto = httpClient.get("/nodes") {
             parameter("q", query)
-            parameter("limit", limit)
-            parameter("offset", offset)
             type?.let { parameter("type", it) }
         }.body()
         return response.nodes
