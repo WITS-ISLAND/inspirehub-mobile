@@ -68,7 +68,7 @@ struct DerivedPostView: View {
                             }
                         Button(action: addTag) {
                             Image(systemName: "plus.circle.fill")
-                                .foregroundColor(.blue)
+                                .foregroundColor(.appPrimary)
                         }
                         .disabled(tagInput.trimmingCharacters(in: .whitespaces).isEmpty)
                     }

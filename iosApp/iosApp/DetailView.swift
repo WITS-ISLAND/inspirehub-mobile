@@ -21,7 +21,7 @@ struct DetailView: View {
                 VStack(spacing: 16) {
                     Image(systemName: "exclamationmark.triangle")
                         .font(.system(size: 40))
-                        .foregroundColor(.orange)
+                        .foregroundColor(.appSecondary)
                     Text(error)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
@@ -107,8 +107,8 @@ struct DetailView: View {
                         .font(.caption)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 5)
-                        .background(Color.blue.opacity(0.1))
-                        .foregroundColor(.blue)
+                        .background(Color.appPrimary.opacity(0.1))
+                        .foregroundColor(.appPrimary)
                         .cornerRadius(8)
                 }
             }
@@ -260,7 +260,7 @@ struct DetailView: View {
             .foregroundColor(.white)
             .frame(maxWidth: .infinity)
             .padding(12)
-            .background(Color.orange)
+            .background(Color.appSecondary)
             .cornerRadius(10)
         }
         .sheet(isPresented: $showDerivedPost) {
@@ -280,7 +280,7 @@ struct DetailView: View {
                     NavigationLink(destination: DetailView(nodeId: child.id)) {
                         HStack(spacing: 8) {
                             Image(systemName: "arrow.turn.down.right")
-                                .foregroundColor(.blue)
+                                .foregroundColor(.appPrimary)
                                 .font(.caption)
                             Text(child.title)
                                 .font(.subheadline)
@@ -323,7 +323,7 @@ struct DetailView: View {
                         viewModel.submitComment()
                     }) {
                         Image(systemName: "paperplane.fill")
-                            .foregroundColor(.blue)
+                            .foregroundColor(.appPrimary)
                             .frame(width: 44, height: 44)
                             .contentShape(Rectangle())
                     }
@@ -341,10 +341,10 @@ struct DetailView: View {
                         Text("ログインしてコメントする")
                             .font(.subheadline)
                     }
-                    .foregroundColor(.blue)
+                    .foregroundColor(.appPrimary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)
-                    .background(Color.blue.opacity(0.05))
+                    .background(Color.appPrimary.opacity(0.05))
                     .cornerRadius(8)
                 }
             }

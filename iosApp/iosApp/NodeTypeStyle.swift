@@ -10,14 +10,14 @@ enum NodeTypeStyle {
 
     /// The foreground/accent color for a given node type.
     ///
-    /// - Issue: Red -- conveys urgency and problem-awareness
-    /// - Idea: Blue -- aligns with the app's Primary color, conveys creativity
-    /// - Project: Green -- conveys progress and growth
+    /// - Issue: Coral-red -- conveys urgency and problem-awareness
+    /// - Idea: Indigo-blue -- aligns with the app's Primary color, conveys creativity
+    /// - Project: Teal-green -- conveys progress and growth
     static func color(for type: NodeType) -> Color {
         switch type {
-        case .issue: return .red
-        case .idea: return .blue
-        case .project: return .green
+        case .issue: return .issueColor
+        case .idea: return .ideaColor
+        case .project: return .projectColor
         default: return .secondary
         }
     }
@@ -32,7 +32,7 @@ enum NodeTypeStyle {
     /// The SF Symbol name for a given node type.
     static func icon(for type: NodeType) -> String {
         switch type {
-        case .issue: return "exclamationmark.triangle.fill"
+        case .issue: return "exclamationmark.circle.fill"
         case .idea: return "lightbulb.fill"
         case .project: return "folder.fill"
         default: return "doc.fill"

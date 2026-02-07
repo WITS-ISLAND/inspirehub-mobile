@@ -16,7 +16,7 @@ struct LoginView: View {
             VStack(spacing: 16) {
                 Image(systemName: "lightbulb.fill")
                     .font(.system(size: 80))
-                    .foregroundColor(.orange)
+                    .foregroundColor(.appSecondary)
 
                 Text("InspireHub")
                     .font(.largeTitle)
@@ -39,7 +39,7 @@ struct LoginView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.blue)
+                .background(Color.appPrimary)
                 .cornerRadius(12)
             }
             .disabled(viewModel.isLoading)

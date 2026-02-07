@@ -100,7 +100,7 @@ struct HomeView: View {
                                 .foregroundColor(isCurrentTab(tab) ? .primary : .secondary)
 
                             Rectangle()
-                                .fill(isCurrentTab(tab) ? Color.blue : Color.clear)
+                                .fill(isCurrentTab(tab) ? Color.appPrimary : Color.clear)
                                 .frame(height: 2)
                         }
                         .frame(minHeight: 44)
@@ -298,8 +298,8 @@ struct NodeCardView: View {
                         .font(.caption)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 5)
-                        .background(Color.blue.opacity(0.1))
-                        .foregroundColor(.blue)
+                        .background(Color.appPrimary.opacity(0.1))
+                        .foregroundColor(.appPrimary)
                         .cornerRadius(8)
                 }
             }

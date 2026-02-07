@@ -52,7 +52,7 @@ struct IssuePostView: View {
                             }
                         Button(action: addTag) {
                             Image(systemName: "plus.circle.fill")
-                                .foregroundColor(.blue)
+                                .foregroundColor(.appPrimary)
                         }
                         .disabled(tagInput.trimmingCharacters(in: .whitespaces).isEmpty)
                     }
@@ -128,8 +128,8 @@ struct RemovableTagChip: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
-        .background(Color.blue.opacity(0.1))
-        .foregroundColor(.blue)
+        .background(Color.appPrimary.opacity(0.1))
+        .foregroundColor(.appPrimary)
         .cornerRadius(8)
     }
 }
@@ -141,8 +141,8 @@ struct TagChip: View {
             .font(.caption)
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
-            .background(Color.blue.opacity(0.1))
-            .foregroundColor(.blue)
+            .background(Color.appPrimary.opacity(0.1))
+            .foregroundColor(.appPrimary)
             .cornerRadius(8)
     }
 }
