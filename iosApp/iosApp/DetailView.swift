@@ -28,6 +28,7 @@ struct DetailView: View {
                 ProgressView("読み込み中...")
             }
         }
+        .navigationTitle(viewModel.selectedNode?.title ?? "詳細")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             viewModel.loadDetail(nodeId: nodeId)
@@ -126,12 +127,17 @@ struct DetailView: View {
     private func parentSection(parentNode: ParentNode) -> some View {
         NavigationLink(destination: DetailView(nodeId: parentNode.id)) {
             HStack(spacing: 8) {
-                Image(systemName: parentNode.type == .issue ? "exclamationmark.triangle.fill" : "lightbulb.fill")
-                    .foregroundColor(parentNode.type == .issue ? .orange : .yellow)
+                Image(systemName: parentNodeIcon(parentNode.type))
+                    .foregroundColor(parentNodeColor(parentNode.type))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("派生元")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
+                    HStack(spacing: 4) {
+                        Text("派生元")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                        Text(parentNodeTypeLabel(parentNode.type))
+                            .font(.caption2)
+                            .foregroundColor(parentNodeColor(parentNode.type))
+                    }
                     Text(parentNode.title)
                         .font(.subheadline)
                         .foregroundColor(.primary)
@@ -148,6 +154,33 @@ struct DetailView: View {
             .cornerRadius(8)
         }
         .buttonStyle(.plain)
+    }
+
+    private func parentNodeIcon(_ type: NodeType) -> String {
+        switch type {
+        case .issue: return "exclamationmark.triangle.fill"
+        case .idea: return "lightbulb.fill"
+        case .project: return "folder.fill"
+        default: return "doc.fill"
+        }
+    }
+
+    private func parentNodeColor(_ type: NodeType) -> Color {
+        switch type {
+        case .issue: return .orange
+        case .idea: return .yellow
+        case .project: return .blue
+        default: return .secondary
+        }
+    }
+
+    private func parentNodeTypeLabel(_ type: NodeType) -> String {
+        switch type {
+        case .issue: return "課題"
+        case .idea: return "アイデア"
+        case .project: return "プロジェクト"
+        default: return ""
+        }
     }
 
     // MARK: - Reactions

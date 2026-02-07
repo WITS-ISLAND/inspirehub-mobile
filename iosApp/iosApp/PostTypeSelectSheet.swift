@@ -7,7 +7,7 @@ struct PostTypeSelectSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 20) {
                 Text("投稿タイプを選択")
                     .font(.title2)

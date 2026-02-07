@@ -72,7 +72,7 @@ struct HomeView: View {
                 nodeList
             }
         }
-        .navigationTitle("InspireHub")
+        .navigationTitle("ホーム")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -194,7 +194,6 @@ struct HomeView: View {
 
 struct NodeCardView: View {
     let node: Node
-    @State private var isParentExpanded = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -244,48 +243,54 @@ struct NodeCardView: View {
     // MARK: - Parent Node Badge
 
     private func parentNodeBadge(_ parentNode: ParentNode) -> some View {
-        Button(action: {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                isParentExpanded.toggle()
-            }
-        }) {
-            VStack(alignment: .leading, spacing: isParentExpanded ? 6 : 0) {
-                HStack(spacing: 6) {
-                    Image(systemName: parentNode.type == .issue ? "exclamationmark.triangle.fill" : "lightbulb.fill")
-                        .font(.caption2)
-                        .foregroundColor(parentNode.type == .issue ? .orange : .yellow)
-                    Text("派生元")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                    Text(parentNode.title)
-                        .font(.caption2)
-                        .fontWeight(.medium)
-                        .foregroundColor(.primary)
-                        .lineLimit(1)
-                    Spacer()
-                    Image(systemName: isParentExpanded ? "chevron.up" : "chevron.down")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                }
-
-                if isParentExpanded {
-                    NavigationLink(destination: DetailView(nodeId: parentNode.id)) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "arrow.turn.up.left")
-                                .font(.caption2)
-                            Text("派生元を見る")
-                                .font(.caption2)
-                        }
-                        .foregroundColor(.blue)
-                    }
-                }
-            }
-            .padding(8)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(.tertiarySystemBackground))
-            .cornerRadius(8)
+        HStack(spacing: 6) {
+            Image(systemName: parentNodeIcon(parentNode.type))
+                .font(.caption2)
+                .foregroundColor(parentNodeColor(parentNode.type))
+            Text("派生元")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            Text(parentNodeTypeLabel(parentNode.type))
+                .font(.caption2)
+                .foregroundColor(parentNodeColor(parentNode.type))
+            Text(parentNode.title)
+                .font(.caption2)
+                .fontWeight(.medium)
+                .foregroundColor(.primary)
+                .lineLimit(1)
+            Spacer()
         }
-        .buttonStyle(.plain)
+        .padding(8)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.tertiarySystemBackground))
+        .cornerRadius(8)
+    }
+
+    private func parentNodeIcon(_ type: NodeType) -> String {
+        switch type {
+        case .issue: return "exclamationmark.triangle.fill"
+        case .idea: return "lightbulb.fill"
+        case .project: return "folder.fill"
+        default: return "doc.fill"
+        }
+    }
+
+    private func parentNodeColor(_ type: NodeType) -> Color {
+        switch type {
+        case .issue: return .orange
+        case .idea: return .yellow
+        case .project: return .blue
+        default: return .secondary
+        }
+    }
+
+    private func parentNodeTypeLabel(_ type: NodeType) -> String {
+        switch type {
+        case .issue: return "課題:"
+        case .idea: return "アイデア:"
+        case .project: return "プロジェクト:"
+        default: return ""
+        }
     }
 
     private func inlineReaction(emoji: String, count: Int32, isReacted: Bool) -> some View {
