@@ -15,6 +15,7 @@ import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import co.touchlab.kermit.Logger as KermitLogger
 
 /**
  * Ktor Client を使用した NodeDataSource 実装
@@ -24,6 +25,8 @@ import io.ktor.http.contentType
 class KtorNodeDataSource(
     private val httpClient: HttpClient
 ) : NodeDataSource {
+
+    private val log = KermitLogger.withTag("KtorNodeDataSource")
 
     /**
      * GET /nodes
@@ -62,6 +65,7 @@ class KtorNodeDataSource(
         tags: List<String>,
         parentNodeId: String?
     ): String {
+        log.d { "createNode: parentNodeId=$parentNodeId" }
         val response: CreateNodeResponseDto = httpClient.post("/nodes") {
             contentType(ContentType.Application.Json)
             setBody(CreateNodeRequestDto(

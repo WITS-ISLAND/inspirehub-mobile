@@ -25,7 +25,7 @@ fun NodeDto.toDomain(): Node {
         authorName = authorName,
         authorPicture = authorPicture,
         parentNode = parentNode?.toDomain(),
-        tagIds = tags.map { it.id },
+        tagIds = tags.map { it.name },
         reactions = reactions.toDomain(),
         commentCount = commentCount,
         createdAt = createdAt,
