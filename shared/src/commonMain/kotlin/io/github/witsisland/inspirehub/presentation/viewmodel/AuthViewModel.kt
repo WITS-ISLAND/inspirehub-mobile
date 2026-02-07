@@ -30,6 +30,10 @@ class AuthViewModel(
         viewModelScope.launch {
             userStore.isAuthenticated.collect { _isAuthenticated.value = it }
         }
+        // 永続化されたセッションを復元
+        viewModelScope.launch {
+            authRepository.restoreSession()
+        }
     }
 
     private val _isLoading = MutableStateFlow(viewModelScope, false)

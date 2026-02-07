@@ -2,6 +2,7 @@ package io.github.witsisland.inspirehub.di
 
 import io.github.witsisland.inspirehub.data.network.createHttpClient
 import io.github.witsisland.inspirehub.data.repository.AuthRepositoryImpl
+import io.github.witsisland.inspirehub.data.storage.TokenStorage
 import io.github.witsisland.inspirehub.data.repository.CommentRepositoryImpl
 import io.github.witsisland.inspirehub.data.repository.NodeRepositoryImpl
 import io.github.witsisland.inspirehub.data.repository.ReactionRepositoryImpl
@@ -51,6 +52,7 @@ val appModule = module {
     // HttpClient（シングルトン）
     single {
         val userStore: UserStore = get()
+        val tokenStorage: TokenStorage = get()
         createHttpClient(
             baseUrl = "https://api.inspirehub.wtnqk.org",
             enableLogging = true,
@@ -58,6 +60,7 @@ val appModule = module {
             refreshTokenProvider = { userStore.refreshToken.value },
             onTokenRefreshed = { access, refresh ->
                 userStore.updateTokens(access, refresh)
+                tokenStorage.saveTokens(access, refresh)
             }
         )
     }
@@ -71,7 +74,7 @@ val appModule = module {
     single<UserDataSource> { KtorUserDataSource(get()) }
 
     // Repository（シングルトン、インターフェース）
-    single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
+    single<AuthRepository> { AuthRepositoryImpl(get(), get(), get()) }
     single<NodeRepository> { NodeRepositoryImpl(get(), get()) }
     single<CommentRepository> { CommentRepositoryImpl(get()) }
     single<ReactionRepository> { ReactionRepositoryImpl(get()) }
