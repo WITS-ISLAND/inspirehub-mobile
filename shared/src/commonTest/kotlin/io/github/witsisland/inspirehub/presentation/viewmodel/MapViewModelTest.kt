@@ -109,6 +109,80 @@ class MapViewModelTest : MainDispatcherRule() {
     }
 
     // ========================================
+    // getNodeTree のテスト
+    // ========================================
+
+    @Test
+    fun `getNodeTree - ルートノードと子ノードのツリーが正しく構築されること`() = runTest {
+        // Given
+        fakeNodeRepository.getNodesResult = Result.success(sampleNodes)
+        viewModel.loadNodes()
+
+        // When
+        val tree = viewModel.getNodeTree()
+
+        // Then: node1はルート(depth=0), node2はnode1の子(depth=1)
+        assertEquals(2, tree.size)
+        val root = tree[0]
+        assertEquals("node1", root.node.id)
+        assertEquals(0, root.depth)
+        assertEquals(1, root.childCount)
+
+        val child = tree[1]
+        assertEquals("node2", child.node.id)
+        assertEquals(1, child.depth)
+        assertEquals(0, child.childCount)
+    }
+
+    @Test
+    fun `getNodeTree - ノードが空の場合は空リストが返ること`() = runTest {
+        // Given: ノード未読み込み
+
+        // When
+        val tree = viewModel.getNodeTree()
+
+        // Then
+        assertTrue(tree.isEmpty())
+    }
+
+    @Test
+    fun `getNodeTree - 全てルートノードの場合はdepth0で並ぶこと`() = runTest {
+        // Given
+        val rootOnlyNodes = listOf(
+            Node(
+                id = "r1",
+                type = NodeType.ISSUE,
+                title = "ルート1",
+                content = "内容1",
+                authorId = "user1",
+                authorName = "ユーザー1",
+                commentCount = 0,
+                createdAt = "2026-01-20T09:00:00Z"
+            ),
+            Node(
+                id = "r2",
+                type = NodeType.ISSUE,
+                title = "ルート2",
+                content = "内容2",
+                authorId = "user2",
+                authorName = "ユーザー2",
+                commentCount = 0,
+                createdAt = "2026-01-21T09:00:00Z"
+            )
+        )
+        fakeNodeRepository.getNodesResult = Result.success(rootOnlyNodes)
+        viewModel.loadNodes()
+
+        // When
+        val tree = viewModel.getNodeTree()
+
+        // Then
+        assertEquals(2, tree.size)
+        assertTrue(tree.all { it.depth == 0 })
+        assertTrue(tree.all { it.childCount == 0 })
+    }
+
+    // ========================================
     // 初期状態のテスト
     // ========================================
 

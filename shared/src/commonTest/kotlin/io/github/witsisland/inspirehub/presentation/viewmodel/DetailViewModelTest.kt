@@ -146,6 +146,22 @@ class DetailViewModelTest : MainDispatcherRule() {
     }
 
     @Test
+    fun `loadDetail - 子ノード取得失敗でもノードとコメントは表示されること`() = runTest {
+        fakeNodeRepository.getNodeResult = Result.success(sampleNode)
+        fakeCommentRepository.getCommentsResult = Result.success(sampleComments)
+        fakeNodeRepository.getChildNodesResult = Result.failure(Exception("Child nodes fetch failed"))
+
+        viewModel.loadDetail("node1")
+
+        viewModel.selectedNode.test {
+            assertEquals(sampleNode, awaitItem())
+        }
+        assertEquals(sampleComments.size, viewModel.comments.value.size)
+        assertTrue(viewModel.childNodes.value.isEmpty())
+        assertFalse(viewModel.isLoading.value)
+    }
+
+    @Test
     fun `toggleReaction - 楽観的更新でUI即座反映されること`() = runTest {
         nodeStore.selectNode(sampleNode)
         fakeReactionRepository.toggleReactionResult = Result.success(
