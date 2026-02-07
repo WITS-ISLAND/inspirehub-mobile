@@ -10,6 +10,8 @@ class FakeNodeRepository : NodeRepository {
     var getNodesResult: Result<List<Node>>? = null
     var getNodeResult: Result<Node>? = null
     var createNodeResult: Result<Node>? = null
+    var updateNodeResult: Result<Node>? = null
+    var deleteNodeResult: Result<Unit>? = null
     var toggleLikeResult: Result<Node>? = null
     var getChildNodesResult: Result<List<Node>>? = null
     var searchNodesResult: Result<List<Node>>? = null
@@ -21,6 +23,8 @@ class FakeNodeRepository : NodeRepository {
     var getNodesCallCount = 0
     var getNodeCallCount = 0
     var createNodeCallCount = 0
+    var updateNodeCallCount = 0
+    var deleteNodeCallCount = 0
     var toggleLikeCallCount = 0
     var getChildNodesCallCount = 0
     var searchNodesCallCount = 0
@@ -35,6 +39,11 @@ class FakeNodeRepository : NodeRepository {
     var lastCreateNodeType: NodeType? = null
     var lastCreateNodeParentNodeId: String? = null
     var lastCreateNodeTags: List<String>? = null
+    var lastUpdateNodeId: String? = null
+    var lastUpdateNodeTitle: String? = null
+    var lastUpdateNodeContent: String? = null
+    var lastUpdateNodeTags: List<String>? = null
+    var lastDeleteNodeId: String? = null
     var lastToggleLikeNodeId: String? = null
     var lastGetChildNodesParentNodeId: String? = null
     var lastSearchQuery: String? = null
@@ -80,6 +89,30 @@ class FakeNodeRepository : NodeRepository {
 
         if (shouldReturnError) return Result.failure(Exception(errorMessage))
         return createNodeResult ?: error("createNodeResult not set")
+    }
+
+    override suspend fun updateNode(
+        id: String,
+        title: String,
+        content: String,
+        tags: List<String>
+    ): Result<Node> {
+        updateNodeCallCount++
+        lastUpdateNodeId = id
+        lastUpdateNodeTitle = title
+        lastUpdateNodeContent = content
+        lastUpdateNodeTags = tags
+
+        if (shouldReturnError) return Result.failure(Exception(errorMessage))
+        return updateNodeResult ?: error("updateNodeResult not set")
+    }
+
+    override suspend fun deleteNode(id: String): Result<Unit> {
+        deleteNodeCallCount++
+        lastDeleteNodeId = id
+
+        if (shouldReturnError) return Result.failure(Exception(errorMessage))
+        return deleteNodeResult ?: Result.success(Unit)
     }
 
     override suspend fun toggleLike(nodeId: String): Result<Node> {
@@ -134,6 +167,8 @@ class FakeNodeRepository : NodeRepository {
         getNodesResult = null
         getNodeResult = null
         createNodeResult = null
+        updateNodeResult = null
+        deleteNodeResult = null
         toggleLikeResult = null
         getChildNodesResult = null
         searchNodesResult = null
@@ -143,6 +178,8 @@ class FakeNodeRepository : NodeRepository {
         getNodesCallCount = 0
         getNodeCallCount = 0
         createNodeCallCount = 0
+        updateNodeCallCount = 0
+        deleteNodeCallCount = 0
         toggleLikeCallCount = 0
         getChildNodesCallCount = 0
         searchNodesCallCount = 0
@@ -156,6 +193,11 @@ class FakeNodeRepository : NodeRepository {
         lastCreateNodeType = null
         lastCreateNodeParentNodeId = null
         lastCreateNodeTags = null
+        lastUpdateNodeId = null
+        lastUpdateNodeTitle = null
+        lastUpdateNodeContent = null
+        lastUpdateNodeTags = null
+        lastDeleteNodeId = null
         lastToggleLikeNodeId = null
         lastGetChildNodesParentNodeId = null
         lastSearchQuery = null

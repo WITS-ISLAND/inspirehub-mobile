@@ -68,7 +68,7 @@ class MockNodeDataSource : NodeDataSource {
         title: String,
         content: String,
         tags: List<String>
-    ): NodeDto {
+    ) {
         val index = nodes.indexOfFirst { it.id == id }
         if (index == -1) throw NoSuchElementException("Node not found: $id")
         val updated = nodes[index].copy(
@@ -77,7 +77,6 @@ class MockNodeDataSource : NodeDataSource {
             updatedAt = "2026-02-01T12:00:00Z"
         )
         nodes[index] = updated
-        return updated
     }
 
     override suspend fun deleteNode(id: String) {

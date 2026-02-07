@@ -38,6 +38,20 @@ class NodeStore {
         _nodes.value = listOf(node) + _nodes.value
     }
 
+    fun updateNode(updated: Node) {
+        _nodes.value = _nodes.value.map { if (it.id == updated.id) updated else it }
+        if (_selectedNode.value?.id == updated.id) {
+            _selectedNode.value = updated
+        }
+    }
+
+    fun removeNode(nodeId: String) {
+        _nodes.value = _nodes.value.filter { it.id != nodeId }
+        if (_selectedNode.value?.id == nodeId) {
+            _selectedNode.value = null
+        }
+    }
+
     fun selectNode(node: Node?) {
         _selectedNode.value = node
     }

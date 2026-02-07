@@ -82,22 +82,22 @@ class KtorNodeDataSource(
     /**
      * PUT /nodes/{id}
      * Request: UpdateNodeRequestDto
-     * Response: NodeDto
+     * Response: { "message": string }
      */
     override suspend fun updateNode(
         id: String,
         title: String,
         content: String,
         tags: List<String>
-    ): NodeDto {
-        return httpClient.put("/nodes/$id") {
+    ) {
+        httpClient.put("/nodes/$id") {
             contentType(ContentType.Application.Json)
             setBody(UpdateNodeRequestDto(
                 title = title,
                 content = content,
                 tags = tags
             ))
-        }.body()
+        }
     }
 
     /**

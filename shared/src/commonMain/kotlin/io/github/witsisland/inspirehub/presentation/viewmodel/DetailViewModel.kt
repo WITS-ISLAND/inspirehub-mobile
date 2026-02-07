@@ -53,6 +53,22 @@ class DetailViewModel(
     @NativeCoroutinesState
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    private val _isEditing = MutableStateFlow(viewModelScope, false)
+    @NativeCoroutinesState
+    val isEditing: StateFlow<Boolean> = _isEditing.asStateFlow()
+
+    private val _editTitle = MutableStateFlow(viewModelScope, "")
+    @NativeCoroutinesState
+    val editTitle: StateFlow<String> = _editTitle.asStateFlow()
+
+    private val _editContent = MutableStateFlow(viewModelScope, "")
+    @NativeCoroutinesState
+    val editContent: StateFlow<String> = _editContent.asStateFlow()
+
+    private val _isDeleted = MutableStateFlow(viewModelScope, false)
+    @NativeCoroutinesState
+    val isDeleted: StateFlow<Boolean> = _isDeleted.asStateFlow()
+
     private val _commentText = MutableStateFlow(viewModelScope, "")
     @NativeCoroutinesState
     val commentText: StateFlow<String> = _commentText.asStateFlow()
@@ -146,6 +162,90 @@ class DetailViewModel(
             }
 
             _isCommentSubmitting.value = false
+        }
+    }
+
+    /**
+     * 編集モードを開始
+     */
+    fun startEditing() {
+        val node = selectedNode.value ?: return
+        _editTitle.value = node.title
+        _editContent.value = node.content
+        _isEditing.value = true
+    }
+
+    /**
+     * 編集モードをキャンセル
+     */
+    fun cancelEditing() {
+        _isEditing.value = false
+        _editTitle.value = ""
+        _editContent.value = ""
+    }
+
+    fun updateEditTitle(title: String) {
+        _editTitle.value = title
+    }
+
+    fun updateEditContent(content: String) {
+        _editContent.value = content
+    }
+
+    /**
+     * 編集を保存
+     */
+    fun saveEdit() {
+        val node = selectedNode.value ?: return
+        val title = _editTitle.value.trim()
+        val content = _editContent.value.trim()
+        if (title.isEmpty()) return
+
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+
+            val result = nodeRepository.updateNode(
+                id = node.id,
+                title = title,
+                content = content,
+                tags = node.tagIds
+            )
+
+            if (result.isSuccess) {
+                val updatedNode = result.getOrNull()!!
+                nodeStore.updateNode(updatedNode)
+                _isEditing.value = false
+                _editTitle.value = ""
+                _editContent.value = ""
+            } else {
+                _error.value = result.exceptionOrNull()?.message ?: "Failed to update node"
+            }
+
+            _isLoading.value = false
+        }
+    }
+
+    /**
+     * ノードを削除
+     */
+    fun deleteNode() {
+        val node = selectedNode.value ?: return
+
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+
+            val result = nodeRepository.deleteNode(node.id)
+
+            if (result.isSuccess) {
+                nodeStore.removeNode(node.id)
+                _isDeleted.value = true
+            } else {
+                _error.value = result.exceptionOrNull()?.message ?: "Failed to delete node"
+            }
+
+            _isLoading.value = false
         }
     }
 
