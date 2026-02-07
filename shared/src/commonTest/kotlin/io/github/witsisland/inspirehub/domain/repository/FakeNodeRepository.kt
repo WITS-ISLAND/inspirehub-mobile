@@ -12,6 +12,7 @@ class FakeNodeRepository : NodeRepository {
     var createNodeResult: Result<Node>? = null
     var toggleLikeResult: Result<Node>? = null
     var getChildNodesResult: Result<List<Node>>? = null
+    var searchNodesResult: Result<List<Node>>? = null
 
     var shouldReturnError: Boolean = false
     var errorMessage: String = "Test error"
@@ -21,6 +22,7 @@ class FakeNodeRepository : NodeRepository {
     var createNodeCallCount = 0
     var toggleLikeCallCount = 0
     var getChildNodesCallCount = 0
+    var searchNodesCallCount = 0
 
     var lastGetNodesType: String? = null
     var lastGetNodesLimit: Int? = null
@@ -33,6 +35,8 @@ class FakeNodeRepository : NodeRepository {
     var lastCreateNodeTags: List<String>? = null
     var lastToggleLikeNodeId: String? = null
     var lastGetChildNodesParentNodeId: String? = null
+    var lastSearchQuery: String? = null
+    var lastSearchType: String? = null
 
     override suspend fun getNodes(
         type: String?,
@@ -93,6 +97,26 @@ class FakeNodeRepository : NodeRepository {
             ?: Result.success(nodes.filter { it.parentNode?.id == parentNodeId })
     }
 
+    override suspend fun searchNodes(
+        query: String,
+        type: String?,
+        limit: Int,
+        offset: Int
+    ): Result<List<Node>> {
+        searchNodesCallCount++
+        lastSearchQuery = query
+        lastSearchType = type
+
+        if (shouldReturnError) return Result.failure(Exception(errorMessage))
+        return searchNodesResult ?: Result.success(
+            nodes.filter { node ->
+                val lowerQuery = query.lowercase()
+                node.title.lowercase().contains(lowerQuery) ||
+                    node.content.lowercase().contains(lowerQuery)
+            }
+        )
+    }
+
     fun reset() {
         nodes.clear()
         getNodesResult = null
@@ -100,6 +124,7 @@ class FakeNodeRepository : NodeRepository {
         createNodeResult = null
         toggleLikeResult = null
         getChildNodesResult = null
+        searchNodesResult = null
         shouldReturnError = false
         errorMessage = "Test error"
         getNodesCallCount = 0
@@ -107,6 +132,7 @@ class FakeNodeRepository : NodeRepository {
         createNodeCallCount = 0
         toggleLikeCallCount = 0
         getChildNodesCallCount = 0
+        searchNodesCallCount = 0
         lastGetNodesType = null
         lastGetNodesLimit = null
         lastGetNodesOffset = null
@@ -118,5 +144,7 @@ class FakeNodeRepository : NodeRepository {
         lastCreateNodeTags = null
         lastToggleLikeNodeId = null
         lastGetChildNodesParentNodeId = null
+        lastSearchQuery = null
+        lastSearchType = null
     }
 }

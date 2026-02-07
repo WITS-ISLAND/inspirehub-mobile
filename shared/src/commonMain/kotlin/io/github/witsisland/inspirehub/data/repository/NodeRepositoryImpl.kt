@@ -77,4 +77,23 @@ class NodeRepositoryImpl(
             Result.failure(e)
         }
     }
+
+    override suspend fun searchNodes(
+        query: String,
+        type: String?,
+        limit: Int,
+        offset: Int
+    ): Result<List<Node>> {
+        return try {
+            val dtos = nodeDataSource.searchNodes(
+                query = query,
+                type = type,
+                limit = limit,
+                offset = offset
+            )
+            Result.success(dtos.map { it.toDomain() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

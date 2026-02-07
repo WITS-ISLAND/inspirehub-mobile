@@ -99,6 +99,22 @@ class MockNodeDataSource : NodeDataSource {
         return toggled
     }
 
+    override suspend fun searchNodes(
+        query: String,
+        type: String?,
+        limit: Int,
+        offset: Int
+    ): List<NodeDto> {
+        val lowerQuery = query.lowercase()
+        val filtered = nodes.filter { node ->
+            val matchesQuery = node.title.lowercase().contains(lowerQuery) ||
+                node.content.lowercase().contains(lowerQuery)
+            val matchesType = type == null || node.type == type
+            matchesQuery && matchesType
+        }
+        return filtered.drop(offset).take(limit)
+    }
+
     private fun generateMockNodes(): List<NodeDto> {
         val random = Random(42)
 

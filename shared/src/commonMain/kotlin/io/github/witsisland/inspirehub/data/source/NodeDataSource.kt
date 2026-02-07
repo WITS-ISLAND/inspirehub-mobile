@@ -63,4 +63,18 @@ interface NodeDataSource {
      * @param id ノードID
      */
     suspend fun toggleLike(id: String): NodeDto
+
+    /**
+     * ノードをキーワード検索
+     * @param query 検索キーワード
+     * @param type フィルタ: "idea" | "issue" | "project" | null
+     * @param limit 取得件数（最大100）
+     * @param offset オフセット
+     */
+    suspend fun searchNodes(
+        query: String,
+        type: String? = null,
+        limit: Int = 20,
+        offset: Int = 0
+    ): List<NodeDto>
 }

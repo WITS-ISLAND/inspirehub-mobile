@@ -26,4 +26,11 @@ interface NodeRepository {
     suspend fun toggleLike(nodeId: String): Result<Node>
 
     suspend fun getChildNodes(parentNodeId: String): Result<List<Node>>
+
+    suspend fun searchNodes(
+        query: String,
+        type: String? = null,
+        limit: Int = 20,
+        offset: Int = 0
+    ): Result<List<Node>>
 }
