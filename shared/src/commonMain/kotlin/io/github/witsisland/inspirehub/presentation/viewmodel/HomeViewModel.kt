@@ -35,7 +35,7 @@ class HomeViewModel(
     @NativeCoroutinesState
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    private val _currentTab = MutableStateFlow(viewModelScope, HomeTab.RECENT)
+    private val _currentTab = MutableStateFlow(viewModelScope, HomeTab.ALL)
     @NativeCoroutinesState
     val currentTab: StateFlow<HomeTab> = _currentTab.asStateFlow()
 

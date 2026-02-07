@@ -10,14 +10,29 @@ struct DetailView: View {
     let nodeId: String
     @StateViewModel var viewModel = KoinHelper().getDetailViewModel()
     @State private var showDerivedPost = false
+    @State private var showDeleteAlert = false
     @Environment(\.isAuthenticated) private var isAuthenticated
+    @Environment(\.currentUserId) private var currentUserId
     @Environment(\.loginRequired) private var loginRequired
     @Environment(\.fabHiddenBinding) private var fabHiddenBinding
+    @Environment(\.dismiss) private var dismiss
+
+    private var isOwner: Bool {
+        guard let userId = currentUserId,
+              let node = viewModel.selectedNode else { return false }
+        return node.authorId == userId
+    }
 
     var body: some View {
-        Group {
-            if let node = viewModel.selectedNode {
-                nodeDetailContent(node: node)
+        ZStack {
+            if viewModel.isDeleted as? Bool == true {
+                deletedView
+            } else if let node = viewModel.selectedNode {
+                if viewModel.isEditing as? Bool == true {
+                    editingContent(node: node)
+                } else {
+                    nodeDetailContent(node: node)
+                }
             } else if let error = viewModel.error {
                 VStack(spacing: 16) {
                     Image(systemName: "exclamationmark.triangle")
@@ -35,8 +50,49 @@ struct DetailView: View {
                 ProgressView("読み込み中...")
             }
         }
-        .navigationTitle("詳細")
+        .navigationTitle(viewModel.isEditing as? Bool == true ? "編集" : "詳細")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if isOwner && viewModel.isEditing as? Bool != true && viewModel.isDeleted as? Bool != true {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        Button(action: { viewModel.startEditing() }) {
+                            Label("編集", systemImage: "pencil")
+                        }
+                        Button(role: .destructive, action: { showDeleteAlert = true }) {
+                            Label("削除", systemImage: "trash")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
+                }
+            }
+            if viewModel.isEditing as? Bool == true {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("キャンセル") {
+                        viewModel.cancelEditing()
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("保存") {
+                        viewModel.saveEdit()
+                    }
+                    .fontWeight(.semibold)
+                    .disabled(
+                        (viewModel.editTitle as? String ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                            || viewModel.isLoading as? Bool == true
+                    )
+                }
+            }
+        }
+        .alert("投稿を削除", isPresented: $showDeleteAlert) {
+            Button("キャンセル", role: .cancel) {}
+            Button("削除", role: .destructive) {
+                viewModel.deleteNode()
+            }
+        } message: {
+            Text("この投稿を削除しますか？この操作は取り消せません。")
+        }
         .onAppear {
             fabHiddenBinding.wrappedValue = true
             viewModel.loadDetail(nodeId: nodeId)
@@ -45,6 +101,90 @@ struct DetailView: View {
             fabHiddenBinding.wrappedValue = false
         }
     }
+
+    // MARK: - Deleted View
+
+    private var deletedView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 48))
+                .foregroundColor(.green)
+            Text("投稿を削除しました")
+                .font(.headline)
+            Button("戻る") {
+                dismiss()
+            }
+            .buttonStyle(.bordered)
+        }
+    }
+
+    // MARK: - Editing Content
+
+    private func editingContent(node: Node) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                // Type badge (read-only)
+                HStack(spacing: 8) {
+                    Image(systemName: NodeTypeStyle.icon(for: node.type))
+                        .foregroundColor(NodeTypeStyle.color(for: node.type))
+                    Text(NodeTypeStyle.label(for: node.type))
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(NodeTypeStyle.color(for: node.type))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(NodeTypeStyle.backgroundColor(for: node.type))
+                        .cornerRadius(4)
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("タイトル")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                    TextField("タイトル", text: Binding(
+                        get: { viewModel.editTitle as? String ?? "" },
+                        set: { viewModel.updateEditTitle(title: $0) }
+                    ))
+                    .textFieldStyle(.roundedBorder)
+                    .font(.body)
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("内容")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                    TextEditor(text: Binding(
+                        get: { viewModel.editContent as? String ?? "" },
+                        set: { viewModel.updateEditContent(content: $0) }
+                    ))
+                    .frame(minHeight: 200)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color(.systemGray4), lineWidth: 1)
+                    )
+                }
+
+                if let error = viewModel.error {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                }
+
+                if viewModel.isLoading as? Bool == true {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                        Spacer()
+                    }
+                }
+            }
+            .padding(16)
+        }
+    }
+
+    // MARK: - Detail Content
 
     private func nodeDetailContent(node: Node) -> some View {
         VStack(spacing: 0) {

@@ -5,14 +5,14 @@ import SwiftUI
 // MARK: - Tab / Sort UI Enums
 
 enum HomeTabUI: String, CaseIterable {
-    case latest = "新着"
+    case all = "すべて"
     case issue = "課題"
     case idea = "アイデア"
     case mine = "自分"
 
     var kotlinTab: HomeTab {
         switch self {
-        case .latest: return .recent
+        case .all: return .all
         case .issue: return .issues
         case .idea: return .ideas
         case .mine: return .mine
@@ -21,11 +21,11 @@ enum HomeTabUI: String, CaseIterable {
 
     init(from kotlinTab: HomeTab) {
         switch kotlinTab {
-        case .recent: self = .latest
+        case .all: self = .all
         case .issues: self = .issue
         case .ideas: self = .idea
         case .mine: self = .mine
-        default: self = .latest
+        default: self = .all
         }
     }
 }
@@ -56,20 +56,28 @@ struct HomeView: View {
     @StateViewModel var viewModel = KoinHelper().getHomeViewModel()
     var onNodeTap: ((Node) -> Void)?
 
+    private var isLoading: Bool {
+        viewModel.isLoading as? Bool == true
+    }
+
+    private var errorMessage: String? {
+        viewModel.error as? String
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             tabBar
 
-            if viewModel.isLoading as? Bool == true && (viewModel.nodes as? [Node] ?? []).isEmpty {
-                Spacer()
-                ProgressView()
-                Spacer()
-            } else if let error = viewModel.error as? String, (viewModel.nodes as? [Node] ?? []).isEmpty {
-                Spacer()
-                errorView(error)
-                Spacer()
-            } else {
-                nodeList
+            ZStack {
+                if isLoading && nodes.isEmpty {
+                    ProgressView()
+                        .frame(maxHeight: .infinity)
+                } else if let error = errorMessage, nodes.isEmpty {
+                    errorView(error)
+                        .frame(maxHeight: .infinity)
+                } else {
+                    nodeList
+                }
             }
         }
         .navigationTitle("ホーム")

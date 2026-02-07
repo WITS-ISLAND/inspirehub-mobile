@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 enum class HomeTab {
-    RECENT, ISSUES, IDEAS, MINE
+    ALL, ISSUES, IDEAS, MINE
 }
 
 enum class SortOrder {
@@ -25,7 +25,7 @@ class NodeStore {
     private val _selectedNode = MutableStateFlow<Node?>(null)
     val selectedNode: StateFlow<Node?> = _selectedNode.asStateFlow()
 
-    private val _currentTab = MutableStateFlow(HomeTab.RECENT)
+    private val _currentTab = MutableStateFlow(HomeTab.ALL)
     val currentTab: StateFlow<HomeTab> = _currentTab.asStateFlow()
 
     private val _sortOrder = MutableStateFlow(SortOrder.RECENT)
@@ -71,7 +71,7 @@ class NodeStore {
 
     fun getFilteredNodes(currentUserId: String? = null): List<Node> {
         val filtered = when (_currentTab.value) {
-            HomeTab.RECENT -> _nodes.value
+            HomeTab.ALL -> _nodes.value
             HomeTab.ISSUES -> _nodes.value.filter { it.type == NodeType.ISSUE }
             HomeTab.IDEAS -> _nodes.value.filter { it.type == NodeType.IDEA }
             HomeTab.MINE -> if (currentUserId != null) {
@@ -133,7 +133,7 @@ class NodeStore {
         _nodes.value = emptyList()
         _isLoading.value = false
         _selectedNode.value = null
-        _currentTab.value = HomeTab.RECENT
+        _currentTab.value = HomeTab.ALL
         _sortOrder.value = SortOrder.RECENT
     }
 }

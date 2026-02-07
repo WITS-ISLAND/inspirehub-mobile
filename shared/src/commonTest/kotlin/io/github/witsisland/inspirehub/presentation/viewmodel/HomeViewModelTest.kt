@@ -148,12 +148,12 @@ class HomeViewModelTest : MainDispatcherRule() {
     }
 
     @Test
-    fun `setTab - RECENTタブで全ノードが表示されること`() = runTest {
+    fun `setTab - ALLタブで全ノードが表示されること`() = runTest {
         fakeNodeRepository.getNodesResult = Result.success(sampleNodes)
         viewModel.loadNodes()
         viewModel.setTab(HomeTab.ISSUES)
 
-        viewModel.setTab(HomeTab.RECENT)
+        viewModel.setTab(HomeTab.ALL)
 
         assertEquals(sampleNodes.size, viewModel.nodes.value.size)
     }
@@ -182,6 +182,39 @@ class HomeViewModelTest : MainDispatcherRule() {
         viewModel.sortOrder.test {
             assertEquals(SortOrder.POPULAR, awaitItem())
         }
+    }
+
+    @Test
+    fun `setSortOrder - POPULAR順でリアクション合計が多い順になること`() = runTest {
+        fakeNodeRepository.getNodesResult = Result.success(sampleNodes)
+        viewModel.loadNodes()
+
+        viewModel.setSortOrder(SortOrder.POPULAR)
+
+        val result = viewModel.nodes.value
+        // node2: like=10, node1: like=5, node3: like=3
+        assertEquals("node2", result[0].id)
+        assertEquals("node1", result[1].id)
+        assertEquals("node3", result[2].id)
+    }
+
+    @Test
+    fun `setTab - MINEタブで自分のノードのみ表示されること`() = runTest {
+        fakeNodeRepository.getNodesResult = Result.success(sampleNodes)
+        viewModel.loadNodes()
+        // user1でログイン
+        val user = io.github.witsisland.inspirehub.domain.model.User(
+            id = "user1",
+            handle = "testuser",
+            roleTag = "Backend"
+        )
+        userStore.login(user, "token", "refresh")
+
+        viewModel.setTab(HomeTab.MINE)
+
+        val filtered = viewModel.nodes.value
+        assertEquals(2, filtered.size)
+        assertTrue(filtered.all { it.authorId == "user1" })
     }
 
     @Test
@@ -237,9 +270,9 @@ class HomeViewModelTest : MainDispatcherRule() {
     }
 
     @Test
-    fun `初期状態 - ノードが空で、タブがRECENTであること`() = runTest {
+    fun `初期状態 - ノードが空で、タブがALLであること`() = runTest {
         assertTrue(viewModel.nodes.value.isEmpty())
-        assertEquals(HomeTab.RECENT, viewModel.currentTab.value)
+        assertEquals(HomeTab.ALL, viewModel.currentTab.value)
         assertEquals(SortOrder.RECENT, viewModel.sortOrder.value)
         assertFalse(viewModel.isLoading.value)
         assertNull(viewModel.error.value)
