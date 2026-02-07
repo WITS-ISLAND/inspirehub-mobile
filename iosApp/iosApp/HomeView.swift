@@ -157,7 +157,7 @@ struct HomeView: View {
             LazyVStack(spacing: 12) {
                 ForEach(nodes, id: \.id) { node in
                     NavigationLink(destination: DetailView(nodeId: node.id)) {
-                        NodeCardView(node: node)
+                        NodeCardView(node: node, allNodes: nodes)
                     }
                     .buttonStyle(.plain)
                 }
@@ -194,6 +194,7 @@ struct HomeView: View {
 
 struct NodeCardView: View {
     let node: Node
+    var allNodes: [Node] = []
     @State private var isParentExpanded: Bool = false
 
     var body: some View {
@@ -284,6 +285,20 @@ struct NodeCardView: View {
                             .fontWeight(.medium)
                             .foregroundColor(.primary)
                             .multilineTextAlignment(.leading)
+
+                        if let fullParent = allNodes.first(where: { $0.id == parentNode.id }),
+                           !fullParent.content.isEmpty {
+                            Text(fullParent.content)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(3)
+                                .multilineTextAlignment(.leading)
+                        } else if allNodes.isEmpty || allNodes.first(where: { $0.id == parentNode.id }) == nil {
+                            Text("タップして詳細を見る")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                                .italic()
+                        }
                     }
                     .padding(.leading, 4)
                 }
@@ -395,8 +410,11 @@ struct NodeCardView: View {
 
 #Preview("NodeCardView - Derived") {
     NavigationStack {
-        NodeCardView(node: PreviewData.sampleDerivedNode)
-            .padding()
+        NodeCardView(
+            node: PreviewData.sampleDerivedNode,
+            allNodes: [PreviewData.sampleIssueNode, PreviewData.sampleDerivedNode]
+        )
+        .padding()
     }
 }
 

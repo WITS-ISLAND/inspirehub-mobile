@@ -134,7 +134,7 @@ struct DiscoverView: View {
                 LazyVStack(spacing: 12) {
                     ForEach(popularNodes, id: \.id) { node in
                         NavigationLink(destination: DetailView(nodeId: node.id)) {
-                            NodeCardView(node: node)
+                            NodeCardView(node: node, allNodes: popularNodes)
                         }
                         .buttonStyle(.plain)
                     }
@@ -173,7 +173,7 @@ struct DiscoverView: View {
                 LazyVStack(spacing: 12) {
                     ForEach(searchResults, id: \.id) { node in
                         NavigationLink(destination: DetailView(nodeId: node.id)) {
-                            NodeCardView(node: node)
+                            NodeCardView(node: node, allNodes: searchResults)
                         }
                         .buttonStyle(.plain)
                     }
