@@ -244,8 +244,6 @@ struct NodeCardView: View {
 
     private func parentNodeBadge(_ parentNode: ParentNode) -> some View {
         HStack(spacing: 6) {
-            Text(parentNodeEmoji(parentNode.type))
-                .font(.caption2)
             Text(parentNodeTypeLabel(parentNode.type))
                 .font(.caption2)
                 .foregroundColor(parentNodeColor(parentNode.type))
@@ -263,15 +261,6 @@ struct NodeCardView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(.tertiarySystemBackground))
         .cornerRadius(8)
-    }
-
-    private func parentNodeEmoji(_ type: NodeType) -> String {
-        switch type {
-        case .issue: return "\u{1F4CB}"
-        case .idea: return "\u{1F4A1}"
-        case .project: return "\u{1F527}"
-        default: return "\u{1F4C4}"
-        }
     }
 
     private func parentNodeColor(_ type: NodeType) -> Color {
