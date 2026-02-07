@@ -24,11 +24,11 @@ struct MainTabView: View {
                 .tag(0)
 
                 NavigationStack {
-                    MapView()
+                    DiscoverView()
                 }
                 .tabItem {
-                    Image(systemName: "map.fill")
-                    Text("マップ")
+                    Image(systemName: "magnifyingglass")
+                    Text("ディスカバー")
                 }
                 .tag(1)
 
