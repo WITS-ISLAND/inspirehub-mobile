@@ -63,13 +63,13 @@ class DiscoverViewModel(
     fun search(query: String) {
         discoverStore.setSearchQuery(query)
         if (query.isBlank()) {
+            discoverStore.setLoading(false)
             discoverStore.updateSearchResults(emptyList())
             return
         }
+        discoverStore.setLoading(true)
+        _error.value = null
         viewModelScope.launch {
-            discoverStore.setLoading(true)
-            _error.value = null
-
             val result = nodeRepository.searchNodes(query = query)
             if (result.isSuccess) {
                 discoverStore.updateSearchResults(result.getOrThrow())
