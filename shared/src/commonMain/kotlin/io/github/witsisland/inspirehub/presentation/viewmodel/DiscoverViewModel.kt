@@ -9,6 +9,8 @@ import io.github.witsisland.inspirehub.domain.model.Tag
 import io.github.witsisland.inspirehub.domain.repository.NodeRepository
 import io.github.witsisland.inspirehub.domain.repository.TagRepository
 import io.github.witsisland.inspirehub.domain.store.DiscoverStore
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -60,23 +62,26 @@ class DiscoverViewModel(
         }
     }
 
+    private var searchJob: Job? = null
+
     fun search(query: String) {
+        searchJob?.cancel()
         discoverStore.setSearchQuery(query)
         if (query.isBlank()) {
+            discoverStore.setLoading(false)
             discoverStore.updateSearchResults(emptyList())
             return
         }
-        viewModelScope.launch {
-            discoverStore.setLoading(true)
-            _error.value = null
-
+        discoverStore.setLoading(true)
+        _error.value = null
+        searchJob = viewModelScope.launch {
+            delay(300) // debounce: 入力中はAPI呼び出しを抑制
             val result = nodeRepository.searchNodes(query = query)
             if (result.isSuccess) {
                 discoverStore.updateSearchResults(result.getOrThrow())
             } else {
                 _error.value = result.exceptionOrNull()?.message ?: "Search failed"
             }
-
             discoverStore.setLoading(false)
         }
     }

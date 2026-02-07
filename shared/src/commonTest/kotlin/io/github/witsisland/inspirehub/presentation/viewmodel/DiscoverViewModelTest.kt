@@ -10,6 +10,7 @@ import io.github.witsisland.inspirehub.domain.repository.FakeNodeRepository
 import io.github.witsisland.inspirehub.domain.repository.FakeTagRepository
 import io.github.witsisland.inspirehub.domain.store.DiscoverStore
 import io.github.witsisland.inspirehub.test.MainDispatcherRule
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -87,6 +88,7 @@ class DiscoverViewModelTest : MainDispatcherRule() {
         fakeNodeRepository.searchNodesResult = Result.success(sampleNodes)
 
         viewModel.search("テスト")
+        advanceUntilIdle()
 
         assertEquals(1, fakeNodeRepository.searchNodesCallCount)
         assertEquals("テスト", fakeNodeRepository.lastSearchQuery)
@@ -121,6 +123,7 @@ class DiscoverViewModelTest : MainDispatcherRule() {
         fakeNodeRepository.searchNodesResult = Result.failure(Exception(errorMessage))
 
         viewModel.search("テスト")
+        advanceUntilIdle()
 
         assertEquals(errorMessage, viewModel.error.value)
         assertFalse(viewModel.isLoading.value)
@@ -131,6 +134,7 @@ class DiscoverViewModelTest : MainDispatcherRule() {
         fakeNodeRepository.searchNodesResult = Result.success(emptyList())
 
         viewModel.search("クエリテスト")
+        advanceUntilIdle()
 
         viewModel.searchQuery.test {
             assertEquals("クエリテスト", awaitItem())
@@ -192,6 +196,7 @@ class DiscoverViewModelTest : MainDispatcherRule() {
         val tag = Tag(id = "tag1", name = "AI", usageCount = 50)
 
         viewModel.selectTag(tag)
+        advanceUntilIdle()
 
         assertEquals(1, fakeNodeRepository.searchNodesCallCount)
         assertEquals("AI", fakeNodeRepository.lastSearchQuery)
@@ -215,6 +220,7 @@ class DiscoverViewModelTest : MainDispatcherRule() {
         fakeNodeRepository.searchNodesResult = Result.success(sampleNodes)
 
         viewModel.search("テスト")
+        advanceUntilIdle()
 
         assertEquals(sampleNodes, discoverStore.searchResults.value)
     }
