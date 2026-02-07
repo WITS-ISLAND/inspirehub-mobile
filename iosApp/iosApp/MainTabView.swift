@@ -70,7 +70,7 @@ struct MainTabView: View {
                     .fontWeight(.bold)
                     .foregroundColor(.white)
                     .frame(width: 56, height: 56)
-                    .background(Color.blue)
+                    .background(Color.appPrimary)
                     .clipShape(Circle())
                     .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
             }
@@ -139,7 +139,7 @@ struct MainTabView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: 200)
                     .padding(.vertical, 12)
-                    .background(Color.blue)
+                    .background(Color.appPrimary)
                     .cornerRadius(12)
             }
         }

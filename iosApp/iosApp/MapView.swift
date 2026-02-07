@@ -17,7 +17,7 @@ struct MapView: View {
                 VStack(spacing: 16) {
                     Image(systemName: "exclamationmark.triangle")
                         .font(.system(size: 40))
-                        .foregroundColor(.orange)
+                        .foregroundColor(.appSecondary)
                     Text(error)
                         .font(.subheadline)
                         .foregroundColor(.secondary)

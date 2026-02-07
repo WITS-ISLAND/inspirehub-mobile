@@ -41,7 +41,7 @@ struct MyPageView: View {
         VStack(spacing: 12) {
             Image(systemName: "person.circle.fill")
                 .font(.system(size: 72))
-                .foregroundColor(.blue)
+                .foregroundColor(.appPrimary)
 
             if let user = viewModel.currentUser as? User {
                 if viewModel.isEditingName as? Bool == true {
@@ -55,7 +55,7 @@ struct MyPageView: View {
                         .font(.caption)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 4)
-                        .background(Color.blue.opacity(0.1))
+                        .background(Color.appPrimary.opacity(0.1))
                         .cornerRadius(8)
                 }
             } else {
@@ -83,7 +83,7 @@ struct MyPageView: View {
                 viewModel.startEditingName()
             }) {
                 Image(systemName: "pencil.circle")
-                    .foregroundColor(.blue)
+                    .foregroundColor(.appPrimary)
                     .font(.title3)
             }
         }

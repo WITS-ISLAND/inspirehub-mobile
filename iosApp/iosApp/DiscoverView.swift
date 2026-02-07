@@ -110,8 +110,8 @@ struct DiscoverView: View {
                                 }
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
-                                .background(Color.blue.opacity(0.1))
-                                .foregroundColor(.blue)
+                                .background(Color.appPrimary.opacity(0.1))
+                                .foregroundColor(.appPrimary)
                                 .cornerRadius(16)
                             }
                             .buttonStyle(.plain)
