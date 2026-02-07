@@ -1,5 +1,6 @@
 package io.github.witsisland.inspirehub.data.network
 
+import co.touchlab.kermit.Logger as KermitLogger
 import io.ktor.client.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.auth.*
@@ -42,10 +43,15 @@ fun HttpClient.configureClient(
             })
         }
 
-        // ログ設定
+        // ログ設定（Kermit経由）
         if (enableLogging) {
+            val log = KermitLogger.withTag("HttpClient")
             install(Logging) {
-                logger = Logger.DEFAULT
+                logger = object : Logger {
+                    override fun log(message: String) {
+                        log.d { message }
+                    }
+                }
                 level = LogLevel.INFO
             }
         }

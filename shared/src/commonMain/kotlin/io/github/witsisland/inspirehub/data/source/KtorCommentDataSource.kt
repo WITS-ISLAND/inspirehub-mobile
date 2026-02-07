@@ -1,10 +1,16 @@
 package io.github.witsisland.inspirehub.data.source
 
 import io.github.witsisland.inspirehub.data.dto.CommentDto
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.http.*
+import io.github.witsisland.inspirehub.data.dto.CommentsResponseDto
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.delete
+import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.client.request.put
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 
 /**
  * Ktor Client を使用した CommentDataSource 実装
@@ -14,7 +20,8 @@ class KtorCommentDataSource(
 ) : CommentDataSource {
 
     override suspend fun getComments(nodeId: String): List<CommentDto> {
-        return httpClient.get("/nodes/$nodeId/comments").body()
+        val response: CommentsResponseDto = httpClient.get("/nodes/$nodeId/comments").body()
+        return response.comments
     }
 
     override suspend fun getComment(id: String): CommentDto {

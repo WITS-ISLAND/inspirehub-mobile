@@ -13,5 +13,5 @@ data class TagDto(
     @SerialName("usage_count")
     val usageCount: Int? = null,
     @SerialName("created_at")
-    val createdAt: String
+    val createdAt: String = ""
 )
