@@ -40,6 +40,14 @@ class UserStore {
     }
 
     /**
+     * アクセストークンとリフレッシュトークンを同時に更新
+     */
+    fun updateTokens(accessToken: String, refreshToken: String) {
+        _accessToken.value = accessToken
+        _refreshToken.value = refreshToken
+    }
+
+    /**
      * ログアウト（状態をクリア）
      */
     fun logout() {

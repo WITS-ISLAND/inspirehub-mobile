@@ -9,11 +9,15 @@ import io.ktor.client.engine.okhttp.*
 actual fun createHttpClient(
     baseUrl: String,
     enableLogging: Boolean,
-    tokenProvider: (() -> String?)?
+    tokenProvider: (() -> String?)?,
+    refreshTokenProvider: (() -> String?)?,
+    onTokenRefreshed: ((accessToken: String, refreshToken: String) -> Unit)?
 ): HttpClient {
     return HttpClient(OkHttp).configureClient(
         baseUrl = baseUrl,
         enableLogging = enableLogging,
-        tokenProvider = tokenProvider
+        tokenProvider = tokenProvider,
+        refreshTokenProvider = refreshTokenProvider,
+        onTokenRefreshed = onTokenRefreshed
     )
 }

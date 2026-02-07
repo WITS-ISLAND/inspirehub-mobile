@@ -54,7 +54,11 @@ val appModule = module {
         createHttpClient(
             baseUrl = "https://api.inspirehub.wtnqk.org",
             enableLogging = true,
-            tokenProvider = { userStore.getAccessToken() }
+            tokenProvider = { userStore.getAccessToken() },
+            refreshTokenProvider = { userStore.refreshToken.value },
+            onTokenRefreshed = { access, refresh ->
+                userStore.updateTokens(access, refresh)
+            }
         )
     }
 
