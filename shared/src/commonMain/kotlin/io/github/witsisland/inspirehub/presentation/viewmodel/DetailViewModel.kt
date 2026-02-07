@@ -67,6 +67,10 @@ class DetailViewModel(
      */
     fun loadDetail(nodeId: String) {
         viewModelScope.launch {
+            // 前のノード情報をクリアして古いデータの一瞬表示を防止 (#52)
+            nodeStore.selectNode(null)
+            _comments.value = emptyList()
+            _childNodes.value = emptyList()
             _isLoading.value = true
             _error.value = null
 

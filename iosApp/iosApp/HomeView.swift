@@ -80,7 +80,7 @@ struct HomeView: View {
             }
         }
         .onAppear {
-            viewModel.loadNodes(forceRefresh: false)
+            viewModel.onAppear()
         }
     }
 

@@ -14,6 +14,7 @@ import io.github.witsisland.inspirehub.domain.store.SortOrder
 import io.github.witsisland.inspirehub.domain.store.UserStore
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.datetime.Clock
 
 /**
  * ホーム画面ViewModel
@@ -58,6 +59,20 @@ class HomeViewModel(
     @NativeCoroutinesState
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    /** 前回ノードをロードした時刻（epochMillis） */
+    private var lastLoadedAt: Long = 0L
+
+    /**
+     * 画面表示時に呼ぶ。
+     * 前回ロードから30秒以上経過していればリフレッシュ (#46)
+     */
+    fun onAppear() {
+        val now = Clock.System.now().toEpochMilliseconds()
+        if (now - lastLoadedAt > STALE_THRESHOLD_MS) {
+            loadNodes(forceRefresh = true)
+        }
+    }
+
     fun loadNodes(forceRefresh: Boolean = false) {
         viewModelScope.launch {
             nodeStore.setLoading(true)
@@ -66,6 +81,7 @@ class HomeViewModel(
             val result = nodeRepository.getNodes()
             if (result.isSuccess) {
                 nodeStore.updateNodes(result.getOrThrow())
+                lastLoadedAt = Clock.System.now().toEpochMilliseconds()
             } else {
                 _error.value = result.exceptionOrNull()?.message ?: "Failed to load nodes"
             }
@@ -107,5 +123,10 @@ class HomeViewModel(
                 _error.value = result.exceptionOrNull()?.message ?: "Failed to toggle reaction"
             }
         }
+    }
+
+    companion object {
+        /** 30秒間はキャッシュを使い、超えたらリフレッシュ */
+        private const val STALE_THRESHOLD_MS = 30_000L
     }
 }
