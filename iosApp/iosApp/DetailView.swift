@@ -28,6 +28,7 @@ struct DetailView: View {
                 ProgressView("読み込み中...")
             }
         }
+        .navigationTitle("詳細")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             viewModel.loadDetail(nodeId: nodeId)
@@ -39,10 +40,15 @@ struct DetailView: View {
             VStack(alignment: .leading, spacing: 20) {
                 headerSection(node: node)
                 bodySection(node: node)
+
+                if !node.tagIds.isEmpty {
+                    tagChipsSection(node: node)
+                }
+
                 metaSection(node: node)
 
-                if node.parentNode != nil {
-                    parentSection(parentNode: node.parentNode!)
+                if let parentNode = node.parentNode {
+                    parentSection(parentNode: parentNode)
                 }
 
                 reactionBar(node: node)
@@ -59,14 +65,15 @@ struct DetailView: View {
     private func headerSection(node: Node) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
-                Image(systemName: node.type == .issue ? "exclamationmark.circle.fill" : "lightbulb.fill")
-                    .foregroundColor(node.type == .issue ? .red : .orange)
-                Text(node.type == .issue ? "課題" : "アイデア")
+                Image(systemName: NodeTypeStyle.icon(for: node.type))
+                    .foregroundColor(NodeTypeStyle.color(for: node.type))
+                Text(NodeTypeStyle.label(for: node.type))
                     .font(.caption)
                     .fontWeight(.semibold)
+                    .foregroundColor(NodeTypeStyle.color(for: node.type))
                     .padding(.horizontal, 8)
                     .padding(.vertical, 2)
-                    .background(node.type == .issue ? Color.red.opacity(0.1) : Color.orange.opacity(0.1))
+                    .background(NodeTypeStyle.backgroundColor(for: node.type))
                     .cornerRadius(4)
             }
 
@@ -82,6 +89,24 @@ struct DetailView: View {
         Text(node.content)
             .font(.body)
             .lineSpacing(4)
+    }
+
+    // MARK: - Tags
+
+    private func tagChipsSection(node: Node) -> some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(node.tagIds, id: \.self) { tagId in
+                    Text("#\(tagId)")
+                        .font(.caption)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(Color.blue.opacity(0.1))
+                        .foregroundColor(.blue)
+                        .cornerRadius(8)
+                }
+            }
+        }
     }
 
     // MARK: - Meta
@@ -102,52 +127,93 @@ struct DetailView: View {
 
     private func parentSection(parentNode: ParentNode) -> some View {
         NavigationLink(destination: DetailView(nodeId: parentNode.id)) {
-            HStack(spacing: 8) {
-                Image(systemName: "arrow.turn.up.left")
-                    .foregroundColor(.blue)
-                Text("派生元ノードを見る")
-                    .font(.subheadline)
-                    .foregroundColor(.blue)
+            HStack(spacing: 10) {
+                Image(systemName: NodeTypeStyle.icon(for: parentNode.type))
+                    .font(.title3)
+                    .foregroundColor(NodeTypeStyle.color(for: parentNode.type))
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 4) {
+                        Text("派生元")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                        Text(NodeTypeStyle.label(for: parentNode.type))
+                            .font(.caption2)
+                            .fontWeight(.medium)
+                            .foregroundColor(NodeTypeStyle.color(for: parentNode.type))
+                    }
+                    Text(parentNode.title)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                        .lineLimit(2)
+                    if let content = parentNode.content, !content.isEmpty {
+                        Text(content)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(3)
+                    }
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.blue.opacity(0.05))
+            .background(NodeTypeStyle.color(for: parentNode.type).opacity(0.05))
             .cornerRadius(8)
         }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Reactions
 
     private func reactionBar(node: Node) -> some View {
         HStack(spacing: 16) {
-            Button(action: { viewModel.toggleReaction(type: .like) }) {
-                VStack(spacing: 2) {
-                    Text("👍")
-                        .font(.title3)
-                    Text(node.reactions.like.count > 0 ? "いいね \(node.reactions.like.count)" : "いいね")
-                        .font(.system(size: 9))
-                        .foregroundColor(node.reactions.like.isReacted ? .blue : .secondary)
-                }
+            reactionButton(
+                emoji: "👍",
+                label: "いいね",
+                count: node.reactions.like.count,
+                isReacted: node.reactions.like.isReacted
+            ) {
+                viewModel.toggleReaction(type: .like)
             }
-            .buttonStyle(.plain)
 
-            reactionButton(emoji: "💡", label: "共感", count: node.reactions.interested.count) { }
-            reactionButton(emoji: "👀", label: "気になる", count: node.reactions.wantToTry.count) { }
+            reactionButton(
+                emoji: "🔥",
+                label: "気になる",
+                count: node.reactions.interested.count,
+                isReacted: node.reactions.interested.isReacted
+            ) {
+                viewModel.toggleReaction(type: .interested)
+            }
+
+            reactionButton(
+                emoji: "💪",
+                label: "やってみたい",
+                count: node.reactions.wantToTry.count,
+                isReacted: node.reactions.wantToTry.isReacted
+            ) {
+                viewModel.toggleReaction(type: .wantToTry)
+            }
         }
         .padding(.vertical, 4)
     }
 
-    private func reactionButton(emoji: String, label: String, count: Int32 = 0, action: @escaping () -> Void) -> some View {
+    private func reactionButton(emoji: String, label: String, count: Int32, isReacted: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 2) {
                 Text(emoji)
                     .font(.title3)
                 Text(count > 0 ? "\(label) \(count)" : label)
-                    .font(.system(size: 9))
-                    .foregroundColor(.secondary)
+                    .font(.system(size: 10))
+                    .foregroundColor(isReacted ? .blue : .secondary)
             }
+            .frame(minWidth: 44, minHeight: 44)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("\(label) \(count)件\(isReacted ? " リアクション済み" : "")")
     }
 
     // MARK: - Derive Button
@@ -185,7 +251,7 @@ struct DetailView: View {
                     NavigationLink(destination: DetailView(nodeId: child.id)) {
                         HStack(spacing: 8) {
                             Image(systemName: "arrow.turn.down.right")
-                                .foregroundColor(.orange)
+                                .foregroundColor(.blue)
                                 .font(.caption)
                             Text(child.title)
                                 .font(.subheadline)
@@ -225,8 +291,11 @@ struct DetailView: View {
                 }) {
                     Image(systemName: "paperplane.fill")
                         .foregroundColor(.blue)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
                 .disabled(viewModel.commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isCommentSubmitting)
+                .accessibilityLabel("コメントを送信")
             }
 
             if viewModel.comments.isEmpty {

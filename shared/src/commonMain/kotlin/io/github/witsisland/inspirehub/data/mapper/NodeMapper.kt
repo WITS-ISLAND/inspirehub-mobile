@@ -42,7 +42,8 @@ fun ParentNodeDto.toDomain(): ParentNode {
             "project" -> NodeType.PROJECT
             else -> NodeType.IDEA
         },
-        title = title
+        title = title,
+        content = content
     )
 }
 

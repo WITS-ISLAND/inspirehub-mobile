@@ -1,4 +1,5 @@
 import SwiftUI
+import Shared
 
 struct PostTypeSelectSheet: View {
     var onIssueSelected: () -> Void
@@ -7,7 +8,7 @@ struct PostTypeSelectSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 20) {
                 Text("投稿タイプを選択")
                     .font(.title2)
@@ -19,9 +20,9 @@ struct PostTypeSelectSheet: View {
                     onIssueSelected()
                 }) {
                     HStack {
-                        Image(systemName: "exclamationmark.triangle.fill")
+                        Image(systemName: NodeTypeStyle.icon(for: .issue))
                             .font(.title2)
-                            .foregroundColor(.orange)
+                            .foregroundColor(NodeTypeStyle.color(for: .issue))
                         VStack(alignment: .leading, spacing: 4) {
                             Text("課題を投稿")
                                 .font(.headline)
@@ -45,9 +46,9 @@ struct PostTypeSelectSheet: View {
                     onIdeaSelected()
                 }) {
                     HStack {
-                        Image(systemName: "lightbulb.fill")
+                        Image(systemName: NodeTypeStyle.icon(for: .idea))
                             .font(.title2)
-                            .foregroundColor(.yellow)
+                            .foregroundColor(NodeTypeStyle.color(for: .idea))
                         VStack(alignment: .leading, spacing: 4) {
                             Text("アイデアを投稿")
                                 .font(.headline)
