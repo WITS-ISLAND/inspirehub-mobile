@@ -55,6 +55,7 @@ struct MainTabView: View {
                     .clipShape(Circle())
                     .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
             }
+            .accessibilityLabel("新規投稿")
             .padding(.trailing, 20)
             .padding(.bottom, 80)
         }
