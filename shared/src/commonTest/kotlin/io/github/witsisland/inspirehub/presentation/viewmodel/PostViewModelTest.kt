@@ -4,6 +4,7 @@ import io.github.witsisland.inspirehub.domain.model.Node
 import io.github.witsisland.inspirehub.domain.model.NodeType
 import io.github.witsisland.inspirehub.domain.model.ParentNode
 import io.github.witsisland.inspirehub.domain.repository.FakeNodeRepository
+import io.github.witsisland.inspirehub.domain.repository.FakeTagRepository
 import io.github.witsisland.inspirehub.domain.store.NodeStore
 import io.github.witsisland.inspirehub.test.MainDispatcherRule
 import kotlinx.coroutines.test.runTest
@@ -19,6 +20,7 @@ class PostViewModelTest : MainDispatcherRule() {
 
     private lateinit var viewModel: PostViewModel
     private lateinit var fakeNodeRepository: FakeNodeRepository
+    private lateinit var fakeTagRepository: FakeTagRepository
     private lateinit var nodeStore: NodeStore
 
     private val createdNode = Node(
@@ -48,14 +50,16 @@ class PostViewModelTest : MainDispatcherRule() {
     @BeforeTest
     fun setup() {
         fakeNodeRepository = FakeNodeRepository()
+        fakeTagRepository = FakeTagRepository()
         nodeStore = NodeStore()
-        viewModel = PostViewModel(nodeStore, fakeNodeRepository)
+        viewModel = PostViewModel(nodeStore, fakeNodeRepository, fakeTagRepository)
     }
 
     @AfterTest
     fun tearDown() {
         nodeStore.clear()
         fakeNodeRepository.reset()
+        fakeTagRepository.reset()
     }
 
     @Test

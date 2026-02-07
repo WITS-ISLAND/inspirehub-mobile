@@ -34,6 +34,14 @@ class DiscoverViewModel(
     @NativeCoroutinesState
     val popularNodes: StateFlow<List<Node>> = _popularNodes.asStateFlow()
 
+    private val _selectedTag = MutableStateFlow<Tag?>(viewModelScope, null)
+    @NativeCoroutinesState
+    val selectedTag: StateFlow<Tag?> = _selectedTag.asStateFlow()
+
+    private val _tagNodes = MutableStateFlow<List<Node>>(viewModelScope, emptyList())
+    @NativeCoroutinesState
+    val tagNodes: StateFlow<List<Node>> = _tagNodes.asStateFlow()
+
     private val _isLoading = MutableStateFlow(viewModelScope, false)
     @NativeCoroutinesState
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -58,6 +66,12 @@ class DiscoverViewModel(
         viewModelScope.launch {
             discoverStore.searchQuery.collect { _searchQuery.value = it }
         }
+        viewModelScope.launch {
+            discoverStore.selectedTag.collect { _selectedTag.value = it }
+        }
+        viewModelScope.launch {
+            discoverStore.tagNodes.collect { _tagNodes.value = it }
+        }
     }
 
     fun search(query: String) {
@@ -66,6 +80,10 @@ class DiscoverViewModel(
             discoverStore.updateSearchResults(emptyList())
             return
         }
+        // テキスト検索時はタグフィルタを解除
+        discoverStore.setSelectedTag(null)
+        discoverStore.updateTagNodes(emptyList())
+
         viewModelScope.launch {
             discoverStore.setLoading(true)
             _error.value = null
@@ -113,7 +131,40 @@ class DiscoverViewModel(
         }
     }
 
+    /**
+     * タグを選択してそのタグのノード一覧を取得
+     */
     fun selectTag(tag: Tag) {
-        search(tag.name)
+        // 同じタグをタップしたら解除
+        if (_selectedTag.value?.id == tag.id) {
+            clearTagFilter()
+            return
+        }
+
+        discoverStore.setSelectedTag(tag)
+        discoverStore.setSearchQuery("")
+        discoverStore.updateSearchResults(emptyList())
+
+        viewModelScope.launch {
+            discoverStore.setLoading(true)
+            _error.value = null
+
+            val result = tagRepository.getNodesByTagName(tag.name)
+            if (result.isSuccess) {
+                discoverStore.updateTagNodes(result.getOrThrow())
+            } else {
+                _error.value = result.exceptionOrNull()?.message ?: "Failed to load tag nodes"
+            }
+
+            discoverStore.setLoading(false)
+        }
+    }
+
+    /**
+     * タグフィルタを解除
+     */
+    fun clearTagFilter() {
+        discoverStore.setSelectedTag(null)
+        discoverStore.updateTagNodes(emptyList())
     }
 }

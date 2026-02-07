@@ -187,17 +187,54 @@ class DiscoverViewModelTest : MainDispatcherRule() {
     }
 
     @Test
-    fun `selectTag - タグ名で検索が実行されること`() = runTest {
-        fakeNodeRepository.searchNodesResult = Result.success(sampleNodes)
+    fun `selectTag - タグ別ノード一覧が取得されること`() = runTest {
+        fakeTagRepository.getNodesByTagNameResult = Result.success(sampleNodes)
         val tag = Tag(id = "tag1", name = "AI", usageCount = 50)
 
         viewModel.selectTag(tag)
 
-        assertEquals(1, fakeNodeRepository.searchNodesCallCount)
-        assertEquals("AI", fakeNodeRepository.lastSearchQuery)
-        viewModel.searchQuery.test {
-            assertEquals("AI", awaitItem())
-        }
+        assertEquals(1, fakeTagRepository.getNodesByTagNameCallCount)
+        assertEquals("AI", fakeTagRepository.lastGetNodesByTagName)
+        assertFalse(viewModel.isLoading.value)
+        assertNull(viewModel.error.value)
+        assertEquals(sampleNodes.size, viewModel.tagNodes.value.size)
+        assertEquals(tag, viewModel.selectedTag.value)
+    }
+
+    @Test
+    fun `selectTag - 同じタグを再タップするとフィルタが解除されること`() = runTest {
+        fakeTagRepository.getNodesByTagNameResult = Result.success(sampleNodes)
+        val tag = Tag(id = "tag1", name = "AI", usageCount = 50)
+
+        viewModel.selectTag(tag)
+        viewModel.selectTag(tag)
+
+        assertNull(viewModel.selectedTag.value)
+        assertTrue(viewModel.tagNodes.value.isEmpty())
+    }
+
+    @Test
+    fun `selectTag - 失敗時にエラーが設定されること`() = runTest {
+        val errorMessage = "Tag nodes API error"
+        fakeTagRepository.getNodesByTagNameResult = Result.failure(Exception(errorMessage))
+        val tag = Tag(id = "tag1", name = "AI", usageCount = 50)
+
+        viewModel.selectTag(tag)
+
+        assertEquals(errorMessage, viewModel.error.value)
+        assertFalse(viewModel.isLoading.value)
+    }
+
+    @Test
+    fun `clearTagFilter - タグフィルタが解除されること`() = runTest {
+        fakeTagRepository.getNodesByTagNameResult = Result.success(sampleNodes)
+        val tag = Tag(id = "tag1", name = "AI", usageCount = 50)
+
+        viewModel.selectTag(tag)
+        viewModel.clearTagFilter()
+
+        assertNull(viewModel.selectedTag.value)
+        assertTrue(viewModel.tagNodes.value.isEmpty())
     }
 
     @Test
@@ -206,6 +243,8 @@ class DiscoverViewModelTest : MainDispatcherRule() {
         assertTrue(viewModel.searchResults.value.isEmpty())
         assertTrue(viewModel.popularTags.value.isEmpty())
         assertTrue(viewModel.popularNodes.value.isEmpty())
+        assertNull(viewModel.selectedTag.value)
+        assertTrue(viewModel.tagNodes.value.isEmpty())
         assertFalse(viewModel.isLoading.value)
         assertNull(viewModel.error.value)
     }
