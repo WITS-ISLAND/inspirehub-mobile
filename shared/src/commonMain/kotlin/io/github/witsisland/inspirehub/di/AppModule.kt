@@ -68,7 +68,7 @@ val appModule = module {
 
     // Repository（シングルトン、インターフェース）
     single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
-    single<NodeRepository> { NodeRepositoryImpl(get()) }
+    single<NodeRepository> { NodeRepositoryImpl(get(), get()) }
     single<CommentRepository> { CommentRepositoryImpl(get()) }
     single<ReactionRepository> { ReactionRepositoryImpl(get()) }
     single<TagRepository> { TagRepositoryImpl(get()) }

@@ -2,12 +2,14 @@ package io.github.witsisland.inspirehub.data.repository
 
 import io.github.witsisland.inspirehub.data.mapper.toDomain
 import io.github.witsisland.inspirehub.data.source.NodeDataSource
+import io.github.witsisland.inspirehub.data.source.ReactionDataSource
 import io.github.witsisland.inspirehub.domain.model.Node
 import io.github.witsisland.inspirehub.domain.model.NodeType
 import io.github.witsisland.inspirehub.domain.repository.NodeRepository
 
 class NodeRepositoryImpl(
-    private val nodeDataSource: NodeDataSource
+    private val nodeDataSource: NodeDataSource,
+    private val reactionDataSource: ReactionDataSource
 ) : NodeRepository {
 
     override suspend fun getNodes(
@@ -45,12 +47,14 @@ class NodeRepositoryImpl(
                 NodeType.IDEA -> "idea"
                 NodeType.PROJECT -> "project"
             }
-            val dto = nodeDataSource.createNode(
+            // POST /nodes は id のみ返す → getNode で完全なノードを取得
+            val nodeId = nodeDataSource.createNode(
                 title = title,
                 content = content,
                 type = typeString,
                 tags = tags
             )
+            val dto = nodeDataSource.getNode(nodeId)
             Result.success(dto.toDomain())
         } catch (e: Exception) {
             Result.failure(e)
@@ -59,7 +63,10 @@ class NodeRepositoryImpl(
 
     override suspend fun toggleLike(nodeId: String): Result<Node> {
         return try {
-            val dto = nodeDataSource.toggleLike(nodeId)
+            // POST /nodes/{id}/like は ReactionSummaryDto を返す
+            // 完全なノードデータが必要なので、reaction後に getNode で再取得
+            reactionDataSource.toggleLike(nodeId)
+            val dto = nodeDataSource.getNode(nodeId)
             Result.success(dto.toDomain())
         } catch (e: Exception) {
             Result.failure(e)

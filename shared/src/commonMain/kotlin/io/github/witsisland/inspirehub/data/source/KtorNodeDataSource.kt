@@ -1,6 +1,7 @@
 package io.github.witsisland.inspirehub.data.source
 
 import io.github.witsisland.inspirehub.data.dto.CreateNodeRequestDto
+import io.github.witsisland.inspirehub.data.dto.CreateNodeResponseDto
 import io.github.witsisland.inspirehub.data.dto.NodeDto
 import io.github.witsisland.inspirehub.data.dto.NodesResponseDto
 import io.github.witsisland.inspirehub.data.dto.UpdateNodeRequestDto
@@ -17,11 +18,17 @@ import io.ktor.http.contentType
 
 /**
  * Ktor Client を使用した NodeDataSource 実装
+ *
+ * API: /nodes
  */
 class KtorNodeDataSource(
     private val httpClient: HttpClient
 ) : NodeDataSource {
 
+    /**
+     * GET /nodes
+     * Response: { "nodes": [NodeDto], "total": number }
+     */
     override suspend fun getNodes(
         type: String?,
         limit: Int,
@@ -35,17 +42,26 @@ class KtorNodeDataSource(
         return response.nodes
     }
 
+    /**
+     * GET /nodes/{id}
+     * Response: NodeDto（直接）
+     */
     override suspend fun getNode(id: String): NodeDto {
         return httpClient.get("/nodes/$id").body()
     }
 
+    /**
+     * POST /nodes
+     * Request: CreateNodeRequestDto
+     * Response: { "id": string, "message": string } (201 Created)
+     */
     override suspend fun createNode(
         title: String,
         content: String,
         type: String,
         tags: List<String>
-    ): NodeDto {
-        return httpClient.post("/nodes") {
+    ): String {
+        val response: CreateNodeResponseDto = httpClient.post("/nodes") {
             contentType(ContentType.Application.Json)
             setBody(CreateNodeRequestDto(
                 title = title,
@@ -54,8 +70,14 @@ class KtorNodeDataSource(
                 tags = tags
             ))
         }.body()
+        return response.id
     }
 
+    /**
+     * PUT /nodes/{id}
+     * Request: UpdateNodeRequestDto
+     * Response: NodeDto
+     */
     override suspend fun updateNode(
         id: String,
         title: String,
@@ -72,14 +94,18 @@ class KtorNodeDataSource(
         }.body()
     }
 
+    /**
+     * DELETE /nodes/{id}
+     * Response: 204 No Content
+     */
     override suspend fun deleteNode(id: String) {
         httpClient.delete("/nodes/$id")
     }
 
-    override suspend fun toggleLike(id: String): NodeDto {
-        return httpClient.post("/nodes/$id/like").body()
-    }
-
+    /**
+     * GET /nodes?q={query}
+     * Response: { "nodes": [NodeDto], "total": number }
+     */
     override suspend fun searchNodes(
         query: String,
         type: String?,

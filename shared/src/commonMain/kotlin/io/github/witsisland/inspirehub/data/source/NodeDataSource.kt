@@ -4,10 +4,14 @@ import io.github.witsisland.inspirehub.data.dto.NodeDto
 
 /**
  * ノードデータソースインターフェース
+ *
+ * API: /nodes
  */
 interface NodeDataSource {
     /**
-     * ノード一覧を取得
+     * GET /nodes
+     * Response: { "nodes": [NodeDto], "total": number }
+     *
      * @param type フィルタ: "idea" | "issue" | "project" | null
      * @param limit 取得件数（最大100）
      * @param offset オフセット
@@ -19,27 +23,36 @@ interface NodeDataSource {
     ): List<NodeDto>
 
     /**
-     * ノード詳細を取得
+     * GET /nodes/{id}
+     * Response: NodeDto（直接）
+     *
      * @param id ノードID
      */
     suspend fun getNode(id: String): NodeDto
 
     /**
-     * ノードを作成
+     * POST /nodes
+     * Request: CreateNodeRequestDto
+     * Response: { "id": string, "message": string } (201 Created)
+     *
      * @param title タイトル
      * @param content 本文
      * @param type "idea" | "issue" | "project"
      * @param tags タグID一覧
+     * @return 作成されたノードのID
      */
     suspend fun createNode(
         title: String,
         content: String,
         type: String,
         tags: List<String> = emptyList()
-    ): NodeDto
+    ): String
 
     /**
-     * ノードを更新
+     * PUT /nodes/{id}
+     * Request: UpdateNodeRequestDto
+     * Response: NodeDto
+     *
      * @param id ノードID
      * @param title タイトル
      * @param content 本文
@@ -53,19 +66,17 @@ interface NodeDataSource {
     ): NodeDto
 
     /**
-     * ノードを削除
+     * DELETE /nodes/{id}
+     * Response: 204 No Content
+     *
      * @param id ノードID
      */
     suspend fun deleteNode(id: String)
 
     /**
-     * ノードにいいねを切り替え
-     * @param id ノードID
-     */
-    suspend fun toggleLike(id: String): NodeDto
-
-    /**
-     * ノードをキーワード検索
+     * GET /nodes?q={query}
+     * Response: { "nodes": [NodeDto], "total": number }
+     *
      * @param query 検索キーワード
      * @param type フィルタ: "idea" | "issue" | "project" | null
      * @param limit 取得件数（最大100）
