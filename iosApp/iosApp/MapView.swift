@@ -73,8 +73,8 @@ struct MapView: View {
                         .frame(width: 24)
                 }
 
-                Image(systemName: node.type == .issue ? "exclamationmark.circle.fill" : "lightbulb.fill")
-                    .foregroundColor(node.type == .issue ? .red : .orange)
+                Image(systemName: NodeTypeStyle.icon(for: node.type))
+                    .foregroundColor(NodeTypeStyle.color(for: node.type))
                     .font(.title3)
 
                 VStack(alignment: .leading, spacing: 4) {

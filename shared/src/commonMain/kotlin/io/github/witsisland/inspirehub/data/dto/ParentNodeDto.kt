@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class ParentNodeDto(
     val id: String,
     val type: String,
-    val title: String
+    val title: String,
+    val content: String? = null
 )

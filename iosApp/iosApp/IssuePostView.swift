@@ -84,7 +84,7 @@ struct IssuePostView: View {
                         .cornerRadius(12)
                 }
             }
-            .onChange(of: isSuccess) { newValue in
+            .onChange(of: isSuccess) { _, newValue in
                 if newValue {
                     dismiss()
                 }
