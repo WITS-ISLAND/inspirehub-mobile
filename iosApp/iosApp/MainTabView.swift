@@ -37,23 +37,18 @@ struct MainTabView: View {
                 }
                 .tag(1)
 
-                if isAuthenticated {
-                    NavigationStack {
+                NavigationStack {
+                    if isAuthenticated {
                         MyPageView()
+                    } else {
+                        loginPromptTab
                     }
-                    .tabItem {
-                        Image(systemName: "person.fill")
-                        Text("マイページ")
-                    }
-                    .tag(2)
-                } else {
-                    loginPromptTab
-                        .tabItem {
-                            Image(systemName: "person.fill")
-                            Text("マイページ")
-                        }
-                        .tag(2)
                 }
+                .tabItem {
+                    Image(systemName: "person.fill")
+                    Text("マイページ")
+                }
+                .tag(2)
             }
 
             // FAB

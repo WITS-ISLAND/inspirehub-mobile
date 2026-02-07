@@ -9,11 +9,19 @@ import SwiftUI
 struct MapView: View {
     @StateViewModel var viewModel = KoinHelper().getMapViewModel()
 
+    private var isLoading: Bool {
+        viewModel.isLoading as? Bool == true
+    }
+
+    private var errorMessage: String? {
+        viewModel.error as? String
+    }
+
     var body: some View {
-        Group {
-            if viewModel.isLoading as? Bool == true && nodes.isEmpty {
+        ZStack {
+            if isLoading && nodes.isEmpty {
                 ProgressView("読み込み中...")
-            } else if let error = viewModel.error as? String, nodes.isEmpty {
+            } else if let error = errorMessage, nodes.isEmpty {
                 VStack(spacing: 16) {
                     Image(systemName: "exclamationmark.triangle")
                         .font(.system(size: 40))
