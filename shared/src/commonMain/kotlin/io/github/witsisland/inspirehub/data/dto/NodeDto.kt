@@ -15,7 +15,7 @@ data class NodeDto(
     val authorName: String = "",
     @SerialName("author_picture")
     val authorPicture: String? = null,
-    @SerialName("parent_node")
+    @SerialName("parentNode")
     val parentNode: ParentNodeDto? = null,
     val tags: List<TagDto> = emptyList(),
     val reactions: ReactionsDto = ReactionsDto(),
