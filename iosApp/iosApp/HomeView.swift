@@ -194,6 +194,7 @@ struct HomeView: View {
 
 struct NodeCardView: View {
     let node: Node
+    @State private var isParentExpanded: Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -243,27 +244,56 @@ struct NodeCardView: View {
     // MARK: - Parent Node Badge
 
     private func parentNodeBadge(_ parentNode: ParentNode) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: parentNodeIcon(parentNode.type))
-                .font(.caption2)
-                .foregroundColor(parentNodeColor(parentNode.type))
-            Text("派生元")
-                .font(.caption2)
-                .foregroundColor(.secondary)
-            Text(parentNodeTypeLabel(parentNode.type))
-                .font(.caption2)
-                .foregroundColor(parentNodeColor(parentNode.type))
-            Text(parentNode.title)
-                .font(.caption2)
-                .fontWeight(.medium)
-                .foregroundColor(.primary)
-                .lineLimit(1)
-            Spacer()
+        Button {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isParentExpanded.toggle()
+            }
+        } label: {
+            VStack(alignment: .leading, spacing: isParentExpanded ? 6 : 0) {
+                HStack(spacing: 6) {
+                    Image(systemName: parentNodeIcon(parentNode.type))
+                        .font(.caption2)
+                        .foregroundColor(parentNodeColor(parentNode.type))
+                    Text("派生元")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    Text(parentNodeTypeLabel(parentNode.type))
+                        .font(.caption2)
+                        .foregroundColor(parentNodeColor(parentNode.type))
+                    Text(parentNode.title)
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                        .lineLimit(isParentExpanded ? nil : 1)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .rotationEffect(.degrees(isParentExpanded ? 90 : 0))
+                }
+
+                if isParentExpanded {
+                    Divider()
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(parentNodeTypeLabel(parentNode.type).replacingOccurrences(of: ":", with: ""))
+                            .font(.caption)
+                            .foregroundColor(parentNodeColor(parentNode.type))
+                            .fontWeight(.semibold)
+                        Text(parentNode.title)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(.primary)
+                            .multilineTextAlignment(.leading)
+                    }
+                    .padding(.leading, 4)
+                }
+            }
+            .padding(8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(.tertiarySystemBackground))
+            .cornerRadius(8)
         }
-        .padding(8)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.tertiarySystemBackground))
-        .cornerRadius(8)
+        .buttonStyle(.plain)
     }
 
     private func parentNodeIcon(_ type: NodeType) -> String {
