@@ -220,8 +220,8 @@ struct MyPageView: View {
     private func myNodeRow(node: Node) -> some View {
         VStack(spacing: 0) {
             HStack(spacing: 12) {
-                Image(systemName: node.type == .issue ? "exclamationmark.circle.fill" : "lightbulb.fill")
-                    .foregroundColor(node.type == .issue ? .red : .orange)
+                Image(systemName: NodeTypeStyle.icon(for: node.type))
+                    .foregroundColor(NodeTypeStyle.color(for: node.type))
                     .font(.title3)
 
                 VStack(alignment: .leading, spacing: 4) {

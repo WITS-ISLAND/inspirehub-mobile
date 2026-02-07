@@ -22,10 +22,6 @@ class AuthRepositoryImpl(
             val tokenResponse = authDataSource.verifyGoogleToken(idToken)
             val user = tokenResponse.user.toDomain()
 
-            // TODO: デバッグ用 - 確認後に削除すること
-            log.d { "🔑 accessToken: ${tokenResponse.accessToken}" }
-            log.d { "🔄 refreshToken: ${tokenResponse.refreshToken}" }
-
             // UserStore にログイン状態を保存
             userStore.login(
                 user = user,

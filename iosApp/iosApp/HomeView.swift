@@ -72,7 +72,7 @@ struct HomeView: View {
                 nodeList
             }
         }
-        .navigationTitle("InspireHub")
+        .navigationTitle("ホーム")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -103,6 +103,8 @@ struct HomeView: View {
                                 .fill(isCurrentTab(tab) ? Color.blue : Color.clear)
                                 .frame(height: 2)
                         }
+                        .frame(minHeight: 44)
+                        .contentShape(Rectangle())
                     }
                     .frame(minWidth: 70)
                     .padding(.horizontal, 8)
@@ -217,13 +219,29 @@ struct NodeCardView: View {
                 .lineLimit(3)
                 .multilineTextAlignment(.leading)
 
-            HStack(spacing: 12) {
-                Label("\(node.reactions.like.count)", systemImage: node.reactions.like.isReacted ? "hand.thumbsup.fill" : "hand.thumbsup")
+            if !node.tagIds.isEmpty {
+                tagChipsRow
+            }
+
+            HStack(spacing: 4) {
+                Label(node.authorName, systemImage: "person")
                     .font(.caption2)
-                    .foregroundColor(node.reactions.like.isReacted ? .blue : .secondary)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                Spacer()
+            }
+
+            HStack(spacing: 10) {
+                inlineReaction(emoji: "👍", count: node.reactions.like.count, isReacted: node.reactions.like.isReacted)
+                inlineReaction(emoji: "🔥", count: node.reactions.interested.count, isReacted: node.reactions.interested.isReacted)
+                inlineReaction(emoji: "💪", count: node.reactions.wantToTry.count, isReacted: node.reactions.wantToTry.isReacted)
                 Label("\(node.commentCount)", systemImage: "bubble.right")
                     .font(.caption2)
                     .foregroundColor(.secondary)
+            }
+
+            if let parentNode = node.parentNode {
+                parentNodeBadge(parentNode)
             }
         }
         .padding(14)
@@ -232,26 +250,81 @@ struct NodeCardView: View {
         .cornerRadius(12)
     }
 
-    private var nodeTypeBadge: some View {
-        let isIssue = node.type == .issue
-        return HStack(spacing: 4) {
-            Image(systemName: isIssue ? "exclamationmark.triangle.fill" : "lightbulb.fill")
+    // MARK: - Parent Node Badge
+
+    private func parentNodeBadge(_ parentNode: ParentNode) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: NodeTypeStyle.icon(for: parentNode.type))
                 .font(.caption2)
-            Text(isIssue ? "課題" : "アイデア")
+                .foregroundColor(NodeTypeStyle.color(for: parentNode.type))
+            Text(NodeTypeStyle.label(for: parentNode.type))
+                .font(.caption2)
+                .foregroundColor(NodeTypeStyle.color(for: parentNode.type))
+            Text("›")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            Text(parentNode.title)
+                .font(.caption2)
+                .fontWeight(.medium)
+                .foregroundColor(.primary)
+                .lineLimit(1)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.tertiarySystemBackground))
+        .cornerRadius(8)
+    }
+
+    private func inlineReaction(emoji: String, count: Int32, isReacted: Bool) -> some View {
+        HStack(spacing: 2) {
+            Text(emoji)
+                .font(.caption2)
+            if count > 0 {
+                Text("\(count)")
+                    .font(.caption2)
+                    .foregroundColor(isReacted ? .blue : .secondary)
+            }
+        }
+    }
+
+    private var tagChipsRow: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                ForEach(node.tagIds, id: \.self) { tagId in
+                    Text("#\(tagId)")
+                        .font(.caption)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(Color.blue.opacity(0.1))
+                        .foregroundColor(.blue)
+                        .cornerRadius(8)
+                }
+            }
+        }
+    }
+
+    private var nodeTypeBadge: some View {
+        HStack(spacing: 4) {
+            Image(systemName: NodeTypeStyle.icon(for: node.type))
+                .font(.caption2)
+            Text(NodeTypeStyle.label(for: node.type))
                 .font(.caption2)
                 .fontWeight(.medium)
         }
         .padding(.horizontal, 8)
-        .padding(.vertical, 3)
-        .background(isIssue ? Color.orange.opacity(0.15) : Color.yellow.opacity(0.15))
-        .foregroundColor(isIssue ? .orange : .yellow)
+        .padding(.vertical, 4)
+        .background(NodeTypeStyle.backgroundColor(for: node.type))
+        .foregroundColor(NodeTypeStyle.color(for: node.type))
         .cornerRadius(6)
     }
 
     private func formatDate(_ dateString: String) -> String {
         let isoFormatter = ISO8601DateFormatter()
         isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        guard let date = isoFormatter.date(from: dateString) else { return dateString }
+        guard let date = isoFormatter.date(from: dateString) ?? ISO8601DateFormatter().date(from: dateString) else {
+            return dateString
+        }
         let formatter = RelativeDateTimeFormatter()
         formatter.locale = Locale(identifier: "ja_JP")
         formatter.unitsStyle = .short
@@ -272,6 +345,11 @@ struct NodeCardView: View {
         .padding()
 }
 
+#Preview("NodeCardView - Derived") {
+    NodeCardView(node: PreviewData.sampleDerivedNode)
+        .padding()
+}
+
 enum PreviewData {
     static var sampleNode: Node {
         Node(
@@ -283,15 +361,15 @@ enum PreviewData {
             authorName: "テストユーザー",
             authorPicture: nil,
             parentNode: nil,
-            tagIds: [],
+            tagIds: ["tag-1", "tag-2"],
             reactions: Reactions(
                 like: ReactionSummary(count: 5, isReacted: true),
-                interested: ReactionSummary(count: 2, isReacted: false),
+                interested: ReactionSummary(count: 3, isReacted: false),
                 wantToTry: ReactionSummary(count: 1, isReacted: false)
             ),
             commentCount: 3,
             createdAt: "2025-01-15T10:30:00Z",
-            updatedAt: "2025-01-15T10:30:00Z"
+            updatedAt: nil
         )
     }
 
@@ -302,18 +380,40 @@ enum PreviewData {
             title: "サンプル課題",
             content: "リモートワークで雑談の機会が減っている。チームの一体感が薄れている。",
             authorId: "user-2",
-            authorName: "テストユーザー2",
+            authorName: "課題提起者",
             authorPicture: nil,
             parentNode: nil,
-            tagIds: [],
+            tagIds: ["tag-3"],
             reactions: Reactions(
                 like: ReactionSummary(count: 12, isReacted: false),
-                interested: ReactionSummary(count: 3, isReacted: false),
-                wantToTry: ReactionSummary(count: 0, isReacted: false)
+                interested: ReactionSummary(count: 8, isReacted: true),
+                wantToTry: ReactionSummary(count: 2, isReacted: false)
             ),
             commentCount: 7,
             createdAt: "2025-01-15T09:30:00Z",
-            updatedAt: "2025-01-15T09:30:00Z"
+            updatedAt: nil
+        )
+    }
+
+    static var sampleDerivedNode: Node {
+        Node(
+            id: "preview-3",
+            type: .idea,
+            title: "雑談チャンネル自動生成ツール",
+            content: "曜日ごとにランダムでペアを組んで雑談チャンネルを自動生成するSlackボットを作る。",
+            authorId: "user-1",
+            authorName: "テストユーザー",
+            authorPicture: nil,
+            parentNode: ParentNode(id: "preview-2", type: .issue, title: "サンプル課題", content: "これはサンプルの課題内容です。"),
+            tagIds: ["tag-1"],
+            reactions: Reactions(
+                like: ReactionSummary(count: 8, isReacted: false),
+                interested: ReactionSummary(count: 5, isReacted: true),
+                wantToTry: ReactionSummary(count: 3, isReacted: false)
+            ),
+            commentCount: 5,
+            createdAt: "2025-01-15T11:00:00Z",
+            updatedAt: nil
         )
     }
 }

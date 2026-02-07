@@ -39,11 +39,13 @@ class MockNodeDataSource : NodeDataSource {
         title: String,
         content: String,
         type: String,
-        tags: List<String>
-    ): NodeDto {
+        tags: List<String>,
+        parentNodeId: String?
+    ): String {
         val now = "2026-02-01T12:00:00Z"
+        val id = "node_${nextId++}"
         val newNode = NodeDto(
-            id = "node_${nextId++}",
+            id = id,
             title = title,
             content = content,
             type = type,
@@ -58,7 +60,7 @@ class MockNodeDataSource : NodeDataSource {
             updatedAt = now
         )
         nodes.add(0, newNode)
-        return newNode
+        return id
     }
 
     override suspend fun updateNode(
@@ -82,23 +84,6 @@ class MockNodeDataSource : NodeDataSource {
         nodes.removeAll { it.id == id }
     }
 
-    override suspend fun toggleLike(id: String): NodeDto {
-        val index = nodes.indexOfFirst { it.id == id }
-        if (index == -1) throw NoSuchElementException("Node not found: $id")
-        val current = nodes[index]
-        val currentLike = current.reactions.like
-        val toggled = current.copy(
-            reactions = current.reactions.copy(
-                like = currentLike.copy(
-                    count = if (currentLike.isReacted) currentLike.count - 1 else currentLike.count + 1,
-                    isReacted = !currentLike.isReacted
-                )
-            )
-        )
-        nodes[index] = toggled
-        return toggled
-    }
-
     override suspend fun searchNodes(
         query: String,
         type: String?,
@@ -108,7 +93,7 @@ class MockNodeDataSource : NodeDataSource {
         val lowerQuery = query.lowercase()
         val filtered = nodes.filter { node ->
             val matchesQuery = node.title.lowercase().contains(lowerQuery) ||
-                node.content.lowercase().contains(lowerQuery)
+                node.content?.lowercase()?.contains(lowerQuery) == true
             val matchesType = type == null || node.type == type
             matchesQuery && matchesType
         }
@@ -208,7 +193,7 @@ class MockNodeDataSource : NodeDataSource {
                 type = "idea",
                 authorId = "user_2",
                 authorName = "佐藤花子",
-                parentNode = ParentNodeDto(id = "node_1", type = "issue", title = "通勤時間の有効活用ができていない"),
+                parentNode = ParentNodeDto(id = "node_1", type = "issue", title = "通勤時間の有効活用ができていない", content = "毎日の通勤で往復2時間を費やしているが、満員電車でスマホを見る程度しかできていない。この時間をもっと有意義に使いたい。"),
                 tags = emptyList(),
                 reactions = mockReactions(),
                 commentCount = random.nextInt(31),
@@ -222,7 +207,7 @@ class MockNodeDataSource : NodeDataSource {
                 type = "idea",
                 authorId = "user_1",
                 authorName = "田中太郎",
-                parentNode = ParentNodeDto(id = "node_2", type = "issue", title = "地域の高齢者の孤立問題"),
+                parentNode = ParentNodeDto(id = "node_2", type = "issue", title = "地域の高齢者の孤立問題", content = "近所に一人暮らしの高齢者が増えている。買い物や病院への移動手段がなく、社会的に孤立しているケースが多い。"),
                 tags = emptyList(),
                 reactions = mockReactions(),
                 commentCount = random.nextInt(31),
@@ -236,7 +221,7 @@ class MockNodeDataSource : NodeDataSource {
                 type = "idea",
                 authorId = "user_3",
                 authorName = "鈴木一郎",
-                parentNode = ParentNodeDto(id = "node_3", type = "issue", title = "フードロスが多すぎる"),
+                parentNode = ParentNodeDto(id = "node_3", type = "issue", title = "フードロスが多すぎる", content = "スーパーやコンビニで毎日大量の食品が廃棄されている。まだ食べられる食品を必要な人に届ける仕組みが必要。"),
                 tags = emptyList(),
                 reactions = mockReactions(),
                 commentCount = random.nextInt(31),
@@ -250,7 +235,7 @@ class MockNodeDataSource : NodeDataSource {
                 type = "idea",
                 authorId = "user_4",
                 authorName = "高橋美咲",
-                parentNode = ParentNodeDto(id = "node_1", type = "issue", title = "通勤時間の有効活用ができていない"),
+                parentNode = ParentNodeDto(id = "node_1", type = "issue", title = "通勤時間の有効活用ができていない", content = "毎日の通勤で往復2時間を費やしているが、満員電車でスマホを見る程度しかできていない。この時間をもっと有意義に使いたい。"),
                 tags = emptyList(),
                 reactions = mockReactions(),
                 commentCount = random.nextInt(31),
@@ -264,7 +249,7 @@ class MockNodeDataSource : NodeDataSource {
                 type = "idea",
                 authorId = "user_5",
                 authorName = "山田健二",
-                parentNode = ParentNodeDto(id = "node_2", type = "issue", title = "地域の高齢者の孤立問題"),
+                parentNode = ParentNodeDto(id = "node_2", type = "issue", title = "地域の高齢者の孤立問題", content = "近所に一人暮らしの高齢者が増えている。買い物や病院への移動手段がなく、社会的に孤立しているケースが多い。"),
                 tags = emptyList(),
                 reactions = mockReactions(),
                 commentCount = random.nextInt(31),

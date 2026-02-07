@@ -6,23 +6,25 @@ import io.github.witsisland.inspirehub.data.repository.CommentRepositoryImpl
 import io.github.witsisland.inspirehub.data.repository.NodeRepositoryImpl
 import io.github.witsisland.inspirehub.data.repository.ReactionRepositoryImpl
 import io.github.witsisland.inspirehub.data.repository.TagRepositoryImpl
+import io.github.witsisland.inspirehub.data.repository.UserRepositoryImpl
 import io.github.witsisland.inspirehub.data.source.AuthDataSource
 import io.github.witsisland.inspirehub.data.source.CommentDataSource
 import io.github.witsisland.inspirehub.data.source.KtorAuthDataSource
 import io.github.witsisland.inspirehub.data.source.KtorCommentDataSource
 import io.github.witsisland.inspirehub.data.source.KtorNodeDataSource
-import io.github.witsisland.inspirehub.data.source.MockCommentDataSource
-import io.github.witsisland.inspirehub.data.source.MockNodeDataSource
-import io.github.witsisland.inspirehub.data.source.MockReactionDataSource
-import io.github.witsisland.inspirehub.data.source.MockTagDataSource
+import io.github.witsisland.inspirehub.data.source.KtorReactionDataSource
+import io.github.witsisland.inspirehub.data.source.KtorTagDataSource
+import io.github.witsisland.inspirehub.data.source.KtorUserDataSource
 import io.github.witsisland.inspirehub.data.source.NodeDataSource
 import io.github.witsisland.inspirehub.data.source.ReactionDataSource
 import io.github.witsisland.inspirehub.data.source.TagDataSource
+import io.github.witsisland.inspirehub.data.source.UserDataSource
 import io.github.witsisland.inspirehub.domain.repository.AuthRepository
 import io.github.witsisland.inspirehub.domain.repository.CommentRepository
 import io.github.witsisland.inspirehub.domain.repository.NodeRepository
 import io.github.witsisland.inspirehub.domain.repository.ReactionRepository
 import io.github.witsisland.inspirehub.domain.repository.TagRepository
+import io.github.witsisland.inspirehub.domain.repository.UserRepository
 import io.github.witsisland.inspirehub.domain.store.DiscoverStore
 import io.github.witsisland.inspirehub.domain.store.NodeStore
 import io.github.witsisland.inspirehub.domain.store.UserStore
@@ -52,23 +54,29 @@ val appModule = module {
         createHttpClient(
             baseUrl = "https://api.inspirehub.wtnqk.org",
             enableLogging = true,
-            tokenProvider = { userStore.getAccessToken() }
+            tokenProvider = { userStore.getAccessToken() },
+            refreshTokenProvider = { userStore.refreshToken.value },
+            onTokenRefreshed = { access, refresh ->
+                userStore.updateTokens(access, refresh)
+            }
         )
     }
 
-    // DataSource（シングルトン）
+    // DataSource（シングルトン） - 実API (Ktor)
     single<AuthDataSource> { KtorAuthDataSource(get()) }
-    single<NodeDataSource> { MockNodeDataSource() }
-    single<CommentDataSource> { MockCommentDataSource() }
-    single<ReactionDataSource> { MockReactionDataSource() }
-    single<TagDataSource> { MockTagDataSource() }
+    single<NodeDataSource> { KtorNodeDataSource(get()) }
+    single<CommentDataSource> { KtorCommentDataSource(get()) }
+    single<ReactionDataSource> { KtorReactionDataSource(get()) }
+    single<TagDataSource> { KtorTagDataSource(get()) }
+    single<UserDataSource> { KtorUserDataSource(get()) }
 
     // Repository（シングルトン、インターフェース）
     single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
-    single<NodeRepository> { NodeRepositoryImpl(get()) }
+    single<NodeRepository> { NodeRepositoryImpl(get(), get()) }
     single<CommentRepository> { CommentRepositoryImpl(get()) }
     single<ReactionRepository> { ReactionRepositoryImpl(get()) }
     single<TagRepository> { TagRepositoryImpl(get()) }
+    single<UserRepository> { UserRepositoryImpl(get(), get()) }
 
     // ViewModel（Factory - 画面ごとに生成）
     factoryOf(::AuthViewModel)

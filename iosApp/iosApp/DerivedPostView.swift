@@ -22,10 +22,8 @@ struct DerivedPostView: View {
             Form {
                 Section(header: Text("派生元")) {
                     HStack {
-                        Image(systemName: parentNode.type == .issue
-                              ? "exclamationmark.triangle.fill"
-                              : "lightbulb.fill")
-                            .foregroundColor(parentNode.type == .issue ? .orange : .yellow)
+                        Image(systemName: NodeTypeStyle.icon(for: parentNode.type))
+                            .foregroundColor(NodeTypeStyle.color(for: parentNode.type))
                         VStack(alignment: .leading, spacing: 2) {
                             Text(parentNode.title)
                                 .font(.subheadline)

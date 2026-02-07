@@ -11,8 +11,14 @@ class MockCommentDataSource : CommentDataSource {
         generateSampleComments()
     }
 
-    override suspend fun getComments(nodeId: String): List<CommentDto> {
+    override suspend fun getComments(
+        nodeId: String,
+        limit: Int,
+        offset: Int
+    ): List<CommentDto> {
         return comments.filter { it.nodeId == nodeId }
+            .drop(offset)
+            .take(limit)
     }
 
     override suspend fun getComment(id: String): CommentDto {

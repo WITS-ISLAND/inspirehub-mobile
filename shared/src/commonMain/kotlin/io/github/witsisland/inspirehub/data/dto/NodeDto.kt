@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 data class NodeDto(
     val id: String,
     val title: String,
-    val content: String,
+    val content: String? = null,
     val type: String,
     @SerialName("author_id")
     val authorId: String,

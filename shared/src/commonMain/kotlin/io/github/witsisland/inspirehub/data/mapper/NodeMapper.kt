@@ -20,12 +20,12 @@ fun NodeDto.toDomain(): Node {
             else -> NodeType.IDEA
         },
         title = title,
-        content = content,
+        content = content ?: "",
         authorId = authorId,
         authorName = authorName,
         authorPicture = authorPicture,
         parentNode = parentNode?.toDomain(),
-        tagIds = tags.map { it.id },
+        tagIds = tags.map { it.name },
         reactions = reactions.toDomain(),
         commentCount = commentCount,
         createdAt = createdAt,
@@ -42,7 +42,8 @@ fun ParentNodeDto.toDomain(): ParentNode {
             "project" -> NodeType.PROJECT
             else -> NodeType.IDEA
         },
-        title = title
+        title = title,
+        content = content
     )
 }
 

@@ -1,26 +1,58 @@
 package io.github.witsisland.inspirehub.data.source
 
 import io.github.witsisland.inspirehub.data.dto.CommentDto
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.http.*
+import io.github.witsisland.inspirehub.data.dto.CommentsResponseDto
+import io.github.witsisland.inspirehub.data.dto.CreateCommentRequestDto
+import io.github.witsisland.inspirehub.data.dto.UpdateCommentRequestDto
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.delete
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.put
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 
 /**
  * Ktor Client を使用した CommentDataSource 実装
+ *
+ * API: /nodes/{nodeId}/comments, /comments/{id}
  */
 class KtorCommentDataSource(
     private val httpClient: HttpClient
 ) : CommentDataSource {
 
-    override suspend fun getComments(nodeId: String): List<CommentDto> {
-        return httpClient.get("/nodes/$nodeId/comments").body()
+    /**
+     * GET /nodes/{nodeId}/comments
+     * Response: { "comments": [CommentDto], "total": number }
+     */
+    override suspend fun getComments(
+        nodeId: String,
+        limit: Int,
+        offset: Int
+    ): List<CommentDto> {
+        val response: CommentsResponseDto = httpClient.get("/nodes/$nodeId/comments") {
+            parameter("limit", limit)
+            parameter("offset", offset)
+        }.body()
+        return response.comments
     }
 
+    /**
+     * GET /comments/{id}
+     * Response: CommentDto（直接）
+     */
     override suspend fun getComment(id: String): CommentDto {
         return httpClient.get("/comments/$id").body()
     }
 
+    /**
+     * POST /nodes/{nodeId}/comments
+     * Request: CreateCommentRequestDto
+     * Response: CommentDto
+     */
     override suspend fun createComment(
         nodeId: String,
         content: String,
@@ -28,23 +60,32 @@ class KtorCommentDataSource(
     ): CommentDto {
         return httpClient.post("/nodes/$nodeId/comments") {
             contentType(ContentType.Application.Json)
-            setBody(buildMap {
-                put("content", content)
-                parentId?.let { put("parent_id", it) }
-            })
+            setBody(CreateCommentRequestDto(
+                content = content,
+                parentId = parentId
+            ))
         }.body()
     }
 
+    /**
+     * PUT /comments/{id}
+     * Request: UpdateCommentRequestDto
+     * Response: CommentDto
+     */
     override suspend fun updateComment(
         id: String,
         content: String
     ): CommentDto {
         return httpClient.put("/comments/$id") {
             contentType(ContentType.Application.Json)
-            setBody(mapOf("content" to content))
+            setBody(UpdateCommentRequestDto(content = content))
         }.body()
     }
 
+    /**
+     * DELETE /comments/{id}
+     * Response: 204 No Content
+     */
     override suspend fun deleteComment(id: String) {
         httpClient.delete("/comments/$id")
     }
