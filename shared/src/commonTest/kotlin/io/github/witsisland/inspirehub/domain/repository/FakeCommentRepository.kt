@@ -31,7 +31,11 @@ class FakeCommentRepository : CommentRepository {
     var lastCreateCommentParentId: String? = null
     var lastDeleteCommentId: String? = null
 
-    override suspend fun getComments(nodeId: String): Result<List<Comment>> {
+    override suspend fun getComments(
+        nodeId: String,
+        limit: Int,
+        offset: Int
+    ): Result<List<Comment>> {
         getCommentsCallCount++
         lastGetCommentsNodeId = nodeId
 

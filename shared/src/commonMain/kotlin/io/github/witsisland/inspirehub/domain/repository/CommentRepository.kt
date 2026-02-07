@@ -10,8 +10,14 @@ interface CommentRepository {
     /**
      * ノードのコメント一覧を取得
      * @param nodeId ノードID
+     * @param limit 取得件数（最大100）
+     * @param offset オフセット
      */
-    suspend fun getComments(nodeId: String): Result<List<Comment>>
+    suspend fun getComments(
+        nodeId: String,
+        limit: Int = 20,
+        offset: Int = 0
+    ): Result<List<Comment>>
 
     /**
      * コメントを作成

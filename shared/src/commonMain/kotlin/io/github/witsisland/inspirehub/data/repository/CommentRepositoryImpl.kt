@@ -13,9 +13,13 @@ class CommentRepositoryImpl(
     private val dataSource: CommentDataSource
 ) : CommentRepository {
 
-    override suspend fun getComments(nodeId: String): Result<List<Comment>> {
+    override suspend fun getComments(
+        nodeId: String,
+        limit: Int,
+        offset: Int
+    ): Result<List<Comment>> {
         return try {
-            val dtos = dataSource.getComments(nodeId)
+            val dtos = dataSource.getComments(nodeId, limit = limit, offset = offset)
             Result.success(dtos.map { it.toDomain() })
         } catch (e: Exception) {
             Result.failure(e)

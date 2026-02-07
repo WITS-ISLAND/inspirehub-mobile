@@ -76,7 +76,7 @@ class NodeRepositoryImpl(
 
     override suspend fun getChildNodes(parentNodeId: String): Result<List<Node>> {
         return try {
-            val dtos = nodeDataSource.getNodes()
+            val dtos = nodeDataSource.getNodes(limit = 100)
             val children = dtos
                 .map { it.toDomain() }
                 .filter { it.parentNode?.id == parentNodeId }
