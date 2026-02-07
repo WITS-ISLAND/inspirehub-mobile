@@ -12,6 +12,10 @@ private struct LoginRequiredActionKey: EnvironmentKey {
     static let defaultValue: () -> Void = {}
 }
 
+private struct CurrentUserIdKey: EnvironmentKey {
+    static let defaultValue: String? = nil
+}
+
 extension EnvironmentValues {
     var isAuthenticated: Bool {
         get { self[IsAuthenticatedKey.self] }
@@ -21,6 +25,11 @@ extension EnvironmentValues {
     var loginRequired: () -> Void {
         get { self[LoginRequiredActionKey.self] }
         set { self[LoginRequiredActionKey.self] = newValue }
+    }
+
+    var currentUserId: String? {
+        get { self[CurrentUserIdKey.self] }
+        set { self[CurrentUserIdKey.self] = newValue }
     }
 }
 
@@ -42,6 +51,7 @@ struct RootView: View {
             }
         )
         .environment(\.isAuthenticated, isAuth)
+        .environment(\.currentUserId, (viewModel.currentUser as? User)?.id)
         .environment(\.loginRequired, { showLoginSheet = true })
         .sheet(isPresented: $showLoginSheet) {
             NavigationStack {
