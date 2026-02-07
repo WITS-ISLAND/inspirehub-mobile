@@ -41,8 +41,8 @@ struct DetailView: View {
                 bodySection(node: node)
                 metaSection(node: node)
 
-                if node.parentNodeId != nil {
-                    parentSection(parentNodeId: node.parentNodeId!)
+                if node.parentNode != nil {
+                    parentSection(parentNode: node.parentNode!)
                 }
 
                 reactionBar(node: node)
@@ -100,8 +100,8 @@ struct DetailView: View {
 
     // MARK: - Parent Node
 
-    private func parentSection(parentNodeId: String) -> some View {
-        NavigationLink(destination: DetailView(nodeId: parentNodeId)) {
+    private func parentSection(parentNode: ParentNode) -> some View {
+        NavigationLink(destination: DetailView(nodeId: parentNode.id)) {
             HStack(spacing: 8) {
                 Image(systemName: "arrow.turn.up.left")
                     .foregroundColor(.blue)
@@ -120,30 +120,29 @@ struct DetailView: View {
 
     private func reactionBar(node: Node) -> some View {
         HStack(spacing: 16) {
-            Button(action: { viewModel.toggleLike() }) {
+            Button(action: { viewModel.toggleReaction(type: .like) }) {
                 VStack(spacing: 2) {
                     Text("👍")
                         .font(.title3)
-                    Text(node.likeCount > 0 ? "いいね \(node.likeCount)" : "いいね")
+                    Text(node.reactions.like.count > 0 ? "いいね \(node.reactions.like.count)" : "いいね")
                         .font(.system(size: 9))
-                        .foregroundColor(node.isLiked ? .blue : .secondary)
+                        .foregroundColor(node.reactions.like.isReacted ? .blue : .secondary)
                 }
             }
             .buttonStyle(.plain)
 
-            reactionButton(emoji: "💡", label: "共感") { }
-            reactionButton(emoji: "👀", label: "気になる") { }
-            reactionButton(emoji: "🤝", label: "作りたい") { }
+            reactionButton(emoji: "💡", label: "共感", count: node.reactions.interested.count) { }
+            reactionButton(emoji: "👀", label: "気になる", count: node.reactions.wantToTry.count) { }
         }
         .padding(.vertical, 4)
     }
 
-    private func reactionButton(emoji: String, label: String, action: @escaping () -> Void) -> some View {
+    private func reactionButton(emoji: String, label: String, count: Int32 = 0, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 2) {
                 Text(emoji)
                     .font(.title3)
-                Text(label)
+                Text(count > 0 ? "\(label) \(count)" : label)
                     .font(.system(size: 9))
                     .foregroundColor(.secondary)
             }

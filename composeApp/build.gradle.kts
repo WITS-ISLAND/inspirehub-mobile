@@ -32,8 +32,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.koin.core)
             implementation("io.insert-koin:koin-compose-viewmodel:4.1.0")
-            implementation("org.jetbrains.androidx.navigation:navigation-compose:2.9.6")
-            implementation("org.jetbrains.compose.material:material-icons-extended:1.10.0")
+            implementation(libs.navigation.compose)
+            implementation(compose.materialIconsExtended)
             implementation(projects.shared)
         }
         commonTest.dependencies {

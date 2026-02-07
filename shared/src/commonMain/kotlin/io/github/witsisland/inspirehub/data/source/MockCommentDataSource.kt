@@ -2,10 +2,6 @@ package io.github.witsisland.inspirehub.data.source
 
 import io.github.witsisland.inspirehub.data.dto.CommentDto
 
-/**
- * モック用コメントデータソース
- * 開発・テスト時に使用するインメモリ実装
- */
 class MockCommentDataSource : CommentDataSource {
 
     private val comments: MutableList<CommentDto> = mutableListOf()
@@ -61,7 +57,7 @@ class MockCommentDataSource : CommentDataSource {
 
     private fun generateSampleComments() {
         val authors = listOf(
-            Triple("user_1", "鈴木一郎", null),
+            Triple("user_1", "鈴木一郎", null as String?),
             Triple("user_2", "高橋美咲", null),
             Triple("user_3", "田中健太", null),
             Triple("user_4", "佐藤花子", null),
@@ -116,7 +112,6 @@ class MockCommentDataSource : CommentDataSource {
                 )
                 commentId++
 
-                // 一部コメントに返信を追加（3件に1件の割合）
                 if (i == 0 && nodeIndex % 2 == 0) {
                     val replyAuthor = authors[commentId % authors.size]
                     val replyContent = replyContents[(commentId - 1) % replyContents.size]

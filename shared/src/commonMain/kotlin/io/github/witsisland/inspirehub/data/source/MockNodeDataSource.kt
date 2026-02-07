@@ -1,12 +1,11 @@
 package io.github.witsisland.inspirehub.data.source
 
 import io.github.witsisland.inspirehub.data.dto.NodeDto
+import io.github.witsisland.inspirehub.data.dto.ParentNodeDto
+import io.github.witsisland.inspirehub.data.dto.ReactionSummaryDto
+import io.github.witsisland.inspirehub.data.dto.ReactionsDto
 import kotlin.random.Random
 
-/**
- * モック実装のNodeDataSource
- * 開発・テスト用にインメモリでノードデータを管理
- */
 class MockNodeDataSource : NodeDataSource {
 
     private val nodes: MutableList<NodeDto> = mutableListOf()
@@ -51,9 +50,9 @@ class MockNodeDataSource : NodeDataSource {
             authorId = "user_mock",
             authorName = "テストユーザー",
             authorPicture = null,
+            parentNode = null,
             tags = emptyList(),
-            likeCount = 0,
-            isLiked = false,
+            reactions = ReactionsDto(),
             commentCount = 0,
             createdAt = now,
             updatedAt = now
@@ -87,18 +86,47 @@ class MockNodeDataSource : NodeDataSource {
         val index = nodes.indexOfFirst { it.id == id }
         if (index == -1) throw NoSuchElementException("Node not found: $id")
         val current = nodes[index]
+        val currentLike = current.reactions.like
         val toggled = current.copy(
-            isLiked = !current.isLiked,
-            likeCount = if (current.isLiked) current.likeCount - 1 else current.likeCount + 1
+            reactions = current.reactions.copy(
+                like = currentLike.copy(
+                    count = if (currentLike.isReacted) currentLike.count - 1 else currentLike.count + 1,
+                    isReacted = !currentLike.isReacted
+                )
+            )
         )
         nodes[index] = toggled
         return toggled
     }
 
+    override suspend fun searchNodes(
+        query: String,
+        type: String?,
+        limit: Int,
+        offset: Int
+    ): List<NodeDto> {
+        val lowerQuery = query.lowercase()
+        val filtered = nodes.filter { node ->
+            val matchesQuery = node.title.lowercase().contains(lowerQuery) ||
+                node.content.lowercase().contains(lowerQuery)
+            val matchesType = type == null || node.type == type
+            matchesQuery && matchesType
+        }
+        return filtered.drop(offset).take(limit)
+    }
+
     private fun generateMockNodes(): List<NodeDto> {
         val random = Random(42)
+
+        fun mockReactions(): ReactionsDto {
+            return ReactionsDto(
+                like = ReactionSummaryDto(count = random.nextInt(31), isReacted = false),
+                interested = ReactionSummaryDto(count = random.nextInt(15), isReacted = false),
+                wantToTry = ReactionSummaryDto(count = random.nextInt(10), isReacted = false)
+            )
+        }
+
         return listOf(
-            // 課題 5件
             NodeDto(
                 id = "node_1",
                 title = "通勤時間の有効活用ができていない",
@@ -106,10 +134,8 @@ class MockNodeDataSource : NodeDataSource {
                 type = "issue",
                 authorId = "user_1",
                 authorName = "田中太郎",
-                authorPicture = null,
                 tags = emptyList(),
-                likeCount = random.nextInt(31),
-                isLiked = false,
+                reactions = mockReactions(),
                 commentCount = random.nextInt(31),
                 createdAt = "2026-01-20T09:00:00Z",
                 updatedAt = "2026-01-20T09:00:00Z"
@@ -121,10 +147,8 @@ class MockNodeDataSource : NodeDataSource {
                 type = "issue",
                 authorId = "user_2",
                 authorName = "佐藤花子",
-                authorPicture = null,
                 tags = emptyList(),
-                likeCount = random.nextInt(31),
-                isLiked = false,
+                reactions = mockReactions(),
                 commentCount = random.nextInt(31),
                 createdAt = "2026-01-19T14:30:00Z",
                 updatedAt = "2026-01-19T14:30:00Z"
@@ -136,10 +160,8 @@ class MockNodeDataSource : NodeDataSource {
                 type = "issue",
                 authorId = "user_3",
                 authorName = "鈴木一郎",
-                authorPicture = null,
                 tags = emptyList(),
-                likeCount = random.nextInt(31),
-                isLiked = false,
+                reactions = mockReactions(),
                 commentCount = random.nextInt(31),
                 createdAt = "2026-01-18T11:00:00Z",
                 updatedAt = "2026-01-18T11:00:00Z"
@@ -151,10 +173,8 @@ class MockNodeDataSource : NodeDataSource {
                 type = "issue",
                 authorId = "user_4",
                 authorName = "高橋美咲",
-                authorPicture = null,
                 tags = emptyList(),
-                likeCount = random.nextInt(31),
-                isLiked = false,
+                reactions = mockReactions(),
                 commentCount = random.nextInt(31),
                 createdAt = "2026-01-17T16:00:00Z",
                 updatedAt = "2026-01-17T16:00:00Z"
@@ -166,15 +186,12 @@ class MockNodeDataSource : NodeDataSource {
                 type = "issue",
                 authorId = "user_5",
                 authorName = "山田健二",
-                authorPicture = null,
                 tags = emptyList(),
-                likeCount = random.nextInt(31),
-                isLiked = false,
+                reactions = mockReactions(),
                 commentCount = random.nextInt(31),
                 createdAt = "2026-01-16T10:00:00Z",
                 updatedAt = "2026-01-16T10:00:00Z"
             ),
-            // アイデア 5件（うち2件は派生アイデア）
             NodeDto(
                 id = "node_6",
                 title = "音声学習アプリで通勤時間を活用",
@@ -182,10 +199,9 @@ class MockNodeDataSource : NodeDataSource {
                 type = "idea",
                 authorId = "user_2",
                 authorName = "佐藤花子",
-                authorPicture = null,
+                parentNode = ParentNodeDto(id = "node_1", type = "issue", title = "通勤時間の有効活用ができていない"),
                 tags = emptyList(),
-                likeCount = random.nextInt(31),
-                isLiked = false,
+                reactions = mockReactions(),
                 commentCount = random.nextInt(31),
                 createdAt = "2026-01-21T08:00:00Z",
                 updatedAt = "2026-01-21T08:00:00Z"
@@ -197,10 +213,9 @@ class MockNodeDataSource : NodeDataSource {
                 type = "idea",
                 authorId = "user_1",
                 authorName = "田中太郎",
-                authorPicture = null,
+                parentNode = ParentNodeDto(id = "node_2", type = "issue", title = "地域の高齢者の孤立問題"),
                 tags = emptyList(),
-                likeCount = random.nextInt(31),
-                isLiked = false,
+                reactions = mockReactions(),
                 commentCount = random.nextInt(31),
                 createdAt = "2026-01-20T15:00:00Z",
                 updatedAt = "2026-01-20T15:00:00Z"
@@ -212,15 +227,13 @@ class MockNodeDataSource : NodeDataSource {
                 type = "idea",
                 authorId = "user_3",
                 authorName = "鈴木一郎",
-                authorPicture = null,
+                parentNode = ParentNodeDto(id = "node_3", type = "issue", title = "フードロスが多すぎる"),
                 tags = emptyList(),
-                likeCount = random.nextInt(31),
-                isLiked = false,
+                reactions = mockReactions(),
                 commentCount = random.nextInt(31),
                 createdAt = "2026-01-19T20:00:00Z",
                 updatedAt = "2026-01-19T20:00:00Z"
             ),
-            // 派生アイデア（node_1 の通勤課題から派生）
             NodeDto(
                 id = "node_9",
                 title = "通勤中にできるマイクロタスクワーク",
@@ -228,15 +241,13 @@ class MockNodeDataSource : NodeDataSource {
                 type = "idea",
                 authorId = "user_4",
                 authorName = "高橋美咲",
-                authorPicture = null,
+                parentNode = ParentNodeDto(id = "node_1", type = "issue", title = "通勤時間の有効活用ができていない"),
                 tags = emptyList(),
-                likeCount = random.nextInt(31),
-                isLiked = false,
+                reactions = mockReactions(),
                 commentCount = random.nextInt(31),
                 createdAt = "2026-01-22T07:30:00Z",
                 updatedAt = "2026-01-22T07:30:00Z"
             ),
-            // 派生アイデア（node_2 の高齢者孤立から派生）
             NodeDto(
                 id = "node_10",
                 title = "オンライン茶話会プラットフォーム",
@@ -244,10 +255,9 @@ class MockNodeDataSource : NodeDataSource {
                 type = "idea",
                 authorId = "user_5",
                 authorName = "山田健二",
-                authorPicture = null,
+                parentNode = ParentNodeDto(id = "node_2", type = "issue", title = "地域の高齢者の孤立問題"),
                 tags = emptyList(),
-                likeCount = random.nextInt(31),
-                isLiked = false,
+                reactions = mockReactions(),
                 commentCount = random.nextInt(31),
                 createdAt = "2026-01-21T18:00:00Z",
                 updatedAt = "2026-01-21T18:00:00Z"

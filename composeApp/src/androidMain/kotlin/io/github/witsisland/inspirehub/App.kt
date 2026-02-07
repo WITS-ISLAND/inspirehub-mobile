@@ -1,12 +1,12 @@
 package io.github.witsisland.inspirehub
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import io.github.witsisland.inspirehub.ui.MainScreen
-import io.github.witsisland.inspirehub.ui.theme.InspireHubTheme
+import io.github.witsisland.inspirehub.ui.RootScreen
 
 @Composable
 fun App() {
-    InspireHubTheme {
-        MainScreen()
+    MaterialTheme {
+        RootScreen()
     }
 }

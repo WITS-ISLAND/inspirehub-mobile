@@ -2,6 +2,7 @@ package io.github.witsisland.inspirehub.di
 
 import io.github.witsisland.inspirehub.presentation.viewmodel.AuthViewModel
 import io.github.witsisland.inspirehub.presentation.viewmodel.DetailViewModel
+import io.github.witsisland.inspirehub.presentation.viewmodel.DiscoverViewModel
 import io.github.witsisland.inspirehub.presentation.viewmodel.HomeViewModel
 import io.github.witsisland.inspirehub.presentation.viewmodel.MapViewModel
 import io.github.witsisland.inspirehub.presentation.viewmodel.MyPageViewModel
@@ -40,6 +41,11 @@ object KoinHelper : KoinComponent {
 
     fun getDetailViewModel(): DetailViewModel {
         val viewModel: DetailViewModel by inject()
+        return viewModel
+    }
+
+    fun getDiscoverViewModel(): DiscoverViewModel {
+        val viewModel: DiscoverViewModel by inject()
         return viewModel
     }
 }

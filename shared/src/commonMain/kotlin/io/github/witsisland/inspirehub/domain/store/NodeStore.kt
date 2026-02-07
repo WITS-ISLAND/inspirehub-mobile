@@ -14,10 +14,6 @@ enum class SortOrder {
     RECENT, POPULAR
 }
 
-/**
- * ノード状態を管理するStore
- * シングルトンで画面を跨いでノード一覧・選択状態を保持
- */
 class NodeStore {
     private val _nodes = MutableStateFlow<List<Node>>(emptyList())
     val nodes: StateFlow<List<Node>> = _nodes.asStateFlow()
@@ -58,16 +54,24 @@ class NodeStore {
         _sortOrder.value = order
     }
 
-    fun getFilteredNodes(): List<Node> {
+    fun getFilteredNodes(currentUserId: String? = null): List<Node> {
         val filtered = when (_currentTab.value) {
             HomeTab.RECENT -> _nodes.value
             HomeTab.ISSUES -> _nodes.value.filter { it.type == NodeType.ISSUE }
             HomeTab.IDEAS -> _nodes.value.filter { it.type == NodeType.IDEA }
-            HomeTab.MINE -> _nodes.value // TODO: currentUserのauthorIdでフィルタ
+            HomeTab.MINE -> if (currentUserId != null) {
+                _nodes.value.filter { it.authorId == currentUserId }
+            } else {
+                _nodes.value
+            }
         }
         return when (_sortOrder.value) {
             SortOrder.RECENT -> filtered.sortedByDescending { it.createdAt }
-            SortOrder.POPULAR -> filtered // TODO: likeCountでソート（NodeにlikeCount追加後）
+            SortOrder.POPULAR -> filtered.sortedByDescending { node ->
+                node.reactions.like.count +
+                    node.reactions.interested.count +
+                    node.reactions.wantToTry.count
+            }
         }
     }
 

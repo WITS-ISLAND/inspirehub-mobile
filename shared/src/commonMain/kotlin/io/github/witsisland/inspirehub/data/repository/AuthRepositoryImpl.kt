@@ -1,5 +1,6 @@
 package io.github.witsisland.inspirehub.data.repository
 
+import co.touchlab.kermit.Logger
 import io.github.witsisland.inspirehub.data.mapper.toDomain
 import io.github.witsisland.inspirehub.data.source.AuthDataSource
 import io.github.witsisland.inspirehub.domain.model.User
@@ -14,10 +15,16 @@ class AuthRepositoryImpl(
     private val userStore: UserStore
 ) : AuthRepository {
 
+    private val log = Logger.withTag("AuthRepositoryImpl")
+
     override suspend fun verifyGoogleToken(idToken: String): Result<User> {
         return try {
             val tokenResponse = authDataSource.verifyGoogleToken(idToken)
             val user = tokenResponse.user.toDomain()
+
+            // TODO: デバッグ用 - 確認後に削除すること
+            log.d { "🔑 accessToken: ${tokenResponse.accessToken}" }
+            log.d { "🔄 refreshToken: ${tokenResponse.refreshToken}" }
 
             // UserStore にログイン状態を保存
             userStore.login(

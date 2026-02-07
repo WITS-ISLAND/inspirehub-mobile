@@ -69,4 +69,18 @@ class KtorNodeDataSource(
     override suspend fun toggleLike(id: String): NodeDto {
         return httpClient.post("/nodes/$id/like").body()
     }
+
+    override suspend fun searchNodes(
+        query: String,
+        type: String?,
+        limit: Int,
+        offset: Int
+    ): List<NodeDto> {
+        return httpClient.get("/nodes") {
+            parameter("q", query)
+            parameter("limit", limit)
+            parameter("offset", offset)
+            type?.let { parameter("type", it) }
+        }.body()
+    }
 }

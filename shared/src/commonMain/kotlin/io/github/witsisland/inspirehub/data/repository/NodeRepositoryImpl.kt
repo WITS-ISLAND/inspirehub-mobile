@@ -6,9 +6,6 @@ import io.github.witsisland.inspirehub.domain.model.Node
 import io.github.witsisland.inspirehub.domain.model.NodeType
 import io.github.witsisland.inspirehub.domain.repository.NodeRepository
 
-/**
- * NodeRepository の実装
- */
 class NodeRepositoryImpl(
     private val nodeDataSource: NodeDataSource
 ) : NodeRepository {
@@ -46,6 +43,7 @@ class NodeRepositoryImpl(
             val typeString = when (type) {
                 NodeType.ISSUE -> "issue"
                 NodeType.IDEA -> "idea"
+                NodeType.PROJECT -> "project"
             }
             val dto = nodeDataSource.createNode(
                 title = title,
@@ -73,8 +71,27 @@ class NodeRepositoryImpl(
             val dtos = nodeDataSource.getNodes()
             val children = dtos
                 .map { it.toDomain() }
-                .filter { it.parentNodeId == parentNodeId }
+                .filter { it.parentNode?.id == parentNodeId }
             Result.success(children)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun searchNodes(
+        query: String,
+        type: String?,
+        limit: Int,
+        offset: Int
+    ): Result<List<Node>> {
+        return try {
+            val dtos = nodeDataSource.searchNodes(
+                query = query,
+                type = type,
+                limit = limit,
+                offset = offset
+            )
+            Result.success(dtos.map { it.toDomain() })
         } catch (e: Exception) {
             Result.failure(e)
         }

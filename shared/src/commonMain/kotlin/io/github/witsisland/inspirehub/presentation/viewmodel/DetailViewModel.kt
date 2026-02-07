@@ -6,8 +6,10 @@ import com.rickclephas.kmp.observableviewmodel.ViewModel
 import com.rickclephas.kmp.observableviewmodel.launch
 import io.github.witsisland.inspirehub.domain.model.Comment
 import io.github.witsisland.inspirehub.domain.model.Node
+import io.github.witsisland.inspirehub.domain.model.ReactionType
 import io.github.witsisland.inspirehub.domain.repository.CommentRepository
 import io.github.witsisland.inspirehub.domain.repository.NodeRepository
+import io.github.witsisland.inspirehub.domain.repository.ReactionRepository
 import io.github.witsisland.inspirehub.domain.store.NodeStore
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +22,8 @@ import kotlinx.coroutines.flow.asStateFlow
 class DetailViewModel(
     private val nodeStore: NodeStore,
     private val nodeRepository: NodeRepository,
-    private val commentRepository: CommentRepository
+    private val commentRepository: CommentRepository,
+    private val reactionRepository: ReactionRepository
 ) : ViewModel() {
 
     // NodeStoreの選択状態をVM側のMutableStateFlowに転写
@@ -94,16 +97,20 @@ class DetailViewModel(
     }
 
     /**
-     * いいねを切り替え
+     * リアクションを切り替え
      */
-    fun toggleLike() {
+    fun toggleReaction(type: ReactionType) {
         val node = selectedNode.value ?: return
         viewModelScope.launch {
-            val result = nodeRepository.toggleLike(node.id)
+            val result = reactionRepository.toggleReaction(node.id, type)
             if (result.isSuccess) {
-                nodeStore.selectNode(result.getOrNull())
+                // リアクション成功後にノード詳細を再取得して最新状態を反映
+                val nodeResult = nodeRepository.getNode(node.id)
+                if (nodeResult.isSuccess) {
+                    nodeStore.selectNode(nodeResult.getOrNull())
+                }
             } else {
-                _error.value = result.exceptionOrNull()?.message ?: "Failed to toggle like"
+                _error.value = result.exceptionOrNull()?.message ?: "Failed to toggle reaction"
             }
         }
     }

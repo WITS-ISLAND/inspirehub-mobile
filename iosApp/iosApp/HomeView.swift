@@ -218,9 +218,9 @@ struct NodeCardView: View {
                 .multilineTextAlignment(.leading)
 
             HStack(spacing: 12) {
-                Label("\(node.likeCount)", systemImage: node.isLiked ? "hand.thumbsup.fill" : "hand.thumbsup")
+                Label("\(node.reactions.like.count)", systemImage: node.reactions.like.isReacted ? "hand.thumbsup.fill" : "hand.thumbsup")
                     .font(.caption2)
-                    .foregroundColor(node.isLiked ? .blue : .secondary)
+                    .foregroundColor(node.reactions.like.isReacted ? .blue : .secondary)
                 Label("\(node.commentCount)", systemImage: "bubble.right")
                     .font(.caption2)
                     .foregroundColor(.secondary)
@@ -248,9 +248,10 @@ struct NodeCardView: View {
         .cornerRadius(6)
     }
 
-    private func formatDate(_ instant: Kotlinx_datetimeInstant) -> String {
-        let seconds = instant.epochSeconds
-        let date = Date(timeIntervalSince1970: TimeInterval(seconds))
+    private func formatDate(_ dateString: String) -> String {
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        guard let date = isoFormatter.date(from: dateString) else { return dateString }
         let formatter = RelativeDateTimeFormatter()
         formatter.locale = Locale(identifier: "ja_JP")
         formatter.unitsStyle = .short
@@ -279,13 +280,18 @@ enum PreviewData {
             title: "サンプルアイデア",
             content: "これはプレビュー用のサンプルノードです。実際のデータではありません。",
             authorId: "user-1",
-            parentNodeId: nil,
+            authorName: "テストユーザー",
+            authorPicture: nil,
+            parentNode: nil,
             tagIds: [],
-            likeCount: 5,
-            isLiked: true,
+            reactions: Reactions(
+                like: ReactionSummary(count: 5, isReacted: true),
+                interested: ReactionSummary(count: 2, isReacted: false),
+                wantToTry: ReactionSummary(count: 1, isReacted: false)
+            ),
             commentCount: 3,
-            createdAt: Kotlinx_datetimeInstant.companion.fromEpochSeconds(epochSeconds: Int64(Date().timeIntervalSince1970), nanosecondAdjustment: 0),
-            updatedAt: Kotlinx_datetimeInstant.companion.fromEpochSeconds(epochSeconds: Int64(Date().timeIntervalSince1970), nanosecondAdjustment: 0)
+            createdAt: "2025-01-15T10:30:00Z",
+            updatedAt: "2025-01-15T10:30:00Z"
         )
     }
 
@@ -296,13 +302,18 @@ enum PreviewData {
             title: "サンプル課題",
             content: "リモートワークで雑談の機会が減っている。チームの一体感が薄れている。",
             authorId: "user-2",
-            parentNodeId: nil,
+            authorName: "テストユーザー2",
+            authorPicture: nil,
+            parentNode: nil,
             tagIds: [],
-            likeCount: 12,
-            isLiked: false,
+            reactions: Reactions(
+                like: ReactionSummary(count: 12, isReacted: false),
+                interested: ReactionSummary(count: 3, isReacted: false),
+                wantToTry: ReactionSummary(count: 0, isReacted: false)
+            ),
             commentCount: 7,
-            createdAt: Kotlinx_datetimeInstant.companion.fromEpochSeconds(epochSeconds: Int64(Date().timeIntervalSince1970) - 3600, nanosecondAdjustment: 0),
-            updatedAt: Kotlinx_datetimeInstant.companion.fromEpochSeconds(epochSeconds: Int64(Date().timeIntervalSince1970) - 3600, nanosecondAdjustment: 0)
+            createdAt: "2025-01-15T09:30:00Z",
+            updatedAt: "2025-01-15T09:30:00Z"
         )
     }
 }

@@ -51,7 +51,7 @@ struct MapView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
                 ForEach(nodes, id: \.id) { node in
-                    let isChild = node.parentNodeId != nil
+                    let isChild = node.parentNode != nil
                     NavigationLink(destination: DetailView(nodeId: node.id)) {
                         nodeRow(node: node, indented: isChild)
                     }

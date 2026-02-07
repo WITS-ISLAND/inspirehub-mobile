@@ -10,15 +10,11 @@ import io.github.witsisland.inspirehub.domain.store.NodeStore
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-/**
- * マップ画面ViewModel（Phase1簡易版：リスト+派生関係インデント表示）
- */
 class MapViewModel(
     private val nodeStore: NodeStore,
     private val nodeRepository: NodeRepository
 ) : ViewModel() {
 
-    // NodeStoreの状態をVM側のMutableStateFlowに転写
     private val _nodes = MutableStateFlow<List<Node>>(viewModelScope, emptyList())
     @NativeCoroutinesState
     val nodes: StateFlow<List<Node>> = _nodes.asStateFlow()
@@ -56,13 +52,9 @@ class MapViewModel(
         }
     }
 
-    /**
-     * ノードをツリー構造に変換
-     * parentNodeId を辿り、ルートノード → 子ノードの階層を構築
-     */
     fun getNodeTree(): List<NodeTreeItem> {
         val allNodes = nodes.value
-        val childrenMap = allNodes.groupBy { it.parentNodeId }
+        val childrenMap = allNodes.groupBy { it.parentNode?.id }
         val result = mutableListOf<NodeTreeItem>()
 
         fun buildTree(parentId: String?, depth: Int) {
@@ -74,7 +66,6 @@ class MapViewModel(
             }
         }
 
-        // ルートノード（parentNodeId == null）から開始
         buildTree(null, 0)
         return result
     }
