@@ -199,13 +199,10 @@ struct DetailView: View {
 
                     metaSection(node: node)
 
-                    if let parentNode = node.parentNode {
-                        parentSection(parentNode: parentNode)
-                    }
-
                     reactionBar(node: node)
                     deriveButton(node: node)
-                    childNodesSection
+
+                    derivationTreeSection(node: node)
                     commentsSection
                 }
                 .padding(16)
@@ -277,7 +274,7 @@ struct DetailView: View {
                 Image(systemName: "person")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                Text("\(node.authorName)：\(node.authorId)")
+                Text(node.authorName)
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .lineLimit(1)
@@ -287,47 +284,158 @@ struct DetailView: View {
         }
     }
 
-    // MARK: - Parent Node
+    // MARK: - Derivation Tree
 
-    private func parentSection(parentNode: ParentNode) -> some View {
-        NavigationLink(destination: DetailView(nodeId: parentNode.id)) {
-            HStack(spacing: 10) {
-                Image(systemName: NodeTypeStyle.icon(for: parentNode.type))
-                    .font(.title3)
-                    .foregroundColor(NodeTypeStyle.color(for: parentNode.type))
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 4) {
-                        Text("派生元")
-                            .font(.caption2)
+    private func derivationTreeSection(node: Node) -> some View {
+        let hasParent = node.parentNode != nil
+        let hasChildren = !viewModel.childNodes.isEmpty
+
+        return Group {
+            if hasParent || hasChildren {
+                VStack(alignment: .leading, spacing: 0) {
+                    // Section header
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.triangle.branch")
+                            .font(.subheadline)
                             .foregroundColor(.secondary)
-                        Text(NodeTypeStyle.label(for: parentNode.type))
-                            .font(.caption2)
-                            .fontWeight(.medium)
-                            .foregroundColor(NodeTypeStyle.color(for: parentNode.type))
+                        Text("派生ツリー")
+                            .font(.headline)
                     }
-                    Text(parentNode.title)
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(.primary)
-                        .lineLimit(2)
-                    if let content = parentNode.content, !content.isEmpty {
-                        Text(content)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(3)
+                    .padding(.bottom, 12)
+
+                    // Tree items
+                    VStack(alignment: .leading, spacing: 0) {
+                        if let parentNode = node.parentNode {
+                            let isLast = !hasChildren
+                            derivationTreeItem(
+                                label: "派生元",
+                                type: parentNode.type,
+                                title: parentNode.title,
+                                content: parentNode.content,
+                                nodeId: parentNode.id,
+                                isLast: isLast
+                            )
+                        }
+
+                        ForEach(Array(viewModel.childNodes.enumerated()), id: \.element.id) { index, child in
+                            let isLast = index == viewModel.childNodes.count - 1
+                            derivationTreeItem(
+                                label: "派生先",
+                                type: child.type,
+                                title: child.title,
+                                content: child.content,
+                                nodeId: child.id,
+                                isLast: isLast
+                            )
+                        }
                     }
                 }
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
             }
-            .padding(12)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(NodeTypeStyle.color(for: parentNode.type).opacity(0.05))
-            .cornerRadius(8)
         }
-        .buttonStyle(.plain)
+    }
+
+    private func derivationTreeItem(
+        label: String,
+        type: NodeType,
+        title: String,
+        content: String?,
+        nodeId: String,
+        isLast: Bool
+    ) -> some View {
+        HStack(alignment: .top, spacing: 0) {
+            // Tree connector line
+            treeConnector(isLast: isLast)
+
+            // Card
+            NavigationLink(destination: DetailView(nodeId: nodeId)) {
+                derivationCard(
+                    label: label,
+                    type: type,
+                    title: title,
+                    content: content
+                )
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func treeConnector(isLast: Bool) -> some View {
+        VStack(spacing: 0) {
+            // Branch symbol: top vertical line + horizontal connector
+            HStack(alignment: .top, spacing: 0) {
+                // Vertical line (left side)
+                Rectangle()
+                    .fill(Color.secondary.opacity(0.3))
+                    .frame(width: 2)
+
+                // Horizontal connector
+                Rectangle()
+                    .fill(Color.secondary.opacity(0.3))
+                    .frame(width: 12, height: 2)
+                    .padding(.top, 18)
+            }
+            .frame(width: 14)
+
+            // Continuation line below (only if not last)
+            if !isLast {
+                Rectangle()
+                    .fill(Color.secondary.opacity(0.3))
+                    .frame(width: 2)
+                    .frame(maxHeight: .infinity)
+                    .frame(width: 14, alignment: .leading)
+            } else {
+                Spacer()
+                    .frame(width: 14)
+            }
+        }
+        .padding(.trailing, 8)
+    }
+
+    private func derivationCard(
+        label: String,
+        type: NodeType,
+        title: String,
+        content: String?
+    ) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: NodeTypeStyle.icon(for: type))
+                .font(.title3)
+                .foregroundColor(NodeTypeStyle.color(for: type))
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 4) {
+                    Text(label)
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    Text(NodeTypeStyle.label(for: type))
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .foregroundColor(NodeTypeStyle.color(for: type))
+                }
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primary)
+                    .lineLimit(2)
+                if let content, !content.isEmpty {
+                    Text(content)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(NodeTypeStyle.color(for: type).opacity(0.05))
+        .cornerRadius(8)
+        .padding(.vertical, 4)
     }
 
     // MARK: - Reactions
@@ -421,37 +529,6 @@ struct DetailView: View {
         }
     }
 
-    // MARK: - Child Nodes
-
-    private var childNodesSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if !viewModel.childNodes.isEmpty {
-                Text("派生ノード")
-                    .font(.headline)
-
-                ForEach(viewModel.childNodes, id: \.id) { child in
-                    NavigationLink(destination: DetailView(nodeId: child.id)) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "arrow.turn.down.right")
-                                .foregroundColor(.appPrimary)
-                                .font(.caption)
-                            Text(child.title)
-                                .font(.subheadline)
-                                .lineLimit(1)
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                        }
-                        .padding(10)
-                        .background(Color(.secondarySystemBackground))
-                        .cornerRadius(8)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-        }
-    }
 
     // MARK: - Comments
 
