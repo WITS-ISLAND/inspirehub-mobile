@@ -1,5 +1,6 @@
 package io.github.witsisland.inspirehub.data.source
 
+import io.github.witsisland.inspirehub.data.dto.NodeDto
 import io.github.witsisland.inspirehub.data.dto.TagDto
 
 class MockTagDataSource : TagDataSource {
@@ -28,5 +29,9 @@ class MockTagDataSource : TagDataSource {
         return tags
             .filter { it.name.contains(query, ignoreCase = true) }
             .take(limit)
+    }
+
+    override suspend fun getNodesByTagName(tagName: String, limit: Int, offset: Int): List<NodeDto> {
+        return emptyList()
     }
 }

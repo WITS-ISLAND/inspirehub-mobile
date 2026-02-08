@@ -6,8 +6,11 @@ import com.rickclephas.kmp.observableviewmodel.ViewModel
 import com.rickclephas.kmp.observableviewmodel.launch
 import io.github.witsisland.inspirehub.domain.model.Node
 import io.github.witsisland.inspirehub.domain.model.NodeType
+import io.github.witsisland.inspirehub.domain.model.Tag
 import io.github.witsisland.inspirehub.domain.repository.NodeRepository
+import io.github.witsisland.inspirehub.domain.repository.TagRepository
 import io.github.witsisland.inspirehub.domain.store.NodeStore
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -17,7 +20,8 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 class PostViewModel(
     private val nodeStore: NodeStore,
-    private val nodeRepository: NodeRepository
+    private val nodeRepository: NodeRepository,
+    private val tagRepository: TagRepository
 ) : ViewModel() {
 
     private val _title = MutableStateFlow(viewModelScope, "")
@@ -55,6 +59,12 @@ class PostViewModel(
     @NativeCoroutinesState
     val isValid: StateFlow<Boolean> = _isValid.asStateFlow()
 
+    private val _suggestedTags = MutableStateFlow<List<Tag>>(viewModelScope, emptyList())
+    @NativeCoroutinesState
+    val suggestedTags: StateFlow<List<Tag>> = _suggestedTags.asStateFlow()
+
+    private var tagSuggestJob: Job? = null
+
     private fun updateValidation() {
         _isValid.value = _title.value.isNotBlank() && _content.value.isNotBlank()
     }
@@ -77,6 +87,30 @@ class PostViewModel(
 
     fun removeTag(tag: String) {
         _tags.value = _tags.value - tag
+    }
+
+    /**
+     * タグサジェストを検索
+     */
+    fun searchTagSuggestions(query: String) {
+        if (query.isBlank()) {
+            _suggestedTags.value = emptyList()
+            return
+        }
+        tagSuggestJob?.cancel()
+        tagSuggestJob = viewModelScope.launch {
+            val result = tagRepository.suggestTags(query)
+            if (result.isSuccess) {
+                _suggestedTags.value = result.getOrThrow()
+            }
+        }
+    }
+
+    /**
+     * タグサジェストをクリア
+     */
+    fun clearTagSuggestions() {
+        _suggestedTags.value = emptyList()
     }
 
     fun setParentNode(node: Node?) {
@@ -116,6 +150,8 @@ class PostViewModel(
         _error.value = null
         _isSuccess.value = false
         _isValid.value = false
+        _suggestedTags.value = emptyList()
+        tagSuggestJob?.cancel()
     }
 
     private fun submit(type: NodeType, parentNodeId: String?) {

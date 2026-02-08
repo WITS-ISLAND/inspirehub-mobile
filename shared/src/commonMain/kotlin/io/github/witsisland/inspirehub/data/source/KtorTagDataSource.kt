@@ -1,5 +1,7 @@
 package io.github.witsisland.inspirehub.data.source
 
+import io.github.witsisland.inspirehub.data.dto.NodeDto
+import io.github.witsisland.inspirehub.data.dto.NodesResponseDto
 import io.github.witsisland.inspirehub.data.dto.TagDto
 import io.github.witsisland.inspirehub.data.dto.TagSuggestionsResponseDto
 import io.github.witsisland.inspirehub.data.dto.TagsResponseDto
@@ -45,5 +47,17 @@ class KtorTagDataSource(
                 createdAt = ""
             )
         }
+    }
+
+    /**
+     * GET /tags/{name}/nodes
+     * Response: { "nodes": [NodeDto], "total": number }
+     */
+    override suspend fun getNodesByTagName(tagName: String, limit: Int, offset: Int): List<NodeDto> {
+        val response: NodesResponseDto = httpClient.get("/tags/$tagName/nodes") {
+            parameter("limit", limit)
+            parameter("offset", offset)
+        }.body()
+        return response.nodes
     }
 }

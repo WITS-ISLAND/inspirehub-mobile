@@ -22,6 +22,12 @@ class DiscoverStore {
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
+    private val _selectedTag = MutableStateFlow<Tag?>(null)
+    val selectedTag: StateFlow<Tag?> = _selectedTag.asStateFlow()
+
+    private val _tagNodes = MutableStateFlow<List<Node>>(emptyList())
+    val tagNodes: StateFlow<List<Node>> = _tagNodes.asStateFlow()
+
     fun updateSearchResults(nodes: List<Node>) {
         _searchResults.value = nodes
     }
@@ -42,11 +48,21 @@ class DiscoverStore {
         _searchQuery.value = query
     }
 
+    fun setSelectedTag(tag: Tag?) {
+        _selectedTag.value = tag
+    }
+
+    fun updateTagNodes(nodes: List<Node>) {
+        _tagNodes.value = nodes
+    }
+
     fun clear() {
         _searchResults.value = emptyList()
         _popularTags.value = emptyList()
         _popularNodes.value = emptyList()
         _isLoading.value = false
         _searchQuery.value = ""
+        _selectedTag.value = null
+        _tagNodes.value = emptyList()
     }
 }
