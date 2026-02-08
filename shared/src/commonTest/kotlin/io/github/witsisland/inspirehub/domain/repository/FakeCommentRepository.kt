@@ -13,6 +13,7 @@ class FakeCommentRepository : CommentRepository {
     // 各メソッドの戻り値（nullの場合はcommentsリストから自動生成）
     var getCommentsResult: Result<List<Comment>>? = null
     var createCommentResult: Result<String>? = null
+    var updateCommentResult: Result<Unit>? = null
     var deleteCommentResult: Result<Unit>? = null
 
     // エラーシミュレート用フラグ
@@ -22,6 +23,7 @@ class FakeCommentRepository : CommentRepository {
     // 呼び出し回数をカウント
     var getCommentsCallCount = 0
     var createCommentCallCount = 0
+    var updateCommentCallCount = 0
     var deleteCommentCallCount = 0
 
     // 最後に渡された引数を保存
@@ -29,6 +31,8 @@ class FakeCommentRepository : CommentRepository {
     var lastCreateCommentNodeId: String? = null
     var lastCreateCommentContent: String? = null
     var lastCreateCommentParentId: String? = null
+    var lastUpdateCommentId: String? = null
+    var lastUpdateCommentContent: String? = null
     var lastDeleteCommentId: String? = null
 
     override suspend fun getComments(
@@ -58,6 +62,15 @@ class FakeCommentRepository : CommentRepository {
         return createCommentResult ?: Result.success("comment_new")
     }
 
+    override suspend fun updateComment(id: String, content: String): Result<Unit> {
+        updateCommentCallCount++
+        lastUpdateCommentId = id
+        lastUpdateCommentContent = content
+
+        if (shouldReturnError) return Result.failure(Exception(errorMessage))
+        return updateCommentResult ?: Result.success(Unit)
+    }
+
     override suspend fun deleteComment(id: String): Result<Unit> {
         deleteCommentCallCount++
         lastDeleteCommentId = id
@@ -70,16 +83,20 @@ class FakeCommentRepository : CommentRepository {
         comments.clear()
         getCommentsResult = null
         createCommentResult = null
+        updateCommentResult = null
         deleteCommentResult = null
         shouldReturnError = false
         errorMessage = "Test error"
         getCommentsCallCount = 0
         createCommentCallCount = 0
+        updateCommentCallCount = 0
         deleteCommentCallCount = 0
         lastGetCommentsNodeId = null
         lastCreateCommentNodeId = null
         lastCreateCommentContent = null
         lastCreateCommentParentId = null
+        lastUpdateCommentId = null
+        lastUpdateCommentContent = null
         lastDeleteCommentId = null
     }
 }

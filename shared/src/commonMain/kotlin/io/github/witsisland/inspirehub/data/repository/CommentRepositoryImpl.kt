@@ -39,6 +39,15 @@ class CommentRepositoryImpl(
         }
     }
 
+    override suspend fun updateComment(id: String, content: String): Result<Unit> {
+        return try {
+            dataSource.updateComment(id, content)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun deleteComment(id: String): Result<Unit> {
         return try {
             dataSource.deleteComment(id)

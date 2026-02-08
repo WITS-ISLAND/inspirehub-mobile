@@ -77,6 +77,14 @@ class DetailViewModel(
     @NativeCoroutinesState
     val isCommentSubmitting: StateFlow<Boolean> = _isCommentSubmitting.asStateFlow()
 
+    private val _editingCommentId = MutableStateFlow<String?>(viewModelScope, null)
+    @NativeCoroutinesState
+    val editingCommentId: StateFlow<String?> = _editingCommentId.asStateFlow()
+
+    private val _editCommentText = MutableStateFlow(viewModelScope, "")
+    @NativeCoroutinesState
+    val editCommentText: StateFlow<String> = _editCommentText.asStateFlow()
+
     /**
      * ノード詳細を読み込み
      * getNode + getComments + getChildNodes を並行実行
@@ -290,6 +298,68 @@ class DetailViewModel(
             }
 
             _isLoading.value = false
+        }
+    }
+
+    /**
+     * コメント編集を開始
+     */
+    fun startEditingComment(comment: Comment) {
+        _editingCommentId.value = comment.id
+        _editCommentText.value = comment.content
+    }
+
+    /**
+     * コメント編集をキャンセル
+     */
+    fun cancelEditingComment() {
+        _editingCommentId.value = null
+        _editCommentText.value = ""
+    }
+
+    fun updateEditCommentText(text: String) {
+        _editCommentText.value = text
+    }
+
+    /**
+     * コメント編集を保存
+     */
+    fun saveCommentEdit() {
+        val commentId = _editingCommentId.value ?: return
+        val text = _editCommentText.value.trim()
+        if (text.isEmpty()) return
+
+        viewModelScope.launch {
+            _error.value = null
+
+            val result = commentRepository.updateComment(commentId, text)
+
+            if (result.isSuccess) {
+                _comments.value = _comments.value.map {
+                    if (it.id == commentId) it.copy(content = text) else it
+                }
+                _editingCommentId.value = null
+                _editCommentText.value = ""
+            } else {
+                _error.value = result.exceptionOrNull()?.message ?: "Failed to update comment"
+            }
+        }
+    }
+
+    /**
+     * コメントを削除
+     */
+    fun deleteComment(commentId: String) {
+        viewModelScope.launch {
+            _error.value = null
+
+            val result = commentRepository.deleteComment(commentId)
+
+            if (result.isSuccess) {
+                _comments.value = _comments.value.filter { it.id != commentId }
+            } else {
+                _error.value = result.exceptionOrNull()?.message ?: "Failed to delete comment"
+            }
         }
     }
 

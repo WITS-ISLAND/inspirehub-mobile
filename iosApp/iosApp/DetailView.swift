@@ -11,6 +11,8 @@ struct DetailView: View {
     @StateViewModel var viewModel = KoinHelper().getDetailViewModel()
     @State private var showDerivedPost = false
     @State private var showDeleteAlert = false
+    @State private var showDeleteCommentAlert = false
+    @State private var commentToDelete: String?
     @Environment(\.isAuthenticated) private var isAuthenticated
     @Environment(\.currentUserId) private var currentUserId
     @Environment(\.loginRequired) private var loginRequired
@@ -92,6 +94,19 @@ struct DetailView: View {
             }
         } message: {
             Text("この投稿を削除しますか？この操作は取り消せません。")
+        }
+        .alert("コメントを削除", isPresented: $showDeleteCommentAlert) {
+            Button("キャンセル", role: .cancel) {
+                commentToDelete = nil
+            }
+            Button("削除", role: .destructive) {
+                if let id = commentToDelete {
+                    viewModel.deleteComment(commentId: id)
+                    commentToDelete = nil
+                }
+            }
+        } message: {
+            Text("このコメントを削除しますか？")
         }
         .onAppear {
             fabHiddenBinding.wrappedValue = true
@@ -624,7 +639,24 @@ struct DetailView: View {
         }
     }
 
+    private var isCommentOwner: (Comment) -> Bool {
+        { comment in
+            guard let userId = currentUserId else { return false }
+            return comment.authorId == userId
+        }
+    }
+
     private func commentRow(comment: Comment) -> some View {
+        Group {
+            if viewModel.editingCommentId as? String == comment.id {
+                editingCommentRow(comment: comment)
+            } else {
+                displayCommentRow(comment: comment)
+            }
+        }
+    }
+
+    private func displayCommentRow(comment: Comment) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 4) {
                 Image(systemName: "person.circle")
@@ -643,6 +675,66 @@ struct DetailView: View {
         .padding(10)
         .background(Color(.secondarySystemBackground))
         .cornerRadius(8)
+        .contextMenu {
+            if isCommentOwner(comment) {
+                Button {
+                    viewModel.startEditingComment(comment: comment)
+                } label: {
+                    Label("編集", systemImage: "pencil")
+                }
+                Button(role: .destructive) {
+                    commentToDelete = comment.id
+                    showDeleteCommentAlert = true
+                } label: {
+                    Label("削除", systemImage: "trash")
+                }
+            }
+        }
+    }
+
+    private func editingCommentRow(comment: Comment) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "person.circle")
+                    .foregroundColor(.secondary)
+                Text(comment.authorId)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                Spacer()
+            }
+            TextField("コメントを編集...", text: Binding(
+                get: { viewModel.editCommentText as? String ?? "" },
+                set: { viewModel.updateEditCommentText(text: $0) }
+            ))
+            .textFieldStyle(.roundedBorder)
+            .font(.subheadline)
+
+            HStack(spacing: 12) {
+                Spacer()
+                Button("キャンセル") {
+                    viewModel.cancelEditingComment()
+                }
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+                Button("保存") {
+                    viewModel.saveCommentEdit()
+                }
+                .font(.caption)
+                .fontWeight(.semibold)
+                .disabled(
+                    (viewModel.editCommentText as? String ?? "")
+                        .trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                )
+            }
+        }
+        .padding(10)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.appPrimary, lineWidth: 1)
+        )
     }
 
     private func relativeTime(from isoString: String) -> String {

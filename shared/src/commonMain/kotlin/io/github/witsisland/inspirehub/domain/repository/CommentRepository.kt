@@ -33,6 +33,13 @@ interface CommentRepository {
     ): Result<String>
 
     /**
+     * コメントを更新
+     * @param id コメントID
+     * @param content 更新後のコメント内容
+     */
+    suspend fun updateComment(id: String, content: String): Result<Unit>
+
+    /**
      * コメントを削除
      * @param id コメントID
      */

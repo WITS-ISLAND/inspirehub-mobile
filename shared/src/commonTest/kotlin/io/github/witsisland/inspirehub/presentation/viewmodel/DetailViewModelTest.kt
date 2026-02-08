@@ -435,4 +435,114 @@ class DetailViewModelTest : MainDispatcherRule() {
         assertFalse(viewModel.isDeleted.value)
         assertFalse(viewModel.isLoading.value)
     }
+
+    // --- コメント編集機能のテスト ---
+
+    @Test
+    fun `startEditingComment - 編集モードが開始されコメント内容がセットされること`() = runTest {
+        val comment = sampleComments[0]
+
+        viewModel.startEditingComment(comment = comment)
+
+        assertEquals(comment.id, viewModel.editingCommentId.value)
+        assertEquals(comment.content, viewModel.editCommentText.value)
+    }
+
+    @Test
+    fun `cancelEditingComment - 編集モードがキャンセルされること`() = runTest {
+        viewModel.startEditingComment(comment = sampleComments[0])
+
+        viewModel.cancelEditingComment()
+
+        assertNull(viewModel.editingCommentId.value)
+        assertEquals("", viewModel.editCommentText.value)
+    }
+
+    @Test
+    fun `saveCommentEdit - コメント編集が成功すること`() = runTest {
+        // コメント一覧をセット
+        fakeNodeRepository.getNodeResult = Result.success(sampleNode)
+        fakeCommentRepository.getCommentsResult = Result.success(sampleComments)
+        fakeNodeRepository.getChildNodesResult = Result.success(emptyList())
+        viewModel.loadDetail("node1")
+
+        val targetComment = sampleComments[0]
+        viewModel.startEditingComment(comment = targetComment)
+        viewModel.updateEditCommentText(text = "更新後のコメント")
+
+        fakeCommentRepository.updateCommentResult = Result.success(Unit)
+
+        viewModel.saveCommentEdit()
+
+        assertEquals(1, fakeCommentRepository.updateCommentCallCount)
+        assertEquals(targetComment.id, fakeCommentRepository.lastUpdateCommentId)
+        assertEquals("更新後のコメント", fakeCommentRepository.lastUpdateCommentContent)
+        assertNull(viewModel.editingCommentId.value)
+        assertEquals("", viewModel.editCommentText.value)
+        assertEquals("更新後のコメント", viewModel.comments.value.first { it.id == targetComment.id }.content)
+    }
+
+    @Test
+    fun `saveCommentEdit - 空テキストでは保存しないこと`() = runTest {
+        viewModel.startEditingComment(comment = sampleComments[0])
+        viewModel.updateEditCommentText(text = "   ")
+
+        viewModel.saveCommentEdit()
+
+        assertEquals(0, fakeCommentRepository.updateCommentCallCount)
+    }
+
+    @Test
+    fun `saveCommentEdit - 失敗時にエラーが設定されること`() = runTest {
+        viewModel.startEditingComment(comment = sampleComments[0])
+        viewModel.updateEditCommentText(text = "更新テスト")
+
+        val errorMessage = "Update comment failed"
+        fakeCommentRepository.updateCommentResult = Result.failure(Exception(errorMessage))
+
+        viewModel.saveCommentEdit()
+
+        assertEquals(errorMessage, viewModel.error.value)
+        assertEquals(sampleComments[0].id, viewModel.editingCommentId.value) // 編集モード維持
+    }
+
+    // --- コメント削除機能のテスト ---
+
+    @Test
+    fun `deleteComment - コメント削除が成功すること`() = runTest {
+        // コメント一覧をセット
+        fakeNodeRepository.getNodeResult = Result.success(sampleNode)
+        fakeCommentRepository.getCommentsResult = Result.success(sampleComments)
+        fakeNodeRepository.getChildNodesResult = Result.success(emptyList())
+        viewModel.loadDetail("node1")
+
+        assertEquals(2, viewModel.comments.value.size)
+
+        fakeCommentRepository.deleteCommentResult = Result.success(Unit)
+
+        viewModel.deleteComment(commentId = "comment1")
+
+        assertEquals(1, fakeCommentRepository.deleteCommentCallCount)
+        assertEquals("comment1", fakeCommentRepository.lastDeleteCommentId)
+        assertEquals(1, viewModel.comments.value.size)
+        assertFalse(viewModel.comments.value.any { it.id == "comment1" })
+        assertNull(viewModel.error.value)
+    }
+
+    @Test
+    fun `deleteComment - 失敗時にエラーが設定されること`() = runTest {
+        // コメント一覧をセット
+        fakeNodeRepository.getNodeResult = Result.success(sampleNode)
+        fakeCommentRepository.getCommentsResult = Result.success(sampleComments)
+        fakeNodeRepository.getChildNodesResult = Result.success(emptyList())
+        viewModel.loadDetail("node1")
+
+        val errorMessage = "Delete comment failed"
+        fakeCommentRepository.deleteCommentResult = Result.failure(Exception(errorMessage))
+
+        viewModel.deleteComment(commentId = "comment1")
+
+        assertEquals(errorMessage, viewModel.error.value)
+        assertEquals(2, viewModel.comments.value.size) // 削除されない
+    }
 }
