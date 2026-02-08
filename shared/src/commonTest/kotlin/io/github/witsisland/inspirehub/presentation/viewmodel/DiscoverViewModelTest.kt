@@ -245,8 +245,99 @@ class DiscoverViewModelTest : MainDispatcherRule() {
         assertTrue(viewModel.popularNodes.value.isEmpty())
         assertNull(viewModel.selectedTag.value)
         assertTrue(viewModel.tagNodes.value.isEmpty())
+        assertTrue(viewModel.tagSuggestions.value.isEmpty())
         assertFalse(viewModel.isLoading.value)
         assertNull(viewModel.error.value)
+    }
+
+    // --- #プレフィックス タグ検索のテスト ---
+
+    @Test
+    fun `search - #プレフィックスでタグサジェストが取得されること`() = runTest {
+        fakeTagRepository.suggestTagsResult = Result.success(sampleTags)
+
+        viewModel.search("#AI")
+
+        assertEquals(1, fakeTagRepository.suggestTagsCallCount)
+        assertEquals("AI", fakeTagRepository.lastSuggestTagsQuery)
+        assertEquals(sampleTags.size, viewModel.tagSuggestions.value.size)
+        // キーワード検索は実行されない
+        assertEquals(0, fakeNodeRepository.searchNodesCallCount)
+        assertTrue(viewModel.searchResults.value.isEmpty())
+    }
+
+    @Test
+    fun `search - #のみではサジェストが空になること`() = runTest {
+        viewModel.search("#")
+
+        assertEquals(0, fakeTagRepository.suggestTagsCallCount)
+        assertTrue(viewModel.tagSuggestions.value.isEmpty())
+    }
+
+    @Test
+    fun `search - #プレフィックスから通常テキストに戻るとサジェストがクリアされること`() = runTest {
+        fakeTagRepository.suggestTagsResult = Result.success(sampleTags)
+        viewModel.search("#AI")
+        assertEquals(sampleTags.size, viewModel.tagSuggestions.value.size)
+
+        fakeNodeRepository.searchNodesResult = Result.success(sampleNodes)
+        viewModel.search("普通の検索")
+
+        assertTrue(viewModel.tagSuggestions.value.isEmpty())
+        assertEquals(1, fakeNodeRepository.searchNodesCallCount)
+    }
+
+    @Test
+    fun `selectTagSuggestion - サジェスト選択でタグノードが取得されること`() = runTest {
+        fakeTagRepository.getNodesByTagNameResult = Result.success(sampleNodes)
+        val tag = Tag(id = "tag1", name = "AI", usageCount = 50)
+
+        viewModel.selectTagSuggestion(tag)
+
+        assertTrue(viewModel.tagSuggestions.value.isEmpty())
+        assertEquals("", viewModel.searchQuery.value)
+        assertEquals(tag, viewModel.selectedTag.value)
+        assertEquals(sampleNodes.size, viewModel.tagNodes.value.size)
+    }
+
+    @Test
+    fun `submitSearch - #プレフィックスでサジェスト一致タグが選択されること`() = runTest {
+        fakeTagRepository.suggestTagsResult = Result.success(sampleTags)
+        fakeTagRepository.getNodesByTagNameResult = Result.success(sampleNodes)
+
+        // まず#AIで検索してサジェストを取得
+        viewModel.search("#AI")
+        // Enterで確定
+        viewModel.submitSearch()
+
+        // サジェストにAIが含まれるのでselectTagが呼ばれる
+        assertTrue(viewModel.tagSuggestions.value.isEmpty())
+        assertEquals("", viewModel.searchQuery.value)
+        assertEquals("AI", viewModel.selectedTag.value?.name)
+    }
+
+    @Test
+    fun `submitSearch - #プレフィックスでサジェスト不一致時に直接タグ名検索されること`() = runTest {
+        fakeTagRepository.suggestTagsResult = Result.success(emptyList())
+        fakeTagRepository.getNodesByTagNameResult = Result.success(sampleNodes)
+
+        viewModel.search("#新タグ")
+        viewModel.submitSearch()
+
+        assertEquals("新タグ", viewModel.selectedTag.value?.name)
+        assertEquals(sampleNodes.size, viewModel.tagNodes.value.size)
+    }
+
+    @Test
+    fun `submitSearch - 通常のキーワード検索では追加処理しないこと`() = runTest {
+        fakeNodeRepository.searchNodesResult = Result.success(sampleNodes)
+
+        viewModel.search("テスト")
+        val callCountBefore = fakeNodeRepository.searchNodesCallCount
+        viewModel.submitSearch()
+
+        // submitSearchは通常検索では何も追加しない
+        assertEquals(callCountBefore, fakeNodeRepository.searchNodesCallCount)
     }
 
     @Test

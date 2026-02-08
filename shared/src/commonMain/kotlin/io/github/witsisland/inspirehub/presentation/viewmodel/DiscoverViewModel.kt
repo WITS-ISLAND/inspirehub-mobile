@@ -9,6 +9,7 @@ import io.github.witsisland.inspirehub.domain.model.Tag
 import io.github.witsisland.inspirehub.domain.repository.NodeRepository
 import io.github.witsisland.inspirehub.domain.repository.TagRepository
 import io.github.witsisland.inspirehub.domain.store.DiscoverStore
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -42,6 +43,10 @@ class DiscoverViewModel(
     @NativeCoroutinesState
     val tagNodes: StateFlow<List<Node>> = _tagNodes.asStateFlow()
 
+    private val _tagSuggestions = MutableStateFlow<List<Tag>>(viewModelScope, emptyList())
+    @NativeCoroutinesState
+    val tagSuggestions: StateFlow<List<Tag>> = _tagSuggestions.asStateFlow()
+
     private val _isLoading = MutableStateFlow(viewModelScope, false)
     @NativeCoroutinesState
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -49,6 +54,8 @@ class DiscoverViewModel(
     private val _error = MutableStateFlow(viewModelScope, null as String?)
     @NativeCoroutinesState
     val error: StateFlow<String?> = _error.asStateFlow()
+
+    private var tagSuggestJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -76,11 +83,33 @@ class DiscoverViewModel(
 
     fun search(query: String) {
         discoverStore.setSearchQuery(query)
+
         if (query.isBlank()) {
+            _tagSuggestions.value = emptyList()
             discoverStore.updateSearchResults(emptyList())
             return
         }
-        // テキスト検索時はタグフィルタを解除
+
+        // #プレフィックス → タグサジェストモード
+        if (query.startsWith("#")) {
+            discoverStore.updateSearchResults(emptyList())
+            val tagQuery = query.removePrefix("#").trim()
+            if (tagQuery.isEmpty()) {
+                _tagSuggestions.value = emptyList()
+                return
+            }
+            tagSuggestJob?.cancel()
+            tagSuggestJob = viewModelScope.launch {
+                val result = tagRepository.suggestTags(tagQuery)
+                if (result.isSuccess) {
+                    _tagSuggestions.value = result.getOrThrow()
+                }
+            }
+            return
+        }
+
+        // 通常のキーワード検索
+        _tagSuggestions.value = emptyList()
         discoverStore.setSelectedTag(null)
         discoverStore.updateTagNodes(emptyList())
 
@@ -93,6 +122,61 @@ class DiscoverViewModel(
                 discoverStore.updateSearchResults(result.getOrThrow())
             } else {
                 _error.value = result.exceptionOrNull()?.message ?: "Search failed"
+            }
+
+            discoverStore.setLoading(false)
+        }
+    }
+
+    /**
+     * タグサジェストを選択してそのタグのノード一覧を表示
+     */
+    fun selectTagSuggestion(tag: Tag) {
+        _tagSuggestions.value = emptyList()
+        discoverStore.setSearchQuery("")
+        selectTag(tag)
+    }
+
+    /**
+     * 検索を確定（Enter押下時）
+     * #プレフィックス時はタグ名で直接検索
+     */
+    fun submitSearch() {
+        val query = _searchQuery.value
+        if (query.startsWith("#")) {
+            val tagName = query.removePrefix("#").trim()
+            if (tagName.isEmpty()) return
+
+            // サジェストに一致するタグがあればそれを使用
+            val matchingTag = _tagSuggestions.value.find {
+                it.name.equals(tagName, ignoreCase = true)
+            }
+            _tagSuggestions.value = emptyList()
+            discoverStore.setSearchQuery("")
+
+            if (matchingTag != null) {
+                selectTag(matchingTag)
+            } else {
+                searchByTagName(tagName)
+            }
+            return
+        }
+        // 通常のキーワード検索はsearch()で既に処理済み
+    }
+
+    private fun searchByTagName(tagName: String) {
+        discoverStore.setSelectedTag(Tag(id = "", name = tagName, usageCount = 0))
+        discoverStore.updateSearchResults(emptyList())
+
+        viewModelScope.launch {
+            discoverStore.setLoading(true)
+            _error.value = null
+
+            val result = tagRepository.getNodesByTagName(tagName)
+            if (result.isSuccess) {
+                discoverStore.updateTagNodes(result.getOrThrow())
+            } else {
+                _error.value = result.exceptionOrNull()?.message ?: "Failed to search by tag"
             }
 
             discoverStore.setLoading(false)

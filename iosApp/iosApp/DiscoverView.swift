@@ -21,8 +21,12 @@ struct DiscoverView: View {
                     .padding(.top, 40)
                 } else if let errorMessage = viewModel.error {
                     errorView(errorMessage)
-                } else if !searchQuery.isEmpty {
+                } else if !tagSuggestions.isEmpty {
+                    tagSuggestionsSection
+                } else if !searchQuery.isEmpty && !searchQuery.hasPrefix("#") {
                     searchResultsSection
+                } else if searchQuery.hasPrefix("#") {
+                    tagSearchHintSection
                 } else if selectedTag != nil {
                     popularTagsSection
                     tagNodesSection
@@ -40,9 +44,9 @@ struct DiscoverView: View {
         }
         .navigationTitle("ディスカバー")
         .navigationBarTitleDisplayMode(.inline)
-        .searchable(text: searchQueryBinding, prompt: "キーワードで検索...")
+        .searchable(text: searchQueryBinding, prompt: "キーワード or #タグ で検索")
         .onSubmit(of: .search) {
-            viewModel.search(query: searchQuery)
+            viewModel.submitSearch()
         }
         .onChange(of: searchQuery) { _, newValue in
             if newValue.isEmpty {
@@ -88,8 +92,67 @@ struct DiscoverView: View {
         viewModel.tagNodes as? [Node] ?? []
     }
 
+    private var tagSuggestions: [Tag] {
+        viewModel.tagSuggestions as? [Tag] ?? []
+    }
+
     private var isLoading: Bool {
         viewModel.isLoading as? Bool ?? false
+    }
+
+    // MARK: - Tag Suggestions Section
+
+    private var tagSuggestionsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("タグ候補")
+                .font(.headline)
+
+            ForEach(tagSuggestions, id: \.id) { tag in
+                Button(action: {
+                    viewModel.selectTagSuggestion(tag: tag)
+                }) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "tag")
+                            .foregroundColor(.appPrimary)
+                        Text("#\(tag.name)")
+                            .font(.body)
+                            .foregroundColor(.primary)
+                        Spacer()
+                        if tag.usageCount > 0 {
+                            Text("\(tag.usageCount)件")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(8)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    // MARK: - Tag Search Hint
+
+    private var tagSearchHintSection: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "tag")
+                .font(.system(size: 40))
+                .foregroundColor(.secondary.opacity(0.5))
+            Text("タグ名を入力して検索")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+            Text("例: #AI、#モバイル")
+                .font(.caption)
+                .foregroundColor(.secondary.opacity(0.7))
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 32)
     }
 
     // MARK: - Popular Tags Section
