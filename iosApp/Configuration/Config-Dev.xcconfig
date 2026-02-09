@@ -1,0 +1,5 @@
+#include "Config.xcconfig"
+
+// Dev版のオーバーライド
+PRODUCT_NAME=DEV-InspireHub
+PRODUCT_BUNDLE_IDENTIFIER=io.github.witsisland.inspirehub.InspireHubMobile.dev$(TEAM_ID)
