@@ -34,9 +34,11 @@ Issueの文脈（過去のコメント・Plan等）を読み取り、実装か�
 - コミットメッセージはConventional Commits準拠
 - コミットメッセージに `Closes #{issue番号}` を含める
 
-### 4. shared層テスト
+### 4. shared層テスト（条件付き）
 
-- `./gradlew :shared:testDebugUnitTest` を実行
+- `git diff main...HEAD --name-only` で `shared/` 配下の変更をチェック
+- **shared層に変更がある場合のみ** `./gradlew :shared:testDebugUnitTest` を実行
+- 変更がない場合はテストをスキップ（iOS/Android UIのみの変更の場合）
 - テストが通ることを確認してからPR作成に進む
 
 ### 5. PR作成
