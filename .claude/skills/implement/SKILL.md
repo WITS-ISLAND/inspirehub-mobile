@@ -1,6 +1,6 @@
 ---
 name: implement
-description: Issueコメントの文脈（Plan等）を読み、ブランチ作成→実装→PR→TestFlight配信タグまでを実行する
+description: Issueコメントの文脈（Plan等）を読み、ブランチ作成→実装→PR作成まで実行する
 user-invocable: true
 argument-hint: "(Issueの内容に従って実装を進める)"
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, WebSearch, WebFetch
@@ -67,21 +67,13 @@ EOF
 - 変更内容のSummaryを記載
 - テスト結果を記載
 
-### 6. タグpush
+### 6. 完了
 
-PR作成後、**必ず** `dev/pr-{PR番号}` タグをpushすること
+PR作成後、タスク完了。
 
-```bash
-# PRのURLから番号を抽出
-PR_NUMBER=$(gh pr view --json number -q .number)
-
-# タグを作成してpush
-git tag "dev/pr-${PR_NUMBER}"
-git push origin "dev/pr-${PR_NUMBER}"
-```
-
-- このタグがXcode Cloud Dev版ビルド＆TestFlight配信のトリガーになる
-- shared層の変更がなくてもタグpushは必ず行う（iOSへの影響確認のため）
+- Xcode Cloud は PR作成を検知して自動的に Dev版ビルド＆TestFlight配信を開始
+- PR番号で自動的にビルドが識別される
+- タグpushは不要（シンプル化）
 
 ## やり直し
 
@@ -95,4 +87,4 @@ git push origin "dev/pr-${PR_NUMBER}"
 
 - **iOSビルドは実行しない**（GitHub Actions上のLinuxで動作するため）
 - iOSの動作確認はXcode Cloud → TestFlight配信後に人間が行う
-- shared層の変更がなくてもタグpushは必ず行う（iOSへの影響確認のため）
+- PR作成後、Xcode Cloudが自動的にビルド＆TestFlight配信を開始
