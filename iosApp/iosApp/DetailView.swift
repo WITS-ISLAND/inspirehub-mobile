@@ -286,9 +286,7 @@ struct DetailView: View {
         VStack(alignment: .leading, spacing: 4) {
             Divider()
             HStack(spacing: 6) {
-                Image(systemName: "person")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                UserAvatarView(pictureURL: node.authorPicture, size: 16)
                 Text(node.authorName)
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -659,8 +657,7 @@ struct DetailView: View {
     private func displayCommentRow(comment: Comment) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 4) {
-                Image(systemName: "person.circle")
-                    .foregroundColor(.secondary)
+                UserAvatarView(pictureURL: comment.authorPicture, size: 20)
                 Text(comment.authorName)
                     .font(.caption)
                     .fontWeight(.semibold)
@@ -695,9 +692,8 @@ struct DetailView: View {
     private func editingCommentRow(comment: Comment) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Image(systemName: "person.circle")
-                    .foregroundColor(.secondary)
-                Text(comment.authorId)
+                UserAvatarView(pictureURL: comment.authorPicture, size: 20)
+                Text(comment.authorName)
                     .font(.caption)
                     .fontWeight(.semibold)
                 Spacer()
