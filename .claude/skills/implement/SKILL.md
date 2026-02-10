@@ -32,7 +32,7 @@ Issueの文脈（過去のコメント・Plan等）を読み取り、実装か�
 
 - CLAUDE.mdおよび `.claude/rules/` のルールに従って実装
 - コミットメッセージはConventional Commits準拠
-- コミットメッセージに `Closes #{issue番号}` を含める
+- **注意**: コミットメッセージには `Closes #` を含めない（PR本文でのみ使用）
 
 ### 4. shared層テスト（条件付き）
 
