@@ -5,7 +5,9 @@ import io.github.witsisland.inspirehub.domain.model.Tag
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 class DiscoverStore {
     private val _searchResults = MutableStateFlow<List<Node>>(emptyList())
     val searchResults: StateFlow<List<Node>> = _searchResults.asStateFlow()

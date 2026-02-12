@@ -4,11 +4,13 @@ import io.github.witsisland.inspirehub.data.mapper.toDomain
 import io.github.witsisland.inspirehub.data.source.CommentDataSource
 import io.github.witsisland.inspirehub.domain.model.Comment
 import io.github.witsisland.inspirehub.domain.repository.CommentRepository
+import kotlin.native.HiddenFromObjC
 
 /**
  * CommentRepository の実装
  * CommentDataSource を通じてデータ取得し、ドメインモデルに変換する
  */
+@HiddenFromObjC
 class CommentRepositoryImpl(
     private val dataSource: CommentDataSource
 ) : CommentRepository {

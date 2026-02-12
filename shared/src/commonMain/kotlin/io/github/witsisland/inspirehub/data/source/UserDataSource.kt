@@ -1,10 +1,12 @@
 package io.github.witsisland.inspirehub.data.source
 
 import io.github.witsisland.inspirehub.data.dto.UserDto
+import kotlin.native.HiddenFromObjC
 
 /**
  * ユーザーデータソースインターフェース
  */
+@HiddenFromObjC
 interface UserDataSource {
     /**
      * ユーザープロフィールを更新

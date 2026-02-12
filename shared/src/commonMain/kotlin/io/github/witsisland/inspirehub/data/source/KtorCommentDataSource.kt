@@ -16,12 +16,14 @@ import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import kotlin.native.HiddenFromObjC
 
 /**
  * Ktor Client を使用した CommentDataSource 実装
  *
  * API: /nodes/{nodeId}/comments, /comments/{id}
  */
+@HiddenFromObjC
 class KtorCommentDataSource(
     private val httpClient: HttpClient
 ) : CommentDataSource {

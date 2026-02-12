@@ -10,6 +10,7 @@ plugins {
 kotlin {
     sourceSets.all {
         languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
+        languageSettings.optIn("kotlin.experimental.ExperimentalObjCRefinement")
     }
 
     androidTarget {

@@ -2,10 +2,12 @@ package io.github.witsisland.inspirehub.domain.repository
 
 import io.github.witsisland.inspirehub.domain.model.Node
 import io.github.witsisland.inspirehub.domain.model.NodeType
+import kotlin.native.HiddenFromObjC
 
 /**
  * ノードリポジトリ
  */
+@HiddenFromObjC
 interface NodeRepository {
     suspend fun getNodes(
         type: String? = null,

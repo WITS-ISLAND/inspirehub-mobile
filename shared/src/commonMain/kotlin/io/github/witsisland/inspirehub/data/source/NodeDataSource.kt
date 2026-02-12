@@ -1,12 +1,14 @@
 package io.github.witsisland.inspirehub.data.source
 
 import io.github.witsisland.inspirehub.data.dto.NodeDto
+import kotlin.native.HiddenFromObjC
 
 /**
  * ノードデータソースインターフェース
  *
  * API: /nodes
  */
+@HiddenFromObjC
 interface NodeDataSource {
     /**
      * GET /nodes

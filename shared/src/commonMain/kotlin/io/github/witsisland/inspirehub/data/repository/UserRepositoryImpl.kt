@@ -5,7 +5,9 @@ import io.github.witsisland.inspirehub.data.source.UserDataSource
 import io.github.witsisland.inspirehub.domain.model.User
 import io.github.witsisland.inspirehub.domain.repository.UserRepository
 import io.github.witsisland.inspirehub.domain.store.UserStore
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 class UserRepositoryImpl(
     private val userDataSource: UserDataSource,
     private val userStore: UserStore

@@ -5,7 +5,9 @@ import io.github.witsisland.inspirehub.data.source.TagDataSource
 import io.github.witsisland.inspirehub.domain.model.Node
 import io.github.witsisland.inspirehub.domain.model.Tag
 import io.github.witsisland.inspirehub.domain.repository.TagRepository
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 class TagRepositoryImpl(
     private val tagDataSource: TagDataSource
 ) : TagRepository {

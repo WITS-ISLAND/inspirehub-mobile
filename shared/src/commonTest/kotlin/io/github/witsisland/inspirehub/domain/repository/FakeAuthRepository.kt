@@ -1,10 +1,12 @@
 package io.github.witsisland.inspirehub.domain.repository
 
 import io.github.witsisland.inspirehub.domain.model.User
+import kotlin.native.HiddenFromObjC
 
 /**
  * AuthRepositoryのFake実装（テスト用）
  */
+@HiddenFromObjC
 class FakeAuthRepository : AuthRepository {
 
     var verifyGoogleTokenResult: Result<User>? = null

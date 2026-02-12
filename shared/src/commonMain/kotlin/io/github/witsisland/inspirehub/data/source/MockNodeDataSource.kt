@@ -4,8 +4,10 @@ import io.github.witsisland.inspirehub.data.dto.NodeDto
 import io.github.witsisland.inspirehub.data.dto.ParentNodeDto
 import io.github.witsisland.inspirehub.data.dto.ReactionSummaryDto
 import io.github.witsisland.inspirehub.data.dto.ReactionsDto
+import kotlin.native.HiddenFromObjC
 import kotlin.random.Random
 
+@HiddenFromObjC
 class MockNodeDataSource : NodeDataSource {
 
     private val nodes: MutableList<NodeDto> = mutableListOf()

@@ -9,12 +9,14 @@ import io.ktor.client.request.patch
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import kotlin.native.HiddenFromObjC
 
 /**
  * Ktor Client を使用した UserDataSource 実装
  *
  * API: /users/me
  */
+@HiddenFromObjC
 class KtorUserDataSource(
     private val httpClient: HttpClient
 ) : UserDataSource {

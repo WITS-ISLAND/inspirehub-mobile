@@ -4,7 +4,9 @@ import io.github.witsisland.inspirehub.data.source.ReactionDataSource
 import io.github.witsisland.inspirehub.domain.model.ReactionSummary
 import io.github.witsisland.inspirehub.domain.model.ReactionType
 import io.github.witsisland.inspirehub.domain.repository.ReactionRepository
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 class ReactionRepositoryImpl(
     private val dataSource: ReactionDataSource
 ) : ReactionRepository {

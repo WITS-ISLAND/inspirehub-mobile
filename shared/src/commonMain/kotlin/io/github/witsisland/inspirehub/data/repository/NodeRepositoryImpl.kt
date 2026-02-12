@@ -6,7 +6,9 @@ import io.github.witsisland.inspirehub.data.source.ReactionDataSource
 import io.github.witsisland.inspirehub.domain.model.Node
 import io.github.witsisland.inspirehub.domain.model.NodeType
 import io.github.witsisland.inspirehub.domain.repository.NodeRepository
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 class NodeRepositoryImpl(
     private val nodeDataSource: NodeDataSource,
     private val reactionDataSource: ReactionDataSource

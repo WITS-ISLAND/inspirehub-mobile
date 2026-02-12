@@ -6,6 +6,7 @@ import io.github.witsisland.inspirehub.domain.model.ReactionType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlin.native.HiddenFromObjC
 
 enum class HomeTab {
     ALL, ISSUES, IDEAS, MINE
@@ -15,6 +16,7 @@ enum class SortOrder {
     RECENT, POPULAR
 }
 
+@HiddenFromObjC
 class NodeStore {
     private val _nodes = MutableStateFlow<List<Node>>(emptyList())
     val nodes: StateFlow<List<Node>> = _nodes.asStateFlow()

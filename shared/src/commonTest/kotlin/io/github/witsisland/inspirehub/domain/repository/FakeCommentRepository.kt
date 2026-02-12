@@ -1,10 +1,12 @@
 package io.github.witsisland.inspirehub.domain.repository
 
 import io.github.witsisland.inspirehub.domain.model.Comment
+import kotlin.native.HiddenFromObjC
 
 /**
  * CommentRepositoryのFake実装（テスト用）
  */
+@HiddenFromObjC
 class FakeCommentRepository : CommentRepository {
 
     // テスト用コメントリスト

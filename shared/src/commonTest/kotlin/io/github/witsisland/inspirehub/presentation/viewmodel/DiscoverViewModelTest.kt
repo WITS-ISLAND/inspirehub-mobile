@@ -255,10 +255,10 @@ class DiscoverViewModelTest : MainDispatcherRule() {
         assertNull(viewModel.error.value)
     }
 
-    // --- #プレフィックス タグ検索のテスト ---
+    // --- Hashプレフィックス タグ検索のテスト ---
 
     @Test
-    fun `search - #プレフィックスでタグサジェストが取得されること`() = runTest {
+    fun `search - Hashプレフィックスでタグサジェストが取得されること`() = runTest {
         fakeTagRepository.suggestTagsResult = Result.success(sampleTags)
 
         viewModel.search("#AI")
@@ -273,7 +273,7 @@ class DiscoverViewModelTest : MainDispatcherRule() {
     }
 
     @Test
-    fun `search - #のみではサジェストが空になること`() = runTest {
+    fun `search - Hashのみではサジェストが空になること`() = runTest {
         viewModel.search("#")
 
         assertEquals(0, fakeTagRepository.suggestTagsCallCount)
@@ -281,7 +281,7 @@ class DiscoverViewModelTest : MainDispatcherRule() {
     }
 
     @Test
-    fun `search - #プレフィックスから通常テキストに戻るとサジェストがクリアされること`() = runTest {
+    fun `search - Hashプレフィックスから通常テキストに戻るとサジェストがクリアされること`() = runTest {
         fakeTagRepository.suggestTagsResult = Result.success(sampleTags)
         viewModel.search("#AI")
         advanceUntilIdle()
@@ -310,7 +310,7 @@ class DiscoverViewModelTest : MainDispatcherRule() {
     }
 
     @Test
-    fun `submitSearch - #プレフィックスでサジェスト一致タグが選択されること`() = runTest {
+    fun `submitSearch - Hashプレフィックスでサジェスト一致タグが選択されること`() = runTest {
         fakeTagRepository.suggestTagsResult = Result.success(sampleTags)
         fakeTagRepository.getNodesByTagNameResult = Result.success(sampleNodes)
 
@@ -328,7 +328,7 @@ class DiscoverViewModelTest : MainDispatcherRule() {
     }
 
     @Test
-    fun `submitSearch - #プレフィックスでサジェスト不一致時に直接タグ名検索されること`() = runTest {
+    fun `submitSearch - Hashプレフィックスでサジェスト不一致時に直接タグ名検索されること`() = runTest {
         fakeTagRepository.suggestTagsResult = Result.success(emptyList())
         fakeTagRepository.getNodesByTagNameResult = Result.success(sampleNodes)
 

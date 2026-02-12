@@ -1,7 +1,9 @@
 package io.github.witsisland.inspirehub.data.source
 
 import io.github.witsisland.inspirehub.data.dto.ReactionSummaryDto
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 class MockReactionDataSource : ReactionDataSource {
 
     private data class ReactionState(

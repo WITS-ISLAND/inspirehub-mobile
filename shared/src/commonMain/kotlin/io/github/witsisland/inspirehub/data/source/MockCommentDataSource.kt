@@ -1,7 +1,9 @@
 package io.github.witsisland.inspirehub.data.source
 
 import io.github.witsisland.inspirehub.data.dto.CommentDto
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 class MockCommentDataSource : CommentDataSource {
 
     private val comments: MutableList<CommentDto> = mutableListOf()

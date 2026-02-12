@@ -1,10 +1,12 @@
 package io.github.witsisland.inspirehub.domain.repository
 
 import io.github.witsisland.inspirehub.domain.model.User
+import kotlin.native.HiddenFromObjC
 
 /**
  * ユーザーリポジトリ
  */
+@HiddenFromObjC
 interface UserRepository {
     /**
      * ユーザープロフィールを更新

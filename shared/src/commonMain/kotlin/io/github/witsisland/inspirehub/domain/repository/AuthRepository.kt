@@ -1,10 +1,12 @@
 package io.github.witsisland.inspirehub.domain.repository
 
 import io.github.witsisland.inspirehub.domain.model.User
+import kotlin.native.HiddenFromObjC
 
 /**
  * 認証リポジトリ
  */
+@HiddenFromObjC
 interface AuthRepository {
     /**
      * Google ID Tokenを検証してログイン（SDK方式）

@@ -2,10 +2,12 @@ package io.github.witsisland.inspirehub.data.source
 
 import io.github.witsisland.inspirehub.data.dto.TokenResponseDto
 import io.github.witsisland.inspirehub.data.dto.UserDto
+import kotlin.native.HiddenFromObjC
 
 /**
  * 認証データソースインターフェース
  */
+@HiddenFromObjC
 interface AuthDataSource {
     /**
      * Google ID Tokenを検証してトークンを取得（SDK方式）

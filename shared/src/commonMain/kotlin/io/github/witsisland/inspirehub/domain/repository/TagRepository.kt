@@ -2,10 +2,12 @@ package io.github.witsisland.inspirehub.domain.repository
 
 import io.github.witsisland.inspirehub.domain.model.Node
 import io.github.witsisland.inspirehub.domain.model.Tag
+import kotlin.native.HiddenFromObjC
 
 /**
  * タグリポジトリ
  */
+@HiddenFromObjC
 interface TagRepository {
     /**
      * 人気タグ一覧を取得

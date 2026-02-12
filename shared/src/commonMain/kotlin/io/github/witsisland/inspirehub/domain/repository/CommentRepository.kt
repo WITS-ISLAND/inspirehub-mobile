@@ -1,11 +1,13 @@
 package io.github.witsisland.inspirehub.domain.repository
 
 import io.github.witsisland.inspirehub.domain.model.Comment
+import kotlin.native.HiddenFromObjC
 
 /**
  * コメントリポジトリ
  * ノードに紐づくコメントのCRUD操作を提供
  */
+@HiddenFromObjC
 interface CommentRepository {
     /**
      * ノードのコメント一覧を取得

@@ -1,10 +1,12 @@
 package io.github.witsisland.inspirehub.data.source
 
 import io.github.witsisland.inspirehub.data.dto.CommentDto
+import kotlin.native.HiddenFromObjC
 
 /**
  * コメントデータソースインターフェース
  */
+@HiddenFromObjC
 interface CommentDataSource {
     /**
      * ノードのコメント一覧を取得

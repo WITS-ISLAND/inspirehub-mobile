@@ -10,10 +10,12 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import kotlin.native.HiddenFromObjC
 
 /**
  * Ktor Client を使用した AuthDataSource 実装
  */
+@HiddenFromObjC
 class KtorAuthDataSource(
     private val httpClient: HttpClient
 ) : AuthDataSource {

@@ -7,10 +7,12 @@ import io.github.witsisland.inspirehub.data.storage.TokenStorage
 import io.github.witsisland.inspirehub.domain.model.User
 import io.github.witsisland.inspirehub.domain.repository.AuthRepository
 import io.github.witsisland.inspirehub.domain.store.UserStore
+import kotlin.native.HiddenFromObjC
 
 /**
  * AuthRepository の実装
  */
+@HiddenFromObjC
 class AuthRepositoryImpl(
     private val authDataSource: AuthDataSource,
     private val userStore: UserStore,

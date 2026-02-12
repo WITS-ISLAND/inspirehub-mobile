@@ -2,7 +2,9 @@ package io.github.witsisland.inspirehub.domain.repository
 
 import io.github.witsisland.inspirehub.domain.model.Node
 import io.github.witsisland.inspirehub.domain.model.NodeType
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 class FakeNodeRepository : NodeRepository {
 
     var nodes: MutableList<Node> = mutableListOf()

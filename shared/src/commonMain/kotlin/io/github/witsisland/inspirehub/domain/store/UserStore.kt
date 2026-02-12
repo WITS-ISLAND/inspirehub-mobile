@@ -4,11 +4,13 @@ import io.github.witsisland.inspirehub.domain.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlin.native.HiddenFromObjC
 
 /**
  * ユーザー認証状態を管理するStore
  * シングルトンで画面を跨いでユーザー情報とトークンを保持
  */
+@HiddenFromObjC
 class UserStore {
     private val _currentUser = MutableStateFlow<User?>(null)
     val currentUser: StateFlow<User?> = _currentUser.asStateFlow()

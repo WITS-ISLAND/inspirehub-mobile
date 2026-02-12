@@ -2,10 +2,12 @@ package io.github.witsisland.inspirehub.data.source
 
 import io.github.witsisland.inspirehub.data.dto.NodeDto
 import io.github.witsisland.inspirehub.data.dto.TagDto
+import kotlin.native.HiddenFromObjC
 
 /**
  * タグデータソースインターフェース
  */
+@HiddenFromObjC
 interface TagDataSource {
     /**
      * 人気タグ一覧を取得

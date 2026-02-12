@@ -15,6 +15,7 @@ import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import kotlin.native.HiddenFromObjC
 import co.touchlab.kermit.Logger as KermitLogger
 
 /**
@@ -22,6 +23,7 @@ import co.touchlab.kermit.Logger as KermitLogger
  *
  * API: /nodes
  */
+@HiddenFromObjC
 class KtorNodeDataSource(
     private val httpClient: HttpClient
 ) : NodeDataSource {

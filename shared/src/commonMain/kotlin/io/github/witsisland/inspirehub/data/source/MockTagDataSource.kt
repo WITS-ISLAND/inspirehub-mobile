@@ -2,7 +2,9 @@ package io.github.witsisland.inspirehub.data.source
 
 import io.github.witsisland.inspirehub.data.dto.NodeDto
 import io.github.witsisland.inspirehub.data.dto.TagDto
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 class MockTagDataSource : TagDataSource {
 
     private val tags: List<TagDto> = listOf(
