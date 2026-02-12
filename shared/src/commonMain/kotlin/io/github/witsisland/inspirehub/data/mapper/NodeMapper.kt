@@ -10,6 +10,16 @@ import io.github.witsisland.inspirehub.domain.model.ParentNode
 import io.github.witsisland.inspirehub.domain.model.ReactionSummary
 import io.github.witsisland.inspirehub.domain.model.Reactions
 
+/**
+ * [NodeDto] から [Node] ドメインモデルへの変換
+ *
+ * 変換時の注意点:
+ * - [NodeDto.type]: 小文字文字列 → [NodeType] enum。未知の値は [NodeType.IDEA] にフォールバック
+ * - [NodeDto.content]: null → 空文字
+ * - [NodeDto.authorName]: null → 空文字
+ * - [NodeDto.tags]: [TagDto] のリストから名前のみ抽出して [Node.tagIds] にマッピング
+ *   （フィールド名は "tagIds" だが実際にはタグ名のリスト）
+ */
 fun NodeDto.toDomain(): Node {
     return Node(
         id = id,
@@ -33,6 +43,11 @@ fun NodeDto.toDomain(): Node {
     )
 }
 
+/**
+ * [ParentNodeDto] から [ParentNode] ドメインモデルへの変換
+ *
+ * [NodeDto.toDomain] と同じ [NodeType] 変換ロジックを使用。
+ */
 fun ParentNodeDto.toDomain(): ParentNode {
     return ParentNode(
         id = id,
@@ -47,6 +62,9 @@ fun ParentNodeDto.toDomain(): ParentNode {
     )
 }
 
+/**
+ * [ReactionsDto] から [Reactions] ドメインモデルへの変換
+ */
 fun ReactionsDto.toDomain(): Reactions {
     return Reactions(
         like = like.toDomain(),
@@ -55,6 +73,9 @@ fun ReactionsDto.toDomain(): Reactions {
     )
 }
 
+/**
+ * [ReactionSummaryDto] から [ReactionSummary] ドメインモデルへの変換
+ */
 fun ReactionSummaryDto.toDomain(): ReactionSummary {
     return ReactionSummary(
         count = count,

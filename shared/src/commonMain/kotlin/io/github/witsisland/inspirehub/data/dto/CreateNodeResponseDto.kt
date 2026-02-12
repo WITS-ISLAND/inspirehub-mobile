@@ -3,10 +3,14 @@ package io.github.witsisland.inspirehub.data.dto
 import kotlinx.serialization.Serializable
 
 /**
- * POST /nodes のレスポンス (201 Created)
+ * `POST /nodes` のレスポンスDTO (HTTP 201 Created)
  *
- * APIはノードの完全なデータではなく、作成されたノードのIDとメッセージのみ返す。
- * 完全なノードデータが必要な場合は GET /nodes/{id} で別途取得する。
+ * ノード作成成功時に返却される。完全なノードデータは含まれず、
+ * 作成されたノードのIDとメッセージのみ。詳細が必要な場合は
+ * `GET /nodes/{id}` で別途取得する。
+ *
+ * @property id 作成されたノードの一意識別子
+ * @property message 作成成功メッセージ（例: "Node created successfully"）
  */
 @Serializable
 data class CreateNodeResponseDto(
