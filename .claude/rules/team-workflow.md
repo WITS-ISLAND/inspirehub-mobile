@@ -13,8 +13,11 @@ globs: ["**/*"]
 
 1. **エージェントspawn前にworktreeを作成**
    ```bash
-   git worktree add ~/.claude-worktrees/inspirehub-mobile/<branch-name> -b <branch-name>
+   # 必ず origin/main から作成すること
+   git worktree add ~/.claude-worktrees/inspirehub-mobile/<branch-name> -b <branch-name> origin/main
    ```
+   **重要**: `origin/main` を指定することで、常に最新のリモートmainから分岐する。
+   ローカルmainの状態に依存せず、安全で予測可能。
 
 2. **ブランチ命名規則**: `feat/<stream>-<概要>` or `test/<stream>-<概要>`
    - 例: `feat/stream-a-domain-model`, `test/stream-c-viewmodel-tests`, `feat/stream-d-ios-ui`
@@ -25,18 +28,22 @@ globs: ["**/*"]
    - 作業ディレクトリとして worktree パスを明示
 
 5. **マージ戦略**:
-   - 依存関係のあるストリームは、先行ストリームのブランチからworktreeを作成
+   - 通常: `origin/main` から作成
+   - 依存関係のあるストリームは、先行ストリームのブランチから作成
+     ```bash
+     git worktree add ~/.claude-worktrees/inspirehub-mobile/<branch-name> -b <branch-name> <parent-branch>
+     ```
    - 完了後は main にマージ（team-leadまたはユーザーが実施）
    - マージ順序は依存グラフに従う
 
 ### 例: 3エージェント体制
 
 ```bash
-# kotlin-dev-1: shared層の基盤開発
-git worktree add ~/.claude-worktrees/inspirehub-mobile/feat/stream-a-shared -b feat/stream-a-shared
+# kotlin-dev-1: shared層の基盤開発（origin/mainから作成）
+git worktree add ~/.claude-worktrees/inspirehub-mobile/feat/stream-a-shared -b feat/stream-a-shared origin/main
 
-# kotlin-dev-2: テスト開発
-git worktree add ~/.claude-worktrees/inspirehub-mobile/test/stream-c-tests -b test/stream-c-tests
+# kotlin-dev-2: テスト開発（origin/mainから作成）
+git worktree add ~/.claude-worktrees/inspirehub-mobile/test/stream-c-tests -b test/stream-c-tests origin/main
 
 # ios-dev-1: iOS UI開発（shared層の成果物に依存する場合、stream-aブランチから派生）
 git worktree add ~/.claude-worktrees/inspirehub-mobile/feat/stream-d-ios-ui -b feat/stream-d-ios-ui feat/stream-a-shared
