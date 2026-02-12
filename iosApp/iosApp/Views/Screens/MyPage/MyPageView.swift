@@ -39,7 +39,7 @@ struct MyPageView: View {
 
     private var profileSection: some View {
         VStack(spacing: 12) {
-            if let user = viewModel.currentUser as? User {
+            if let user = viewModel.currentUser {
                 UserAvatarView(pictureURL: user.picture, size: 72)
             } else {
                 Image(systemName: "person.circle.fill")
@@ -47,8 +47,8 @@ struct MyPageView: View {
                     .foregroundColor(.appPrimary)
             }
 
-            if let user = viewModel.currentUser as? User {
-                if viewModel.isEditingName as? Bool == true {
+            if let user = viewModel.currentUser {
+                if viewModel.isEditingName == true {
                     nameEditingView
                 } else {
                     nameDisplayView(user: user)
@@ -68,7 +68,7 @@ struct MyPageView: View {
                     .foregroundColor(.secondary)
             }
 
-            if let error = viewModel.error as? String {
+            if let error = viewModel.error {
                 Text(error)
                     .font(.caption)
                     .foregroundColor(.red)
@@ -98,7 +98,7 @@ struct MyPageView: View {
             TextField(
                 "名前を入力",
                 text: Binding(
-                    get: { viewModel.editingName as? String ?? "" },
+                    get: { viewModel.editingName },
                     set: { viewModel.updateEditingName(name: $0) }
                 )
             )
@@ -115,10 +115,10 @@ struct MyPageView: View {
                     viewModel.updateUserName()
                 }
                 .fontWeight(.semibold)
-                .disabled(viewModel.isUpdatingName as? Bool == true)
+                .disabled(viewModel.isUpdatingName == true)
             }
 
-            if viewModel.isUpdatingName as? Bool == true {
+            if viewModel.isUpdatingName == true {
                 ProgressView()
             }
         }
@@ -127,7 +127,7 @@ struct MyPageView: View {
     // MARK: - My Nodes Section
 
     private var myNodes: [Node] {
-        viewModel.myNodes as? [Node] ?? []
+        viewModel.myNodes
     }
 
     private var myNodesSection: some View {
@@ -141,7 +141,7 @@ struct MyPageView: View {
             }
             .padding(.horizontal, 16)
 
-            if viewModel.isLoading as? Bool == true && myNodes.isEmpty {
+            if viewModel.isLoading == true && myNodes.isEmpty {
                 HStack {
                     Spacer()
                     ProgressView()
@@ -166,7 +166,7 @@ struct MyPageView: View {
     // MARK: - Reacted Nodes Section
 
     private var reactedNodes: [Node] {
-        viewModel.reactedNodes as? [Node] ?? []
+        viewModel.reactedNodes
     }
 
     private var reactedNodesSection: some View {

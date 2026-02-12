@@ -57,11 +57,11 @@ struct HomeView: View {
     var onNodeTap: ((Node) -> Void)?
 
     private var isLoading: Bool {
-        viewModel.isLoading as? Bool == true
+        viewModel.isLoading == true
     }
 
     private var errorMessage: String? {
-        viewModel.error as? String
+        viewModel.error
     }
 
     var body: some View {
@@ -125,8 +125,7 @@ struct HomeView: View {
     }
 
     private func isCurrentTab(_ tab: HomeTabUI) -> Bool {
-        guard let currentTab = viewModel.currentTab as? HomeTab else { return false }
-        return currentTab == tab.kotlinTab
+        return viewModel.currentTab == tab.kotlinTab
     }
 
     // MARK: - Sort Menu
@@ -152,14 +151,13 @@ struct HomeView: View {
     }
 
     private func isCurrentSortOrder(_ order: SortOrderUI) -> Bool {
-        guard let currentOrder = viewModel.sortOrder as? Shared.SortOrder else { return false }
-        return currentOrder == order.kotlinOrder
+        return viewModel.sortOrder == order.kotlinOrder
     }
 
     // MARK: - Node List
 
     private var nodes: [Node] {
-        viewModel.nodes as? [Node] ?? []
+        viewModel.nodes
     }
 
     private var nodeList: some View {

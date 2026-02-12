@@ -73,15 +73,15 @@ struct DiscoverView: View {
     }
 
     private var searchResults: [Node] {
-        viewModel.searchResults as? [Node] ?? []
+        viewModel.searchResults
     }
 
     private var popularTags: [Tag] {
-        viewModel.popularTags as? [Tag] ?? []
+        viewModel.popularTags
     }
 
     private var popularNodes: [Node] {
-        viewModel.popularNodes as? [Node] ?? []
+        viewModel.popularNodes
     }
 
     private var selectedTag: Tag? {
@@ -89,15 +89,15 @@ struct DiscoverView: View {
     }
 
     private var tagNodes: [Node] {
-        viewModel.tagNodes as? [Node] ?? []
+        viewModel.tagNodes
     }
 
     private var tagSuggestions: [Tag] {
-        viewModel.tagSuggestions as? [Tag] ?? []
+        viewModel.tagSuggestions
     }
 
     private var isLoading: Bool {
-        viewModel.isLoading as? Bool ?? false
+        viewModel.isLoading == true
     }
 
     // MARK: - Tag Suggestions Section

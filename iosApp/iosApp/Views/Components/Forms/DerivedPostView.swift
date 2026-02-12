@@ -13,13 +13,13 @@ struct DerivedPostView: View {
 
     @State private var tagInput: String = ""
 
-    private var title: String { viewModel.title as? String ?? "" }
-    private var content: String { viewModel.content as? String ?? "" }
-    private var tags: [String] { viewModel.tags as? [String] ?? [] }
-    private var isSubmitting: Bool { viewModel.isSubmitting as? Bool ?? false }
-    private var error: String? { viewModel.error as? String }
-    private var isSuccess: Bool { viewModel.isSuccess as? Bool ?? false }
-    private var isValid: Bool { viewModel.isValid as? Bool ?? false }
+    private var title: String { viewModel.title }
+    private var content: String { viewModel.content }
+    private var tags: [String] { viewModel.tags }
+    private var isSubmitting: Bool { viewModel.isSubmitting }
+    private var error: String? { viewModel.error }
+    private var isSuccess: Bool { viewModel.isSuccess }
+    private var isValid: Bool { viewModel.isValid }
 
     var body: some View {
         NavigationStack {

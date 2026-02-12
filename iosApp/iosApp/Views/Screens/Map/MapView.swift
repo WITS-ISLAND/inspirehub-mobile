@@ -10,11 +10,11 @@ struct MapView: View {
     @StateViewModel var viewModel = KoinHelper().getMapViewModel()
 
     private var isLoading: Bool {
-        viewModel.isLoading as? Bool == true
+        viewModel.isLoading == true
     }
 
     private var errorMessage: String? {
-        viewModel.error as? String
+        viewModel.error
     }
 
     var body: some View {
@@ -56,7 +56,7 @@ struct MapView: View {
     }
 
     private var nodes: [Node] {
-        viewModel.nodes as? [Node] ?? []
+        viewModel.nodes
     }
 
     private var nodeList: some View {

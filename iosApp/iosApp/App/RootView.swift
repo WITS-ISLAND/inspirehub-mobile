@@ -49,7 +49,7 @@ struct RootView: View {
     @State private var showLoginSheet = false
 
     private var isAuth: Bool {
-        viewModel.isAuthenticated as? Bool ?? false
+        viewModel.isAuthenticated == true
     }
 
     var body: some View {
@@ -60,7 +60,7 @@ struct RootView: View {
             }
         )
         .environment(\.isAuthenticated, isAuth)
-        .environment(\.currentUserId, (viewModel.currentUser as? User)?.id)
+        .environment(\.currentUserId, viewModel.currentUser?.id)
         .environment(\.loginRequired, { showLoginSheet = true })
         .sheet(isPresented: $showLoginSheet) {
             NavigationStack {

@@ -35,22 +35,22 @@ struct DetailView: View {
 
     var body: some View {
         ZStack {
-            if viewModel.isDeleted as? Bool == true {
+            if viewModel.isDeleted == true {
                 deletedView
             } else if let node = viewModel.selectedNode {
-                if viewModel.isEditing as? Bool == true {
+                if viewModel.isEditing == true {
                     DetailEditView(
                         node: node,
                         editTitle: Binding(
-                            get: { viewModel.editTitle as? String ?? "" },
+                            get: { viewModel.editTitle },
                             set: { viewModel.updateEditTitle(title: $0) }
                         ),
                         editContent: Binding(
-                            get: { viewModel.editContent as? String ?? "" },
+                            get: { viewModel.editContent },
                             set: { viewModel.updateEditContent(content: $0) }
                         ),
                         error: viewModel.error,
-                        isLoading: viewModel.isLoading as? Bool ?? false
+                        isLoading: viewModel.isLoading
                     )
                 } else {
                     nodeDetailContent(node: node)
@@ -72,10 +72,10 @@ struct DetailView: View {
                 ProgressView("読み込み中...")
             }
         }
-        .navigationTitle(viewModel.isEditing as? Bool == true ? "編集" : "詳細")
+        .navigationTitle(viewModel.isEditing == true ? "編集" : "詳細")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if isOwner && viewModel.isEditing as? Bool != true && viewModel.isDeleted as? Bool != true {
+            if isOwner && viewModel.isEditing != true && viewModel.isDeleted != true {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         Button(action: { viewModel.startEditing() }) {
@@ -89,7 +89,7 @@ struct DetailView: View {
                     }
                 }
             }
-            if viewModel.isEditing as? Bool == true {
+            if viewModel.isEditing == true {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("キャンセル") {
                         viewModel.cancelEditing()
@@ -101,8 +101,8 @@ struct DetailView: View {
                     }
                     .fontWeight(.semibold)
                     .disabled(
-                        (viewModel.editTitle as? String ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                            || viewModel.isLoading as? Bool == true
+                        viewModel.editTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                            || viewModel.isLoading == true
                     )
                 }
             }
@@ -170,14 +170,14 @@ struct DetailView: View {
 
                     DetailDerivationTreeView(
                         parentNode: node.parentNode,
-                        childNodes: viewModel.childNodes as? [Node] ?? []
+                        childNodes: viewModel.childNodes
                     )
 
                     DetailCommentsView(
-                        comments: viewModel.comments as? [Comment] ?? [],
+                        comments: viewModel.comments,
                         currentUserId: currentUserId,
-                        editingCommentId: viewModel.editingCommentId as? String,
-                        editCommentText: viewModel.editCommentText as? String ?? "",
+                        editingCommentId: viewModel.editingCommentId,
+                        editCommentText: viewModel.editCommentText,
                         onStartEditing: { comment in viewModel.startEditingComment(comment: comment) },
                         onCancelEditing: { viewModel.cancelEditingComment() },
                         onUpdateEditText: { text in viewModel.updateEditCommentText(text: text) },
