@@ -1,3 +1,8 @@
+---
+description: Rules for team collaboration workflow, git worktree usage, and PR creation
+globs: ["**/*"]
+---
+
 # チーム開発ワークフロールール
 
 ## Git Worktree によるエージェント分離（必須）

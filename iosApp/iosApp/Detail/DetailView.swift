@@ -7,10 +7,15 @@ import SwiftUI
 // MARK: - DetailView
 
 struct DetailView: View {
+    /// 表示するノードのID
     let nodeId: String
+    /// 詳細画面のViewModel
     @StateViewModel var viewModel = KoinHelper().getDetailViewModel()
+    /// 削除確認アラート表示フラグ
     @State private var showDeleteAlert = false
+    /// コメント削除確認アラート表示フラグ
     @State private var showDeleteCommentAlert = false
+    /// 削除対象のコメントID
     @State private var commentToDelete: String?
     @Environment(\.isAuthenticated) private var isAuthenticated
     @Environment(\.currentUserId) private var currentUserId

@@ -42,7 +42,11 @@ escape_json() {
 }
 
 COMMITS_ESCAPED=$(escape_json "$RECENT_COMMITS")
-SHORT_COMMIT=$(echo "${CI_COMMIT:-unknown}" | cut -c1-7)
+
+# ブランチ情報を取得（CI_GIT_REFの方がより正確）
+BRANCH_NAME="${CI_GIT_REF:-${CI_BRANCH:-unknown}}"
+# refs/heads/ プレフィックスを削除
+BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's|^refs/heads/||')
 
 # --- ビルド結果を判定 ---
 if [ "$CI_XCODEBUILD_EXIT_CODE" = "0" ]; then
@@ -67,11 +71,9 @@ PAYLOAD=$(cat <<ENDJSON
     "description": "${DESCRIPTION}",
     "color": ${COLOR},
     "fields": [
-      { "name": "🌿 Branch", "value": "\`${CI_BRANCH:-unknown}\`", "inline": true },
-      { "name": "🔢 Build", "value": "#${CI_BUILD_NUMBER:-N/A}", "inline": true },
-      { "name": "🛠 Xcode", "value": "${CI_XCODE_VERSION:-unknown}", "inline": true },
-      { "name": "📝 Commit", "value": "\`${SHORT_COMMIT}\`", "inline": true },
       { "name": "⚙️ Workflow", "value": "${CI_WORKFLOW:-default}", "inline": true },
+      { "name": "🌿 Branch", "value": "\`${BRANCH_NAME}\`", "inline": true },
+      { "name": "🔢 Build", "value": "#${CI_BUILD_NUMBER:-N/A}", "inline": true },
       { "name": "📋 直近の変更", "value": "${COMMITS_ESCAPED}", "inline": false }
     ],
     "footer": { "text": "Xcode Cloud ☁️ | InspireHub Mobile" },

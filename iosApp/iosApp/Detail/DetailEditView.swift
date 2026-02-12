@@ -5,10 +5,15 @@ import SwiftUI
 // MARK: - DetailEditView
 
 struct DetailEditView: View {
+    /// 編集するノード情報
     let node: Node
+    /// 編集中のタイトル（双方向バインディング）
     @Binding var editTitle: String
+    /// 編集中の本文（双方向バインディング）
     @Binding var editContent: String
+    /// エラーメッセージ
     let error: String?
+    /// 読み込み中フラグ
     let isLoading: Bool
 
     var body: some View {

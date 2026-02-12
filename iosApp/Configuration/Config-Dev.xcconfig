@@ -3,3 +3,7 @@
 // Dev版のオーバーライド
 PRODUCT_NAME=DEV-InspireHub
 PRODUCT_BUNDLE_IDENTIFIER=io.github.witsisland.inspirehub.InspireHubMobile.dev$(TEAM_ID)
+
+// Kotlin Framework Build Type for Dev configurations
+KOTLIN_FRAMEWORK_BUILD_TYPE[config=Debug-Dev]=debug
+KOTLIN_FRAMEWORK_BUILD_TYPE[config=Release-Dev]=release

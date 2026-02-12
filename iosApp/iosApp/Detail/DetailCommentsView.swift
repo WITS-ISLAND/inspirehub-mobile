@@ -5,14 +5,23 @@ import SwiftUI
 // MARK: - DetailCommentsView
 
 struct DetailCommentsView: View {
+    /// コメント一覧
     let comments: [Comment]
+    /// 現在ログイン中のユーザーID
     let currentUserId: String?
+    /// 編集中のコメントID
     let editingCommentId: String?
+    /// 編集中のコメントテキスト
     let editCommentText: String
+    /// コメント編集開始時のコールバック
     let onStartEditing: (Comment) -> Void
+    /// コメント編集キャンセル時のコールバック
     let onCancelEditing: () -> Void
+    /// コメントテキスト更新時のコールバック
     let onUpdateEditText: (String) -> Void
+    /// コメント保存時のコールバック
     let onSaveEdit: () -> Void
+    /// コメント削除リクエスト時のコールバック
     let onRequestDelete: (String) -> Void
 
     var body: some View {
@@ -69,8 +78,7 @@ struct DetailCommentsView: View {
     private func displayCommentRow(comment: Comment) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 4) {
-                Image(systemName: "person.circle")
-                    .foregroundColor(.secondary)
+                UserAvatarView(pictureURL: comment.authorPicture, size: 20)
                 Text(comment.authorName)
                     .font(.caption)
                     .fontWeight(.semibold)
@@ -106,8 +114,7 @@ struct DetailCommentsView: View {
     private func editingCommentRow(comment: Comment) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Image(systemName: "person.circle")
-                    .foregroundColor(.secondary)
+                UserAvatarView(pictureURL: comment.authorPicture, size: 20)
                 Text(comment.authorName)
                     .font(.caption)
                     .fontWeight(.semibold)

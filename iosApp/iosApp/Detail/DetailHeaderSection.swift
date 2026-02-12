@@ -5,6 +5,7 @@ import SwiftUI
 // MARK: - DetailHeaderSection
 
 struct DetailHeaderSection: View {
+    /// 表示するノード情報
     let node: Node
 
     var body: some View {
@@ -75,9 +76,7 @@ struct DetailHeaderSection: View {
         VStack(alignment: .leading, spacing: 4) {
             Divider()
             HStack(spacing: 6) {
-                Image(systemName: "person")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                UserAvatarView(pictureURL: node.authorPicture, size: 16)
                 Text(node.authorName)
                     .font(.caption)
                     .foregroundColor(.secondary)

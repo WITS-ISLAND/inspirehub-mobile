@@ -39,9 +39,13 @@ struct MyPageView: View {
 
     private var profileSection: some View {
         VStack(spacing: 12) {
-            Image(systemName: "person.circle.fill")
-                .font(.system(size: 72))
-                .foregroundColor(.appPrimary)
+            if let user = viewModel.currentUser as? User {
+                UserAvatarView(pictureURL: user.picture, size: 72)
+            } else {
+                Image(systemName: "person.circle.fill")
+                    .font(.system(size: 72))
+                    .foregroundColor(.appPrimary)
+            }
 
             if let user = viewModel.currentUser as? User {
                 if viewModel.isEditingName as? Bool == true {

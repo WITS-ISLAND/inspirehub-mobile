@@ -5,10 +5,15 @@ import SwiftUI
 // MARK: - DetailReactionBar
 
 struct DetailReactionBar: View {
+    /// 表示するノード情報
     let node: Node
+    /// ログイン状態
     let isAuthenticated: Bool
+    /// ログイン要求時のコールバック
     let onLoginRequired: () -> Void
+    /// リアクション切り替え時のコールバック
     let onToggleReaction: (ReactionType) -> Void
+    /// 派生投稿シート表示フラグ
     @State private var showDerivedPost = false
 
     var body: some View {

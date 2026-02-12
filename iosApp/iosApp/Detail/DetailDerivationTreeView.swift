@@ -5,7 +5,9 @@ import SwiftUI
 // MARK: - DetailDerivationTreeView
 
 struct DetailDerivationTreeView: View {
+    /// 親ノード情報（派生元）
     let parentNode: ParentNode?
+    /// 子ノード一覧（派生先）
     let childNodes: [Node]
 
     private var hasParent: Bool { parentNode != nil }
