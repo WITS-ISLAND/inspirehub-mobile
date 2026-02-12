@@ -131,6 +131,10 @@ struct DerivedPostView: View {
         tagInput = ""
     }
 }
-#Preview("DerivedPostView") {
-    DerivedPostView(parentNode: PreviewData.sampleIssueNode)
-}
+
+// NOTE: DerivedPostView全体のPreviewはKoinHelper依存のため現状では動作しません。
+// TODO: Preview用のMock ViewModelを作成して画面全体のPreviewを有効化
+
+// #Preview("DerivedPostView") {
+//     DerivedPostView(parentNode: PreviewData.sampleIssueNode)
+// }

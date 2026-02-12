@@ -261,8 +261,12 @@ struct MyPageView: View {
         }
     }
 }
-#Preview("MyPageView") {
-    NavigationStack {
-        MyPageView()
-    }
-}
+
+// NOTE: MyPageView全体のPreviewはKoinHelper依存のため現状では動作しません。
+// TODO: Preview用のMock ViewModelを作成して画面全体のPreviewを有効化
+
+// #Preview("MyPageView") {
+//     NavigationStack {
+//         MyPageView()
+//     }
+// }

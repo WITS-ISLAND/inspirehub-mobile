@@ -84,6 +84,9 @@ struct RootView: View {
 
 // MARK: - Preview
 
-#Preview("RootView") {
-    RootView()
-}
+// NOTE: RootView全体のPreviewはKoinHelper依存のため現状では動作しません。
+// TODO: Preview用のMock ViewModelを作成して画面全体のPreviewを有効化
+
+// #Preview("RootView") {
+//     RootView()
+// }

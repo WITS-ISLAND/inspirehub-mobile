@@ -145,12 +145,19 @@ struct MainTabView: View {
         .padding()
     }
 }
-#Preview("MainTabView") {
-    MainTabView(isAuthenticated: true, onLoginRequired: {})
-}
-#Preview("MainTabView - Unauthenticated") {
-    MainTabView(isAuthenticated: false, onLoginRequired: {})
-}
+
+// NOTE: MainTabViewのPreviewはHomeView/DiscoverView/MyPageViewを内包するため、
+// それらがKoinHelper依存でPreview不可の場合、MainTabView全体も動作しません。
+// PostTypeSelectSheetは独立したコンポーネントなので動作する可能性があります。
+// TODO: Preview用のMock ViewModelを作成してMainTabViewのPreviewを有効化
+
+// #Preview("MainTabView") {
+//     MainTabView(isAuthenticated: true, onLoginRequired: {})
+// }
+// #Preview("MainTabView - Unauthenticated") {
+//     MainTabView(isAuthenticated: false, onLoginRequired: {})
+// }
+
 #Preview("PostTypeSelectSheet") {
     PostTypeSelectSheet(
         onIssueSelected: {},

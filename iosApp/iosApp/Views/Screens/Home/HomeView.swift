@@ -344,11 +344,15 @@ struct NodeCardView: View {
 
 // MARK: - Preview
 
-#Preview("HomeView") {
-    NavigationStack {
-        HomeView()
-    }
-}
+// NOTE: HomeView全体のPreviewはKoinHelper依存のため現状では動作しません。
+// 個別コンポーネント（NodeCardView）のPreviewは動作します。
+// TODO: Preview用のMock ViewModelを作成して画面全体のPreviewを有効化
+
+// #Preview("HomeView") {
+//     NavigationStack {
+//         HomeView()
+//     }
+// }
 
 #Preview("NodeCardView") {
     NodeCardView(node: PreviewData.sampleNode)
@@ -358,72 +362,4 @@ struct NodeCardView: View {
 #Preview("NodeCardView - Derived") {
     NodeCardView(node: PreviewData.sampleDerivedNode)
         .padding()
-}
-
-enum PreviewData {
-    static var sampleNode: Node {
-        Node(
-            id: "preview-1",
-            type: .idea,
-            title: "サンプルアイデア",
-            content: "これはプレビュー用のサンプルノードです。実際のデータではありません。",
-            authorId: "user-1",
-            authorName: "テストユーザー",
-            authorPicture: nil,
-            parentNode: nil,
-            tagIds: ["tag-1", "tag-2"],
-            reactions: Reactions(
-                like: ReactionSummary(count: 5, isReacted: true),
-                interested: ReactionSummary(count: 3, isReacted: false),
-                wantToTry: ReactionSummary(count: 1, isReacted: false)
-            ),
-            commentCount: 3,
-            createdAt: "2025-01-15T10:30:00Z",
-            updatedAt: nil
-        )
-    }
-
-    static var sampleIssueNode: Node {
-        Node(
-            id: "preview-2",
-            type: .issue,
-            title: "サンプル課題",
-            content: "リモートワークで雑談の機会が減っている。チームの一体感が薄れている。",
-            authorId: "user-2",
-            authorName: "課題提起者",
-            authorPicture: nil,
-            parentNode: nil,
-            tagIds: ["tag-3"],
-            reactions: Reactions(
-                like: ReactionSummary(count: 12, isReacted: false),
-                interested: ReactionSummary(count: 8, isReacted: true),
-                wantToTry: ReactionSummary(count: 2, isReacted: false)
-            ),
-            commentCount: 7,
-            createdAt: "2025-01-15T09:30:00Z",
-            updatedAt: nil
-        )
-    }
-
-    static var sampleDerivedNode: Node {
-        Node(
-            id: "preview-3",
-            type: .idea,
-            title: "雑談チャンネル自動生成ツール",
-            content: "曜日ごとにランダムでペアを組んで雑談チャンネルを自動生成するSlackボットを作る。",
-            authorId: "user-1",
-            authorName: "テストユーザー",
-            authorPicture: nil,
-            parentNode: ParentNode(id: "preview-2", type: .issue, title: "サンプル課題", content: "これはサンプルの課題内容です。"),
-            tagIds: ["tag-1"],
-            reactions: Reactions(
-                like: ReactionSummary(count: 8, isReacted: false),
-                interested: ReactionSummary(count: 5, isReacted: true),
-                wantToTry: ReactionSummary(count: 3, isReacted: false)
-            ),
-            commentCount: 5,
-            createdAt: "2025-01-15T11:00:00Z",
-            updatedAt: nil
-        )
-    }
 }

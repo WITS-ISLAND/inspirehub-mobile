@@ -335,8 +335,12 @@ struct DiscoverView: View {
         .padding(.vertical, 32)
     }
 }
-#Preview("DiscoverView") {
-    NavigationStack {
-        DiscoverView()
-    }
-}
+
+// NOTE: DiscoverView全体のPreviewはKoinHelper依存のため現状では動作しません。
+// TODO: Preview用のMock ViewModelを作成して画面全体のPreviewを有効化
+
+// #Preview("DiscoverView") {
+//     NavigationStack {
+//         DiscoverView()
+//     }
+// }

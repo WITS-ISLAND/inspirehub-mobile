@@ -138,6 +138,10 @@ struct IdeaPostView: View {
         viewModel.clearTagSuggestions()
     }
 }
-#Preview("IdeaPostView") {
-    IdeaPostView()
-}
+
+// NOTE: IdeaPostView全体のPreviewはKoinHelper依存のため現状では動作しません。
+// TODO: Preview用のMock ViewModelを作成して画面全体のPreviewを有効化
+
+// #Preview("IdeaPostView") {
+//     IdeaPostView()
+// }

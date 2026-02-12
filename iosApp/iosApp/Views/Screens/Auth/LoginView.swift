@@ -97,6 +97,9 @@ struct LoginView: View {
 
 // MARK: - Preview
 
-#Preview("LoginView") {
-    LoginView(viewModel: KoinHelper().getAuthViewModel())
-}
+// NOTE: LoginView全体のPreviewはKoinHelper依存のため現状では動作しません。
+// TODO: Preview用のMock ViewModelを作成して画面全体のPreviewを有効化
+
+// #Preview("LoginView") {
+//     LoginView(viewModel: KoinHelper().getAuthViewModel())
+// }

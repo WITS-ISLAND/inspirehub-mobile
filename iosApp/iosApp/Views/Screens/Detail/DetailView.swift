@@ -261,8 +261,12 @@ struct DetailView: View {
     }
 }
 
-#Preview("DetailView") {
-    NavigationStack {
-        DetailView(nodeId: "preview-1")
-    }
-}
+// NOTE: DetailView全体のPreviewはKoinHelper依存のため現状では動作しません。
+// 個別コンポーネント（DetailHeaderSection, DetailReactionBar, DetailCommentsView）のPreviewは動作します。
+// TODO: Preview用のMock ViewModelを作成して画面全体のPreviewを有効化
+
+// #Preview("DetailView") {
+//     NavigationStack {
+//         DetailView(nodeId: "preview-1")
+//     }
+// }
