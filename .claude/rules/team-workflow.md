@@ -70,10 +70,15 @@ PRを作成する前に、以下のビルドチェックを**必ず**全て通�
 # 2. Androidビルド
 ./gradlew :composeApp:assembleDebug
 
-# 3. iOSビルド
-cd iosApp && xcodebuild -project iosApp.xcodeproj -scheme iosApp \
-  -configuration Debug -destination 'generic/platform=iOS Simulator' -quiet
+# 3. iOSビルド（Xcode MCPツール使用）
+# mcp__xcode__BuildProject を使用:
+#   - project: iosApp/iosApp.xcodeproj
+#   - scheme: iosApp
+#   - configuration: Debug
+#   - destination: generic/platform=iOS Simulator
 ```
+
+**重要**: iOSビルドは**必ずXcode MCPツール**を使用すること。Bashの`xcodebuild`コマンドは使用禁止。
 
 ### ルール
 
@@ -85,6 +90,7 @@ cd iosApp && xcodebuild -project iosApp.xcodeproj -scheme iosApp \
 ### 実施方法
 
 - チームリードが直接ビルドチェックを行わず、**qa-checker エージェントに委任**する
+- qa-checkerは**必ずXcode MCPツール**を使用してiOSビルドを実行すること
 - qa-checker がビルドエラーを発見した場合は修正コミットを追加してpush
 
 ## ユーザー動作確認用コマンド（必須表示）
