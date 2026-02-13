@@ -8,9 +8,11 @@ import io.github.witsisland.inspirehub.domain.model.ParentNode
 import io.github.witsisland.inspirehub.domain.model.Reactions
 import io.github.witsisland.inspirehub.domain.model.ReactionSummary
 import io.github.witsisland.inspirehub.domain.model.ReactionType
+import io.github.witsisland.inspirehub.domain.model.Tag
 import io.github.witsisland.inspirehub.domain.repository.FakeCommentRepository
 import io.github.witsisland.inspirehub.domain.repository.FakeNodeRepository
 import io.github.witsisland.inspirehub.domain.repository.FakeReactionRepository
+import io.github.witsisland.inspirehub.domain.repository.FakeTagRepository
 import io.github.witsisland.inspirehub.domain.store.NodeStore
 import io.github.witsisland.inspirehub.test.MainDispatcherRule
 import kotlinx.coroutines.test.runTest
@@ -28,6 +30,7 @@ class DetailViewModelTest : MainDispatcherRule() {
     private lateinit var fakeNodeRepository: FakeNodeRepository
     private lateinit var fakeCommentRepository: FakeCommentRepository
     private lateinit var fakeReactionRepository: FakeReactionRepository
+    private lateinit var fakeTagRepository: FakeTagRepository
     private lateinit var nodeStore: NodeStore
 
     private val sampleNode = Node(
@@ -37,6 +40,7 @@ class DetailViewModelTest : MainDispatcherRule() {
         content = "課題の詳細内容",
         authorId = "user1",
         authorName = "テストユーザー",
+        tagIds = listOf("kotlin", "kmp"),
         reactions = Reactions(like = ReactionSummary(count = 5)),
         commentCount = 2,
         createdAt = "2026-01-20T09:00:00Z",
@@ -85,8 +89,15 @@ class DetailViewModelTest : MainDispatcherRule() {
         fakeNodeRepository = FakeNodeRepository()
         fakeCommentRepository = FakeCommentRepository()
         fakeReactionRepository = FakeReactionRepository()
+        fakeTagRepository = FakeTagRepository()
         nodeStore = NodeStore()
-        viewModel = DetailViewModel(nodeStore, fakeNodeRepository, fakeCommentRepository, fakeReactionRepository)
+        viewModel = DetailViewModel(
+            nodeStore,
+            fakeNodeRepository,
+            fakeCommentRepository,
+            fakeReactionRepository,
+            fakeTagRepository
+        )
     }
 
     @AfterTest
@@ -95,6 +106,7 @@ class DetailViewModelTest : MainDispatcherRule() {
         fakeNodeRepository.reset()
         fakeCommentRepository.reset()
         fakeReactionRepository.reset()
+        fakeTagRepository.reset()
     }
 
     @Test
@@ -302,7 +314,7 @@ class DetailViewModelTest : MainDispatcherRule() {
     // --- 編集機能のテスト ---
 
     @Test
-    fun `startEditing - 編集モードが開始されタイトルと内容がセットされること`() = runTest {
+    fun `startEditing - 編集モードが開始されタイトルと内容とタグがセットされること`() = runTest {
         nodeStore.selectNode(sampleNode)
 
         viewModel.startEditing()
@@ -310,6 +322,7 @@ class DetailViewModelTest : MainDispatcherRule() {
         assertTrue(viewModel.isEditing.value)
         assertEquals(sampleNode.title, viewModel.editTitle.value)
         assertEquals(sampleNode.content, viewModel.editContent.value)
+        assertEquals(sampleNode.tagIds, viewModel.editTags.value)
     }
 
     @Test
@@ -329,6 +342,9 @@ class DetailViewModelTest : MainDispatcherRule() {
         assertFalse(viewModel.isEditing.value)
         assertEquals("", viewModel.editTitle.value)
         assertEquals("", viewModel.editContent.value)
+        assertTrue(viewModel.editTags.value.isEmpty())
+        assertEquals("", viewModel.editTagQuery.value)
+        assertTrue(viewModel.editTagSuggestions.value.isEmpty())
     }
 
     @Test
@@ -544,5 +560,127 @@ class DetailViewModelTest : MainDispatcherRule() {
 
         assertEquals(errorMessage, viewModel.error.value)
         assertEquals(2, viewModel.comments.value.size) // 削除されない
+    }
+
+    // --- タグ編集機能のテスト ---
+
+    @Test
+    fun `addEditTag - タグが編集リストに追加されること`() = runTest {
+        nodeStore.selectNode(sampleNode)
+        viewModel.startEditing()
+
+        viewModel.addEditTag("swift")
+
+        assertEquals(3, viewModel.editTags.value.size)
+        assertTrue(viewModel.editTags.value.contains("swift"))
+    }
+
+    @Test
+    fun `addEditTag - 重複タグは追加されないこと`() = runTest {
+        nodeStore.selectNode(sampleNode)
+        viewModel.startEditing()
+
+        viewModel.addEditTag("kotlin")
+
+        assertEquals(2, viewModel.editTags.value.size) // 追加されない
+    }
+
+    @Test
+    fun `addEditTag - 空白タグは追加されないこと`() = runTest {
+        nodeStore.selectNode(sampleNode)
+        viewModel.startEditing()
+
+        viewModel.addEditTag("   ")
+
+        assertEquals(2, viewModel.editTags.value.size) // 追加されない
+    }
+
+    @Test
+    fun `addEditTag - タグ追加後にクエリと候補がクリアされること`() = runTest {
+        nodeStore.selectNode(sampleNode)
+        viewModel.startEditing()
+        viewModel.updateEditTagQuery("test")
+
+        viewModel.addEditTag("test")
+
+        assertEquals("", viewModel.editTagQuery.value)
+        assertTrue(viewModel.editTagSuggestions.value.isEmpty())
+    }
+
+    @Test
+    fun `removeEditTag - タグが編集リストから削除されること`() = runTest {
+        nodeStore.selectNode(sampleNode)
+        viewModel.startEditing()
+
+        viewModel.removeEditTag("kotlin")
+
+        assertEquals(1, viewModel.editTags.value.size)
+        assertFalse(viewModel.editTags.value.contains("kotlin"))
+        assertTrue(viewModel.editTags.value.contains("kmp"))
+    }
+
+    @Test
+    fun `updateEditTagQuery - タグ検索クエリが更新されること`() = runTest {
+        viewModel.updateEditTagQuery("swift")
+
+        assertEquals("swift", viewModel.editTagQuery.value)
+    }
+
+    @Test
+    fun `searchEditTagSuggestions - タグ候補が検索されること`() = runTest {
+        val suggestedTags = listOf(
+            Tag(id = "tag1", name = "swift", usageCount = 10, createdAt = "2026-01-01T00:00:00Z"),
+            Tag(id = "tag2", name = "swiftui", usageCount = 5, createdAt = "2026-01-01T00:00:00Z")
+        )
+        fakeTagRepository.suggestTagsResult = Result.success(suggestedTags)
+
+        viewModel.searchEditTagSuggestions("swift")
+
+        assertEquals(1, fakeTagRepository.suggestTagsCallCount)
+        assertEquals("swift", fakeTagRepository.lastSuggestTagsQuery)
+        assertEquals(2, viewModel.editTagSuggestions.value.size)
+    }
+
+    @Test
+    fun `searchEditTagSuggestions - 空クエリでは候補がクリアされること`() = runTest {
+        viewModel.searchEditTagSuggestions("")
+
+        assertTrue(viewModel.editTagSuggestions.value.isEmpty())
+        assertEquals(0, fakeTagRepository.suggestTagsCallCount)
+    }
+
+    @Test
+    fun `clearEditTagSuggestions - タグ候補がクリアされること`() = runTest {
+        val suggestedTags = listOf(
+            Tag(id = "tag1", name = "swift", usageCount = 10, createdAt = "2026-01-01T00:00:00Z")
+        )
+        fakeTagRepository.suggestTagsResult = Result.success(suggestedTags)
+        viewModel.searchEditTagSuggestions("swift")
+
+        viewModel.clearEditTagSuggestions()
+
+        assertTrue(viewModel.editTagSuggestions.value.isEmpty())
+    }
+
+    @Test
+    fun `saveEdit - タグを含めて保存されること`() = runTest {
+        nodeStore.selectNode(sampleNode)
+        viewModel.startEditing()
+        viewModel.addEditTag("swift")
+        viewModel.removeEditTag("kmp")
+
+        val updatedNode = sampleNode.copy(
+            tagIds = listOf("kotlin", "swift")
+        )
+        fakeNodeRepository.updateNodeResult = Result.success(updatedNode)
+
+        viewModel.saveEdit()
+
+        assertEquals(1, fakeNodeRepository.updateNodeCallCount)
+        assertEquals(listOf("kotlin", "swift"), fakeNodeRepository.lastUpdateNodeTags)
+        assertFalse(viewModel.isEditing.value)
+        assertTrue(viewModel.editTags.value.isEmpty())
+        assertTrue(viewModel.editTagSuggestions.value.isEmpty())
+        assertEquals("", viewModel.editTagQuery.value)
     }
 }

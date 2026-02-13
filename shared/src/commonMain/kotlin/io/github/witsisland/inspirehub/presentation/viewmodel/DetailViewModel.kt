@@ -7,10 +7,13 @@ import com.rickclephas.kmp.observableviewmodel.launch
 import io.github.witsisland.inspirehub.domain.model.Comment
 import io.github.witsisland.inspirehub.domain.model.Node
 import io.github.witsisland.inspirehub.domain.model.ReactionType
+import io.github.witsisland.inspirehub.domain.model.Tag
 import io.github.witsisland.inspirehub.domain.repository.CommentRepository
 import io.github.witsisland.inspirehub.domain.repository.NodeRepository
 import io.github.witsisland.inspirehub.domain.repository.ReactionRepository
+import io.github.witsisland.inspirehub.domain.repository.TagRepository
 import io.github.witsisland.inspirehub.domain.store.NodeStore
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,7 +26,8 @@ class DetailViewModel(
     private val nodeStore: NodeStore,
     private val nodeRepository: NodeRepository,
     private val commentRepository: CommentRepository,
-    private val reactionRepository: ReactionRepository
+    private val reactionRepository: ReactionRepository,
+    private val tagRepository: TagRepository
 ) : ViewModel() {
 
     // NodeStoreの選択状態をVM側のMutableStateFlowに転写
@@ -84,6 +88,21 @@ class DetailViewModel(
     private val _editCommentText = MutableStateFlow(viewModelScope, "")
     @NativeCoroutinesState
     val editCommentText: StateFlow<String> = _editCommentText.asStateFlow()
+
+    // タグ編集用StateFlow
+    private val _editTags = MutableStateFlow(viewModelScope, emptyList<String>())
+    @NativeCoroutinesState
+    val editTags: StateFlow<List<String>> = _editTags.asStateFlow()
+
+    private val _editTagSuggestions = MutableStateFlow<List<Tag>>(viewModelScope, emptyList())
+    @NativeCoroutinesState
+    val editTagSuggestions: StateFlow<List<Tag>> = _editTagSuggestions.asStateFlow()
+
+    private val _editTagQuery = MutableStateFlow(viewModelScope, "")
+    @NativeCoroutinesState
+    val editTagQuery: StateFlow<String> = _editTagQuery.asStateFlow()
+
+    private var tagSuggestJob: Job? = null
 
     /**
      * ノード詳細を読み込み
@@ -224,6 +243,7 @@ class DetailViewModel(
         val node = selectedNode.value ?: return
         _editTitle.value = node.title
         _editContent.value = node.content
+        _editTags.value = node.tagIds
         _isEditing.value = true
     }
 
@@ -234,6 +254,10 @@ class DetailViewModel(
         _isEditing.value = false
         _editTitle.value = ""
         _editContent.value = ""
+        _editTags.value = emptyList()
+        _editTagQuery.value = ""
+        _editTagSuggestions.value = emptyList()
+        tagSuggestJob?.cancel()
     }
 
     fun updateEditTitle(title: String) {
@@ -261,7 +285,7 @@ class DetailViewModel(
                 id = node.id,
                 title = title,
                 content = content,
-                tags = node.tagIds
+                tags = _editTags.value
             )
 
             if (result.isSuccess) {
@@ -270,6 +294,10 @@ class DetailViewModel(
                 _isEditing.value = false
                 _editTitle.value = ""
                 _editContent.value = ""
+                _editTags.value = emptyList()
+                _editTagQuery.value = ""
+                _editTagSuggestions.value = emptyList()
+                tagSuggestJob?.cancel()
             } else {
                 _error.value = result.exceptionOrNull()?.message ?: "Failed to update node"
             }
@@ -361,6 +389,57 @@ class DetailViewModel(
                 _error.value = result.exceptionOrNull()?.message ?: "Failed to delete comment"
             }
         }
+    }
+
+    /**
+     * タグを編集リストに追加
+     */
+    fun addEditTag(tag: String) {
+        val trimmedTag = tag.trim()
+        if (trimmedTag.isNotEmpty() && trimmedTag !in _editTags.value) {
+            _editTags.value = _editTags.value + trimmedTag
+        }
+        // タグ追加後は検索クエリをクリア
+        _editTagQuery.value = ""
+        _editTagSuggestions.value = emptyList()
+    }
+
+    /**
+     * タグを編集リストから削除
+     */
+    fun removeEditTag(tag: String) {
+        _editTags.value = _editTags.value - tag
+    }
+
+    /**
+     * タグ検索クエリを更新
+     */
+    fun updateEditTagQuery(query: String) {
+        _editTagQuery.value = query
+    }
+
+    /**
+     * タグサジェストを検索
+     */
+    fun searchEditTagSuggestions(query: String) {
+        if (query.isBlank()) {
+            _editTagSuggestions.value = emptyList()
+            return
+        }
+        tagSuggestJob?.cancel()
+        tagSuggestJob = viewModelScope.launch {
+            val result = tagRepository.suggestTags(query)
+            if (result.isSuccess) {
+                _editTagSuggestions.value = result.getOrThrow()
+            }
+        }
+    }
+
+    /**
+     * タグサジェストをクリア
+     */
+    fun clearEditTagSuggestions() {
+        _editTagSuggestions.value = emptyList()
     }
 
     /**

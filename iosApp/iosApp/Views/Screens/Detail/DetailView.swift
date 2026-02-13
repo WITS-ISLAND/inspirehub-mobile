@@ -49,6 +49,14 @@ struct DetailView: View {
                             get: { viewModel.editContent },
                             set: { viewModel.updateEditContent(content: $0) }
                         ),
+                        editTags: viewModel.editTags,
+                        editTagSuggestions: viewModel.editTagSuggestions,
+                        editTagQuery: viewModel.editTagQuery,
+                        onAddTag: { tag in viewModel.addEditTag(tag: tag) },
+                        onRemoveTag: { tag in viewModel.removeEditTag(tag: tag) },
+                        onUpdateTagQuery: { query in viewModel.updateEditTagQuery(query: query) },
+                        onSearchTagSuggestions: { query in viewModel.searchEditTagSuggestions(query: query) },
+                        onClearTagSuggestions: { viewModel.clearEditTagSuggestions() },
                         error: viewModel.error,
                         isLoading: viewModel.isLoading
                     )
