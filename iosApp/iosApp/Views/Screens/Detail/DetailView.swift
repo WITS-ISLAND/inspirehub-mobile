@@ -21,6 +21,8 @@ struct DetailView: View {
     @State private var showDeleteCommentAlert = false
     /// 削除対象のコメントID
     @State private var commentToDelete: String?
+    /// リアクションユーザー一覧シートの表示対象
+    @State private var reactionUsersItem: ReactionTypeItem?
     @Environment(\.isAuthenticated) private var isAuthenticated
     @Environment(\.currentUserId) private var currentUserId
     @Environment(\.loginRequired) private var loginRequired
@@ -143,6 +145,9 @@ struct DetailView: View {
         .onDisappear {
             fabHiddenBinding.wrappedValue = false
         }
+        .sheet(item: $reactionUsersItem) { item in
+            ReactionUsersView(nodeId: item.nodeId, reactionType: item.reactionType)
+        }
     }
 
     // MARK: - Deleted View
@@ -173,7 +178,10 @@ struct DetailView: View {
                         node: node,
                         isAuthenticated: isAuthenticated,
                         onLoginRequired: loginRequired,
-                        onToggleReaction: { type in viewModel.toggleReaction(type: type) }
+                        onToggleReaction: { type in viewModel.toggleReaction(type: type) },
+                        onShowReactionUsers: { type in
+                            reactionUsersItem = ReactionTypeItem(reactionType: type, nodeId: nodeId)
+                        }
                     )
 
                     DetailDerivationTreeView(

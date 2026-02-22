@@ -6,8 +6,9 @@ import SwiftUI
 
 /// ノード詳細のリアクションバー
 ///
-/// いいね・共感・気になる・作ってみたいの4種類のリアクションボタンと、
+/// いいね・気になる・やってみたいの3種類のリアクションボタンと、
 /// 派生投稿ボタンを表示する。
+/// タップでリアクションを切り替え、長押しでリアクションしたユーザー一覧シートを表示する。
 struct DetailReactionBar: View {
     /// 表示するノード情報
     let node: Node
@@ -17,6 +18,8 @@ struct DetailReactionBar: View {
     let onLoginRequired: () -> Void
     /// リアクション切り替え時のコールバック
     let onToggleReaction: (ReactionType) -> Void
+    /// リアクションユーザー一覧を表示するコールバック
+    let onShowReactionUsers: (ReactionType) -> Void
     /// 派生投稿シート表示フラグ
     @State private var showDerivedPost = false
 
@@ -35,60 +38,76 @@ struct DetailReactionBar: View {
                 emoji: "👍",
                 label: "いいね",
                 count: node.reactions.like.count,
-                isReacted: node.reactions.like.isReacted
-            ) {
-                guard isAuthenticated else {
-                    onLoginRequired()
-                    return
-                }
-                onToggleReaction(.like)
-            }
+                isReacted: node.reactions.like.isReacted,
+                type: .like
+            )
 
             reactionButton(
                 emoji: "🔥",
                 label: "気になる",
                 count: node.reactions.interested.count,
-                isReacted: node.reactions.interested.isReacted
-            ) {
-                guard isAuthenticated else {
-                    onLoginRequired()
-                    return
-                }
-                onToggleReaction(.interested)
-            }
+                isReacted: node.reactions.interested.isReacted,
+                type: .interested
+            )
 
             reactionButton(
                 emoji: "💪",
                 label: "やってみたい",
                 count: node.reactions.wantToTry.count,
-                isReacted: node.reactions.wantToTry.isReacted
-            ) {
-                guard isAuthenticated else {
-                    onLoginRequired()
-                    return
-                }
-                onToggleReaction(.wantToTry)
-            }
+                isReacted: node.reactions.wantToTry.isReacted,
+                type: .wantToTry
+            )
         }
         .padding(.vertical, 4)
     }
 
     private func reactionButton(
-        emoji: String, label: String, count: Int32, isReacted: Bool, action: @escaping () -> Void
+        emoji: String,
+        label: String,
+        count: Int32,
+        isReacted: Bool,
+        type: ReactionType
     ) -> some View {
-        Button(action: action) {
-            VStack(spacing: 2) {
+        return VStack(spacing: 4) {
+            // チップ: 絵文字（+ カウント）を常にカプセル表示
+            HStack(spacing: 2) {
                 Text(emoji)
-                    .font(.title3)
-                Text(count > 0 ? "\(label) \(count)" : label)
-                    .font(.system(size: 10))
-                    .foregroundColor(isReacted ? .blue : .secondary)
+                    .font(.caption)
+                if count > 0 {
+                    Text("\(count)")
+                        .font(.caption.bold())
+                }
             }
-            .frame(minWidth: 44, minHeight: 44)
-            .contentShape(Rectangle())
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .foregroundColor(isReacted ? .blue : .secondary)
+            .background(isReacted ? Color.blue.opacity(0.12) : Color.secondary.opacity(0.1))
+            .clipShape(Capsule())
+
+            Text(label)
+                .font(.system(size: 10))
+                .foregroundColor(isReacted ? .blue : .secondary)
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel("\(label) \(count)件\(isReacted ? " リアクション済み" : "")")
+        .frame(minWidth: 60, minHeight: 44)
+        .contentShape(Rectangle())
+        // タップ: リアクション切り替え
+        .onTapGesture {
+            guard isAuthenticated else {
+                onLoginRequired()
+                return
+            }
+            onToggleReaction(type)
+        }
+        // 長押し: ユーザー一覧シートを表示（count > 0 のときのみ）
+        .onLongPressGesture {
+            guard count > 0 else { return }
+            onShowReactionUsers(type)
+        }
+        .accessibilityLabel(
+            count > 0
+                ? "\(label) \(count) 長押しでユーザー一覧を表示"
+                : "\(label) タップでリアクション追加"
+        )
     }
 
     // MARK: - Derive Button
@@ -124,7 +143,8 @@ struct DetailReactionBar: View {
         node: PreviewData.sampleNode,
         isAuthenticated: true,
         onLoginRequired: {},
-        onToggleReaction: { _ in }
+        onToggleReaction: { _ in },
+        onShowReactionUsers: { _ in }
     )
     .padding(16)
 }
@@ -134,7 +154,8 @@ struct DetailReactionBar: View {
         node: PreviewData.sampleIssueNode,
         isAuthenticated: false,
         onLoginRequired: {},
-        onToggleReaction: { _ in }
+        onToggleReaction: { _ in },
+        onShowReactionUsers: { _ in }
     )
     .padding(16)
 }
