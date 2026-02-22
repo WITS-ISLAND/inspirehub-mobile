@@ -22,6 +22,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -32,6 +34,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import io.github.witsisland.inspirehub.presentation.viewmodel.AuthViewModel
 import io.github.witsisland.inspirehub.ui.screen.DetailScreen
+import io.github.witsisland.inspirehub.ui.screen.IdeaPostScreen
+import io.github.witsisland.inspirehub.ui.screen.IssuePostScreen
+import io.github.witsisland.inspirehub.ui.screen.PostTypeSelectSheet
 import kotlinx.serialization.Serializable
 
 // ---------------------------------------------------------------------------
@@ -90,8 +95,7 @@ private enum class BottomTab(
  *
  * BottomNavigation（3タブ）+ FAB + NavHostを持つ基盤画面。
  * FABはホームとディスカバータブでのみ表示される。
- *
- * - Note: showPostTypeSheet は後続PR（投稿フロー）で利用する
+ * FABタップでPostTypeSelectSheetを表示し、課題/アイデア投稿画面に遷移する。
  */
 @Composable
 fun MainScreen(
@@ -102,8 +106,14 @@ fun MainScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    /** 投稿タイプ選択シート表示フラグ（後続PRで実装） */
+    /** 投稿タイプ選択シート表示フラグ */
     var showPostTypeSheet by remember { mutableStateOf(false) }
+
+    /** 課題投稿画面表示フラグ */
+    var showIssuePost by remember { mutableStateOf(false) }
+
+    /** アイデア投稿画面表示フラグ */
+    var showIdeaPost by remember { mutableStateOf(false) }
 
     /** FABを表示するタブかどうか */
     val isFabVisible = currentRoute in listOf(BottomTab.Home.route, BottomTab.Discover.route)
@@ -128,6 +138,45 @@ fun MainScreen(
             }
         },
     ) { innerPadding ->
+        // 投稿タイプ選択シート
+        if (showPostTypeSheet) {
+            PostTypeSelectSheet(
+                onDismiss = { showPostTypeSheet = false },
+                onIssueSelected = {
+                    showPostTypeSheet = false
+                    showIssuePost = true
+                },
+                onIdeaSelected = {
+                    showPostTypeSheet = false
+                    showIdeaPost = true
+                },
+            )
+        }
+
+        // 課題投稿画面（フルスクリーンダイアログ）
+        if (showIssuePost) {
+            Dialog(
+                onDismissRequest = { showIssuePost = false },
+                properties = DialogProperties(usePlatformDefaultWidth = false),
+            ) {
+                IssuePostScreen(
+                    onDismiss = { showIssuePost = false },
+                )
+            }
+        }
+
+        // アイデア投稿画面（フルスクリーンダイアログ）
+        if (showIdeaPost) {
+            Dialog(
+                onDismissRequest = { showIdeaPost = false },
+                properties = DialogProperties(usePlatformDefaultWidth = false),
+            ) {
+                IdeaPostScreen(
+                    onDismiss = { showIdeaPost = false },
+                )
+            }
+        }
+
         NavHost(
             navController = navController,
             startDestination = BottomTab.Home.route,
