@@ -1,8 +1,12 @@
 package io.github.witsisland.inspirehub.data.source
 
+import io.github.witsisland.inspirehub.data.dto.ReactedUsersResponseDto
 import io.github.witsisland.inspirehub.data.dto.ReactionSummaryDto
+import io.github.witsisland.inspirehub.domain.model.ReactionType
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import kotlin.native.HiddenFromObjC
 
@@ -40,5 +44,32 @@ class KtorReactionDataSource(
      */
     override suspend fun toggleWantToTry(nodeId: String): ReactionSummaryDto {
         return httpClient.post("/nodes/$nodeId/want-to-try").body()
+    }
+
+    /**
+     * GET /nodes/{nodeId}/reactions/{type}
+     *
+     * リアクション種別に応じたエンドポイントパス:
+     * - [ReactionType.LIKE] → `/nodes/{nodeId}/reactions/like`
+     * - [ReactionType.INTERESTED] → `/nodes/{nodeId}/reactions/interested`
+     * - [ReactionType.WANT_TO_TRY] → `/nodes/{nodeId}/reactions/want-to-try`
+     *
+     * クエリパラメータ: `limit`（件数）, `cursor`（ページネーション用カーソル）
+     */
+    override suspend fun getReactionUsers(
+        nodeId: String,
+        type: ReactionType,
+        limit: Int,
+        cursor: String?
+    ): ReactedUsersResponseDto {
+        val path = when (type) {
+            ReactionType.LIKE -> "/nodes/$nodeId/reactions/like"
+            ReactionType.INTERESTED -> "/nodes/$nodeId/reactions/interested"
+            ReactionType.WANT_TO_TRY -> "/nodes/$nodeId/reactions/want-to-try"
+        }
+        return httpClient.get(path) {
+            parameter("limit", limit)
+            cursor?.let { parameter("cursor", it) }
+        }.body()
     }
 }
