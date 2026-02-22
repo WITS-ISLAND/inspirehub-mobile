@@ -34,6 +34,7 @@ kotlin {
             implementation("io.insert-koin:koin-compose-viewmodel:4.1.0")
             implementation(libs.navigation.compose)
             implementation(compose.materialIconsExtended)
+            implementation(libs.kotlinx.datetime)
             implementation(projects.shared)
         }
         commonTest.dependencies {

@@ -19,7 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -219,7 +219,7 @@ private fun HomeTabRow(
     )
     val selectedIndex = tabs.indexOfFirst { it.tab == currentTab }.coerceAtLeast(0)
 
-    ScrollableTabRow(
+    PrimaryScrollableTabRow(
         selectedTabIndex = selectedIndex,
         edgePadding = 0.dp,
     ) {
