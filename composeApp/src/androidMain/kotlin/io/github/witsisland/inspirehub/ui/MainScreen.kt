@@ -32,6 +32,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import io.github.witsisland.inspirehub.presentation.viewmodel.AuthViewModel
 import io.github.witsisland.inspirehub.ui.screen.DetailScreen
+import io.github.witsisland.inspirehub.ui.screen.DiscoverScreen
+import io.github.witsisland.inspirehub.ui.screen.MyPageScreen
 import kotlinx.serialization.Serializable
 
 // ---------------------------------------------------------------------------
@@ -137,11 +139,14 @@ fun MainScreen(
                 HomeScreenPlaceholder()
             }
             composable(BottomTab.Discover.route) {
-                DiscoverScreenPlaceholder()
+                DiscoverScreen(
+                    onNodeClick = { nodeId -> navController.navigate("detail/$nodeId") },
+                )
             }
             composable(BottomTab.MyPage.route) {
-                MyPageScreenPlaceholder(
+                MyPageScreen(
                     onLogout = { authViewModel.logout() },
+                    onNodeClick = { nodeId -> navController.navigate("detail/$nodeId") },
                 )
             }
             composable(
