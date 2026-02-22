@@ -7,6 +7,7 @@ import io.github.witsisland.inspirehub.presentation.viewmodel.HomeViewModel
 import io.github.witsisland.inspirehub.presentation.viewmodel.MapViewModel
 import io.github.witsisland.inspirehub.presentation.viewmodel.MyPageViewModel
 import io.github.witsisland.inspirehub.presentation.viewmodel.PostViewModel
+import io.github.witsisland.inspirehub.presentation.viewmodel.ReactionUsersViewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -46,6 +47,11 @@ object KoinHelper : KoinComponent {
 
     fun getDiscoverViewModel(): DiscoverViewModel {
         val viewModel: DiscoverViewModel by inject()
+        return viewModel
+    }
+
+    fun getReactionUsersViewModel(): ReactionUsersViewModel {
+        val viewModel: ReactionUsersViewModel by inject()
         return viewModel
     }
 }

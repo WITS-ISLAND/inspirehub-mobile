@@ -36,6 +36,7 @@ import io.github.witsisland.inspirehub.presentation.viewmodel.HomeViewModel
 import io.github.witsisland.inspirehub.presentation.viewmodel.MapViewModel
 import io.github.witsisland.inspirehub.presentation.viewmodel.MyPageViewModel
 import io.github.witsisland.inspirehub.presentation.viewmodel.PostViewModel
+import io.github.witsisland.inspirehub.presentation.viewmodel.ReactionUsersViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -89,4 +90,5 @@ val appModule = module {
     factoryOf(::PostViewModel)
     factoryOf(::DetailViewModel)
     factoryOf(::DiscoverViewModel)
+    factoryOf(::ReactionUsersViewModel)
 }
