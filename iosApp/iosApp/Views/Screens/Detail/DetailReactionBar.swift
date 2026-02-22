@@ -68,12 +68,25 @@ struct DetailReactionBar: View {
         isReacted: Bool,
         type: ReactionType
     ) -> some View {
-        let countLabel = count > 0 ? "\(label) \(count)" : label
-
-        return VStack(spacing: 2) {
-            Text(emoji)
-                .font(.title3)
-            Text(countLabel)
+        return VStack(spacing: 4) {
+            // チップ: 絵文字 + カウント（count > 0 のときのみ表示）
+            if count > 0 {
+                HStack(spacing: 2) {
+                    Text(emoji)
+                        .font(.caption)
+                    Text("\(count)")
+                        .font(.caption.bold())
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .foregroundColor(isReacted ? .blue : .secondary)
+                .background(isReacted ? Color.blue.opacity(0.12) : Color.secondary.opacity(0.1))
+                .clipShape(Capsule())
+            } else {
+                Text(emoji)
+                    .font(.title3)
+            }
+            Text(label)
                 .font(.system(size: 10))
                 .foregroundColor(isReacted ? .blue : .secondary)
         }
@@ -94,7 +107,7 @@ struct DetailReactionBar: View {
         }
         .accessibilityLabel(
             count > 0
-                ? "\(countLabel) 長押しでユーザー一覧を表示"
+                ? "\(label) \(count) 長押しでユーザー一覧を表示"
                 : "\(label) タップでリアクション追加"
         )
     }
