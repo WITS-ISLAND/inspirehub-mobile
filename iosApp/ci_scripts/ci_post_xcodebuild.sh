@@ -2,17 +2,13 @@
 # set -eしない: 失敗時もDiscord通知を最後まで実行するため
 
 echo "=== ci_post_xcodebuild.sh ==="
-
-# archiveアクション時のみ実行
-if [ "$CI_XCODEBUILD_ACTION" != "archive" ]; then
-    echo "Skipping: not an archive action (action=$CI_XCODEBUILD_ACTION)"
-    exit 0
-fi
+echo "Action: ${CI_XCODEBUILD_ACTION:-unknown}"
+echo "Branch: ${CI_GIT_REF:-${CI_BRANCH:-unknown}}"
+echo "PR URL: ${CI_PULL_REQUEST_HTML_URL:-(not a PR)}"
 
 # --- Discord設定 ---
 # Xcode Cloud の Environment Variables で以下を設定すること:
 #   DISCORD_BOT_TOKEN: Discord BotのToken
-#   DISCORD_CLIENT_ID: Discord BotのClient ID
 #   DISCORD_CHANNEL_ID: 通知先のChannel ID
 
 if [ -z "$DISCORD_BOT_TOKEN" ]; then
@@ -23,6 +19,24 @@ fi
 if [ -z "$DISCORD_CHANNEL_ID" ]; then
     echo "Warning: DISCORD_CHANNEL_ID is not set. Skipping Discord notification."
     exit 0
+fi
+
+# --- コンテキスト判定 ---
+# CI_PULL_REQUEST_HTML_URL が設定されていればPRトリガーのビルド
+IS_PR_BUILD=false
+if [ -n "$CI_PULL_REQUEST_HTML_URL" ]; then
+    IS_PR_BUILD=true
+fi
+
+# ブランチ情報を取得（CI_GIT_REFの方がより正確）
+BRANCH_NAME="${CI_GIT_REF:-${CI_BRANCH:-unknown}}"
+# refs/heads/ プレフィックスを削除
+BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's|^refs/heads/||')
+
+# mainブランチかどうか判定（外部テスター配信対象か）
+IS_MAIN_BRANCH=false
+if [ "$BRANCH_NAME" = "main" ]; then
+    IS_MAIN_BRANCH=true
 fi
 
 # --- 直近のコミットメッセージを取得 ---
@@ -43,22 +57,17 @@ escape_json() {
 
 COMMITS_ESCAPED=$(escape_json "$RECENT_COMMITS")
 
-# ブランチ情報を取得（CI_GIT_REFの方がより正確）
-BRANCH_NAME="${CI_GIT_REF:-${CI_BRANCH:-unknown}}"
-# refs/heads/ プレフィックスを削除
-BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's|^refs/heads/||')
-
-# mainブランチかどうか判定（外部テスター配信対象か）
-IS_MAIN_BRANCH=false
-if [ "$BRANCH_NAME" = "main" ]; then
-    IS_MAIN_BRANCH=true
-fi
+# PR URLもエスケープ（埋め込み用）
+PR_URL_ESCAPED=$(escape_json "$CI_PULL_REQUEST_HTML_URL")
 
 # --- ビルド結果を判定 ---
 if [ "$CI_XCODEBUILD_EXIT_CODE" = "0" ]; then
     if [ "$IS_MAIN_BRANCH" = "true" ]; then
         TITLE="🚀 本番ビルド成功！ InspireHub Mobile"
         DESCRIPTION="mainブランチのビルドが通ったで！**外部テスターへの配信を開始**するで 👥✨\nTestFlightの外部テスターグループへ自動配信中..."
+    elif [ "$IS_PR_BUILD" = "true" ]; then
+        TITLE="✅ PRビルド成功！ InspireHub Mobile"
+        DESCRIPTION="PRのビルドが通ったで！**内部テスターへTestFlight配信中**や 📱✨"
     else
         TITLE="🎉 ビルド成功！ InspireHub Mobile"
         DESCRIPTION="いい感じにビルド通ったで！テスト配信の準備OKや 🚀"
@@ -69,12 +78,22 @@ else
     if [ "$IS_MAIN_BRANCH" = "true" ]; then
         TITLE="😱 本番ビルド失敗... InspireHub Mobile"
         DESCRIPTION="あかん、mainブランチのビルドがコケた！外部テスターへの配信ができへん... exit code: ${CI_XCODEBUILD_EXIT_CODE} 🔥\n早めに修正して再pushしてな！"
+    elif [ "$IS_PR_BUILD" = "true" ]; then
+        TITLE="❌ PRビルド失敗... InspireHub Mobile"
+        DESCRIPTION="あかん、PRのビルドがコケた... exit code: ${CI_XCODEBUILD_EXIT_CODE} 🔥\nPRを確認してな！"
     else
         TITLE="😱 ビルド失敗... InspireHub Mobile"
         DESCRIPTION="あかん、ビルドコケた... exit code: ${CI_XCODEBUILD_EXIT_CODE} 🔥"
     fi
     COLOR=15158332
     THUMBNAIL=""
+fi
+
+# --- フィールド構築（PR URLはPRビルド時のみ追加）---
+if [ "$IS_PR_BUILD" = "true" ] && [ -n "$CI_PULL_REQUEST_HTML_URL" ]; then
+    EXTRA_FIELD=", { \"name\": \"🔗 PR\", \"value\": \"${PR_URL_ESCAPED}\", \"inline\": false }"
+else
+    EXTRA_FIELD=""
 fi
 
 # --- Discord Bot APIで通知 ---
@@ -91,6 +110,7 @@ PAYLOAD=$(cat <<ENDJSON
       { "name": "🌿 Branch", "value": "\`${BRANCH_NAME}\`", "inline": true },
       { "name": "🔢 Build", "value": "#${CI_BUILD_NUMBER:-N/A}", "inline": true },
       { "name": "📋 直近の変更", "value": "${COMMITS_ESCAPED}", "inline": false }
+      ${EXTRA_FIELD}
     ],
     "footer": { "text": "Xcode Cloud ☁️ | InspireHub Mobile" },
     "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
