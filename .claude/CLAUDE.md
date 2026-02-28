@@ -240,6 +240,8 @@ struct HomeView: View {
    - **差分は200行程度が目安**。レビューしやすさを最優先する
    - エージェントチームの作業効率よりも、機能単位の分割を優先する
    - 既存PRに無関係な機能を相乗りさせない
+   - **Android専用の変更は `android/` プレフィックスを使う**（例: `android/feat-xxx`, `android/fix-xxx`）
+     → XcodeCloudが不要にトリガーされるのを防ぐ（詳細: `.claude/rules/team-workflow.md`）
 
 ## GitHub Actions（Issue駆動開発）
 

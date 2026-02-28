@@ -21,6 +21,8 @@ globs: ["**/*"]
 
 2. **ブランチ命名規則**: `feat/<stream>-<概要>` or `test/<stream>-<概要>`
    - 例: `feat/stream-a-domain-model`, `test/stream-c-viewmodel-tests`, `feat/stream-d-ios-ui`
+   - **Android専用ブランチ**: `android/feat-<概要>` or `android/fix-<概要>` プレフィックスを使う
+     → XcodeCloudのStart Conditionsで除外される（iOS/shared変更なし）
 
 3. **worktreeパス**: `~/.claude-worktrees/inspirehub-mobile/<branch-name>`
 
@@ -121,6 +123,45 @@ iOS UIの変更を含むPRを作成する前に、**design-reviewer エージェ
 - SwiftUIデザインガイド準拠
 - iOS HIG（Human Interface Guidelines）準拠
 - アクセシビリティ対応
+
+## XcodeCloud ビルドの節約（Androidタグ付きPR）
+
+### 方針
+
+**Android専用の変更には `android/` プレフィックスのブランチを使う。**
+XcodeCloudのStart Conditionsで `android/**` ブランチを除外することで、iOSビルドを無駄に消費しない。
+
+### ブランチ命名規則（Android専用）
+
+| 種別 | 命名 | 例 |
+|------|------|---|
+| 機能追加 | `android/feat-<概要>` | `android/feat-login-screen` |
+| バグ修正 | `android/fix-<概要>` | `android/fix-auth-crash` |
+| リファクタリング | `android/refactor-<概要>` | `android/refactor-viewmodel` |
+
+### XcodeCloud Start Conditions 設定手順（手動・要1回のみ）
+
+App Store Connect でXcodeCloudのワークフローを開き、以下を設定する：
+
+1. **App Store Connect** → アプリ選択 → **Xcode Cloud** → **Workflows**
+2. 対象のWorkflow（例: `iosApp`）を開く
+3. **Start Conditions** を編集
+4. **Source Changes** の **Branch Changes** セクションで：
+   - **"Branch Exclusions"** に `android/**` を追加（ワイルドカード指定）
+5. 保存
+
+これにより `android/` で始まるブランチへのPRではXcodeCloudがトリガーされない。
+
+> **注意**: XcodeCloudのStart Conditions設定はApp Store Connect UIで行う必要がある。
+> リポジトリのコードには反映されない。
+
+### 判断基準
+
+| 変更内容 | ブランチプレフィックス | XcodeCloud |
+|---------|---------------------|------------|
+| iOSのみ / iOS + shared | `feat/`, `fix/` 等 | ✅ 実行される |
+| Androidのみ / Android + shared(Android実装) | `android/` | ⛔ スキップされる |
+| shared(共通ロジック)のみ | `feat/`, `fix/` 等 | ✅ 実行される |
 
 ## コンフリクト防止
 
