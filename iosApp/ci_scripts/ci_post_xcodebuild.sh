@@ -48,15 +48,31 @@ BRANCH_NAME="${CI_GIT_REF:-${CI_BRANCH:-unknown}}"
 # refs/heads/ プレフィックスを削除
 BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's|^refs/heads/||')
 
+# mainブランチかどうか判定（外部テスター配信対象か）
+IS_MAIN_BRANCH=false
+if [ "$BRANCH_NAME" = "main" ]; then
+    IS_MAIN_BRANCH=true
+fi
+
 # --- ビルド結果を判定 ---
 if [ "$CI_XCODEBUILD_EXIT_CODE" = "0" ]; then
-    TITLE="🎉 ビルド成功！ InspireHub Mobile"
-    DESCRIPTION="いい感じにビルド通ったで！テスト配信の準備OKや 🚀"
+    if [ "$IS_MAIN_BRANCH" = "true" ]; then
+        TITLE="🚀 本番ビルド成功！ InspireHub Mobile"
+        DESCRIPTION="mainブランチのビルドが通ったで！**外部テスターへの配信を開始**するで 👥✨\nTestFlightの外部テスターグループへ自動配信中..."
+    else
+        TITLE="🎉 ビルド成功！ InspireHub Mobile"
+        DESCRIPTION="いい感じにビルド通ったで！テスト配信の準備OKや 🚀"
+    fi
     COLOR=3066993
     THUMBNAIL="https://cdn.discordapp.com/emojis/1080553753157832724.webp"
 else
-    TITLE="😱 ビルド失敗... InspireHub Mobile"
-    DESCRIPTION="あかん、ビルドコケた... exit code: ${CI_XCODEBUILD_EXIT_CODE} 🔥"
+    if [ "$IS_MAIN_BRANCH" = "true" ]; then
+        TITLE="😱 本番ビルド失敗... InspireHub Mobile"
+        DESCRIPTION="あかん、mainブランチのビルドがコケた！外部テスターへの配信ができへん... exit code: ${CI_XCODEBUILD_EXIT_CODE} 🔥\n早めに修正して再pushしてな！"
+    else
+        TITLE="😱 ビルド失敗... InspireHub Mobile"
+        DESCRIPTION="あかん、ビルドコケた... exit code: ${CI_XCODEBUILD_EXIT_CODE} 🔥"
+    fi
     COLOR=15158332
     THUMBNAIL=""
 fi
