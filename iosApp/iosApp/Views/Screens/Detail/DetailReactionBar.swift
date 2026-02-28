@@ -34,80 +34,52 @@ struct DetailReactionBar: View {
 
     private var reactionButtons: some View {
         HStack(spacing: 16) {
-            reactionButton(
+            ReactionChipButton(
                 emoji: "👍",
                 label: "いいね",
                 count: node.reactions.like.count,
                 isReacted: node.reactions.like.isReacted,
-                type: .like
+                onTap: {
+                    guard isAuthenticated else { onLoginRequired(); return }
+                    onToggleReaction(.like)
+                },
+                onLongPress: {
+                    guard node.reactions.like.count > 0 else { return }
+                    onShowReactionUsers(.like)
+                }
             )
 
-            reactionButton(
+            ReactionChipButton(
                 emoji: "🔥",
                 label: "気になる",
                 count: node.reactions.interested.count,
                 isReacted: node.reactions.interested.isReacted,
-                type: .interested
+                onTap: {
+                    guard isAuthenticated else { onLoginRequired(); return }
+                    onToggleReaction(.interested)
+                },
+                onLongPress: {
+                    guard node.reactions.interested.count > 0 else { return }
+                    onShowReactionUsers(.interested)
+                }
             )
 
-            reactionButton(
+            ReactionChipButton(
                 emoji: "💪",
                 label: "やってみたい",
                 count: node.reactions.wantToTry.count,
                 isReacted: node.reactions.wantToTry.isReacted,
-                type: .wantToTry
+                onTap: {
+                    guard isAuthenticated else { onLoginRequired(); return }
+                    onToggleReaction(.wantToTry)
+                },
+                onLongPress: {
+                    guard node.reactions.wantToTry.count > 0 else { return }
+                    onShowReactionUsers(.wantToTry)
+                }
             )
         }
         .padding(.vertical, 4)
-    }
-
-    private func reactionButton(
-        emoji: String,
-        label: String,
-        count: Int32,
-        isReacted: Bool,
-        type: ReactionType
-    ) -> some View {
-        return VStack(spacing: 4) {
-            // チップ: 絵文字（+ カウント）を常にカプセル表示
-            HStack(spacing: 2) {
-                Text(emoji)
-                    .font(.caption)
-                if count > 0 {
-                    Text("\(count)")
-                        .font(.caption.bold())
-                }
-            }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 3)
-            .foregroundColor(isReacted ? .blue : .secondary)
-            .background(isReacted ? Color.blue.opacity(0.12) : Color.secondary.opacity(0.1))
-            .clipShape(Capsule())
-
-            Text(label)
-                .font(.system(size: 10))
-                .foregroundColor(isReacted ? .blue : .secondary)
-        }
-        .frame(minWidth: 60, minHeight: 44)
-        .contentShape(Rectangle())
-        // タップ: リアクション切り替え
-        .onTapGesture {
-            guard isAuthenticated else {
-                onLoginRequired()
-                return
-            }
-            onToggleReaction(type)
-        }
-        // 長押し: ユーザー一覧シートを表示（count > 0 のときのみ）
-        .onLongPressGesture {
-            guard count > 0 else { return }
-            onShowReactionUsers(type)
-        }
-        .accessibilityLabel(
-            count > 0
-                ? "\(label) \(count) 長押しでユーザー一覧を表示"
-                : "\(label) タップでリアクション追加"
-        )
     }
 
     // MARK: - Derive Button
@@ -135,6 +107,84 @@ struct DetailReactionBar: View {
         .sheet(isPresented: $showDerivedPost) {
             DerivedPostView(parentNode: node)
         }
+    }
+}
+
+// MARK: - ReactionChipButton
+
+/// タップアニメーション付きリアクションチップボタン
+///
+/// タップ時にスプリングバウンスアニメーションを再生し、
+/// リアクション状態の切り替えをイーズインアウトでスムーズに表示する。
+/// 触覚フィードバック（iOS 17+）も提供する。
+private struct ReactionChipButton: View {
+    /// 絵文字テキスト
+    let emoji: String
+    /// ラベルテキスト
+    let label: String
+    /// リアクション数
+    let count: Int32
+    /// リアクション済みかどうか
+    let isReacted: Bool
+    /// タップ時のコールバック
+    let onTap: () -> Void
+    /// 長押し時のコールバック
+    let onLongPress: () -> Void
+
+    /// タップ中スケールアニメーション用フラグ
+    @State private var isPressed = false
+
+    var body: some View {
+        VStack(spacing: 4) {
+            // チップ: 絵文字（+ カウント）を常にカプセル表示
+            HStack(spacing: 2) {
+                Text(emoji)
+                    .font(.caption)
+                if count > 0 {
+                    Text("\(count)")
+                        .font(.caption.bold())
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .foregroundColor(isReacted ? .blue : .secondary)
+            .background(isReacted ? Color.blue.opacity(0.12) : Color.secondary.opacity(0.1))
+            .clipShape(Capsule())
+
+            Text(label)
+                .font(.system(size: 10))
+                .foregroundColor(isReacted ? .blue : .secondary)
+        }
+        .frame(minWidth: 60, minHeight: 44)
+        .contentShape(Rectangle())
+        // スプリングバウンスアニメーション
+        .scaleEffect(isPressed ? 1.25 : 1.0)
+        // リアクション状態切り替え時のカラートランジション（0.2秒）
+        .animation(.easeInOut(duration: 0.2), value: isReacted)
+        // 触覚フィードバック（iOS 17+）
+        .sensoryFeedback(.impact(flexibility: .soft, intensity: 0.7), trigger: isPressed)
+        // タップ: スプリングバウンス → リアクション切り替え
+        .onTapGesture {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                isPressed = true
+            }
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 100_000_000)
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                    isPressed = false
+                }
+            }
+            onTap()
+        }
+        // 長押し: ユーザー一覧シートを表示（count > 0 のときのみ）
+        .onLongPressGesture {
+            onLongPress()
+        }
+        .accessibilityLabel(
+            count > 0
+                ? "\(label) \(count) 長押しでユーザー一覧を表示"
+                : "\(label) タップでリアクション追加"
+        )
     }
 }
 
