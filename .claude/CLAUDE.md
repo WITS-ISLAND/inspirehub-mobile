@@ -335,3 +335,17 @@ Task toolでspawnして使用。
 | /fix-bug \<BUG-ID\> | バグ自動修正 |
 | /design-review [画面名\|all] | デザインレビュー |
 | /retro | 振り返り・効率化提案 |
+
+
+## PRラベル方針
+
+PRを作成する際は用途に応じて以下のGitHubラベルを付与すること（`gh pr edit <number> --add-label "<label>"`）。
+
+| ラベル | 対象 |
+| ------ | ---- |
+| `iOS` | `iosApp/` に変更を含むPR |
+| `Android` | `composeApp/` に変更を含むPR |
+| `shared` | `shared/` に変更を含むPR |
+| `docs` | ドキュメントのみの変更 |
+
+複数レイヤーにまたがる場合は複数のラベルを付与すること。
