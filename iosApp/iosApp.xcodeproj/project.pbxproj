@@ -185,7 +185,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/zsh;
-			shellScript = "# JAVA_HOMEの認識エラーで/bin/zshで実行\n# 参考：https://qiita.com/nacho4d/items/6d04c9287c55c26fca95\n\n# Android Studio組み込みJDKをJAVA_HOMEに設定\nexport JAVA_HOME=\"/Applications/Android Studio.app/Contents/jbr/Contents/Home\"\n\nif [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\n\ncd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode\n";
+			shellScript = "# JAVA_HOMEの認識エラーで/bin/zshで実行\n# 参考：https://qiita.com/nacho4d/items/6d04c9287c55c26fca95\n\n# Android Studio同梱JDKがあればJAVA_HOMEに設定（ローカル開発用）\nAS_JDK=\"/Applications/Android Studio.app/Contents/jbr/Contents/Home\"\nif [ -d \"$AS_JDK\" ]; then\n  export JAVA_HOME=\"$AS_JDK\"\nfi\n\nif [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\n\ncd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
